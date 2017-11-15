@@ -20,8 +20,8 @@ def start():
     leftWindow = 0
     rightWindow = 0
     totalWindowLength = 0
-    intputFile = null
-    outputFileDir = null
+    intputFile = None
+    outputFileDir = None
     for x in argv:
         argInput = sys.argv[x]
         path = os.path.isfile(argInput)
