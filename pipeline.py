@@ -29,7 +29,7 @@ def start():
             if((fileIO == 0) and (argInput.endswith('.vcf')) or (argInput.endswith('.fasta'))):
                 intputFile = argInput
                 fileIO += 1
-            else if(fileIO == 1):
+            elif(fileIO == 1):
                 outputFileDir = argInput
                 fileIO += 1
         if((argInput.type(int)) and (windowCounter == 0) and (path != False)):
@@ -42,7 +42,7 @@ def start():
         outputFileDir = intputFile
     if(fileIO == 0):
         print("\nNo file or working directory specified.\n")
-    else if(__name__ == '__main__'):
+    elif(__name__ == '__main__'):
         main(intputFile, outputFileDir, leftWindow, rightWindow, totalWindowLength)
 
 def fileConvert(inputFile, outputFileDir):
@@ -54,7 +54,7 @@ def fileConvert(inputFile, outputFileDir):
         print("\nVCF to BED conversion complete.\n")
         output = True
         return(output)
-    else if(inputFile.endswith('.fasta')):
+    elif(inputFile.endswith('.fasta')):
         subprocess.call("") #calls Bedtool and input directory path from args
         print("\nBED to FASTA conversion complete.\n")
         output = True
