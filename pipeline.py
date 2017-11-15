@@ -21,7 +21,7 @@ def start():
     totalWindowLength = 0
     intputFile = null
     outputFileDir = null
-    for(x in argv):
+    for x in argv:
         argInput = sys.argv[x]
         path = os.path.isfile(argInput)
         if(path == true):
@@ -41,7 +41,7 @@ def start():
         outputFileDir = intputFile
     if(fileIO == 0):
         print("\nNo file or working directory specified.\n")
-    if(__name__ == '__main__'):
+    else if(__name__ == '__main__'):
         main(intputFile, outputFileDir, leftWindow, rightWindow, totalWindowLength)
 
 def fileConvert(inputFile, outputFileDir):
