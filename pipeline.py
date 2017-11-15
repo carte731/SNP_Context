@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 ###File conversion V1.0
 
 import os
@@ -10,6 +10,7 @@ from subprocess import call
 import logging
 
 def initModLoad():
+    # subprocess.call("python3_ML/3.6.0")
     subprocess.call("module load bedops_ML/2.4.20")
     subprocess.call("module load bedtools_ML/2.23.0")
 
