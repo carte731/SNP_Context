@@ -22,7 +22,7 @@ def start():
     totalWindowLength = 0
     intputFile = None
     outputFileDir = None
-    for x in argv:
+    for x in range(sys.argv[0:]):
         argInput = sys.argv[x]
         path = os.path.isfile(argInput)
         if(path == true):
