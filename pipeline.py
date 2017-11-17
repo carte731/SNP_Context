@@ -22,7 +22,8 @@ def start():
     totalWindowLength = 0
     intputFile = None
     outputFileDir = None
-    for x in sys.argv[0:]:
+    for x in range(len(sys.argv[0:])):
+        # indexPos = sys.argv.index(x)
         argInput = sys.argv[x]
         path = os.path.isfile(argInput)
         if(path == true):
