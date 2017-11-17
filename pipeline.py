@@ -15,7 +15,7 @@ def initModLoad():
     subprocess.call("module load bedtools_ML/2.23.0")
 
 def start():
-    windowCounter = 0
+    # windowCounter = 0
     fileIO = 0
     leftWindow = 0
     rightWindow = 0
@@ -33,12 +33,12 @@ def start():
             elif(fileIO == 1):
                 outputFileDir = argInput
                 fileIO += 1
-        if((argInput.type(int)) and (windowCounter == 0) and (path != False)): #clean this up, only have one argument fo rwindow length, choose the lenght on both ends
-            leftWindow = argInput
-            windowCounter += 1
-        if((argInput.type(int)) and (windowCounter == 1) and (path != False)):
-            rightWindow = argInput
-            totalWindowLength = leftWindow + rightWindow
+        if((argInput.type(int)) and (path != False)): #clean this up, only have one argument fo rwindow length, choose the lenght on both ends
+            leftWitotalWindowLengthndow = argInput
+            # windowCounter += 1
+        # if((argInput.type(int)) and (windowCounter == 1) and (path != False)):
+        #     rightWindow = argInput
+        #     totalWindowLength = leftWindow + rightWindow
     if(fileIO < 2):
         outputFileDir = intputFile
     if(fileIO == 0):
