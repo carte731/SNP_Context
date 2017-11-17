@@ -26,14 +26,14 @@ def start():
         # indexPos = sys.argv.index(x)
         argInput = sys.argv[x]
         path = os.path.isfile(argInput)
-        if(path == true):
+        if(path == True):
             if((fileIO == 0) and (argInput.endswith('.vcf')) or (argInput.endswith('.fasta'))):
                 intputFile = argInput
                 fileIO += 1
             elif(fileIO == 1):
                 outputFileDir = argInput
                 fileIO += 1
-        if((argInput.type(int)) and (windowCounter == 0) and (path != False)):
+        if((argInput.type(int)) and (windowCounter == 0) and (path != False)): #clean this up, only have one argument fo rwindow length, choose the lenght on both ends
             leftWindow = argInput
             windowCounter += 1
         if((argInput.type(int)) and (windowCounter == 1) and (path != False)):
