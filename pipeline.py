@@ -10,15 +10,15 @@ from subprocess import call
 import logging
 
 def initModLoad():
-    vCheck = sys.version_info[0:3]
-    if(sys.version_info[0] != 3):
+    # vCheck = sys.version_info[0:3]
+    if(sys.version_info[0] == 3):
         import importlib as lib
         if(lib.find_loader('mutation_motif') == None):
-                print("\nPlease install mutation motif module or module load the Morrell version of python 3.6.1\n")
-    else:
+                return("\nPlease install mutation motif module or module load the Morrell version of python 3.6.1\n")
+    elif(sys.version_info[0] == 2):
         import lib
         if(lib.find_loader('mutation_motif') == None):
-                print("\nPlease install mutation motif module or module load the Morrell version of python 3.6.1\n")
+                return("\nPlease install mutation motif module or module load the Morrell version of python 3.6.1\n")
     # subprocess.call("python3_ML/3.6.0")
     subprocess.call("module load bedops_ML/2.4.20")
     subprocess.call("module load bedtools_ML/2.23.0")
