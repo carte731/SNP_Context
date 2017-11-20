@@ -21,8 +21,8 @@ def pythonVersionCheck():
         if(lib.find_loader('mutation_motif') == None):
                 return("\nPlease install mutation motif module or module load the Morrell version of python 3.6.1\n")
     elif(sys.version_info[0] == 2):
-        import lib
-        if(lib.find_loader('mutation_motif') == None):
+        import imp as lib
+        if(lib.find_module('mutation_motif') == None):
                 return("\nPlease install mutation motif module or module load the Morrell version of python 3.6.1\n")
 
 def start():
