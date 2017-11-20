@@ -33,7 +33,7 @@ def start():
             elif(fileIO == 1):
                 outputFileDir = argInput
                 fileIO += 1
-        if((argInput.type(int)) and (path != False)): #clean this up, only have one argument fo rwindow length, choose the lenght on both ends. ALSO CHECK ON HOW TO CHECK IF OBJECT IS A STRING!!!
+        if((type(argInput) == str) and (path != False)): #clean this up, only have one argument fo rwindow length, choose the lenght on both ends. ALSO CHECK ON HOW TO CHECK IF OBJECT IS A STRING!!!
             leftWitotalWindowLengthndow = argInput
             # windowCounter += 1
         # if((argInput.type(int)) and (windowCounter == 1) and (path != False)):
