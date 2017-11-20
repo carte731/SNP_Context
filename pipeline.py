@@ -19,16 +19,18 @@ def pythonVersionCheck():
     if(sys.version_info[0] == 3):
         import importlib as lib
         if(lib.find_loader('mutation_motif') is None):
-            print("\nPlease install mutation motif module or module load the Morrell version of python 3.6.1.\n")
+            print("\nPlease install mutation motif module or module load the Morrell Lab version of python 3.6.1.\n")
+            print("With this command: " + "module load python3_ML/3.6.0\n")
             print("\nExiting...\n")
-            quit()
+            exit()
     elif(sys.version_info[0] == 2):
         import pkgutil as lib
         # import imp as lib
         if(lib.find_loader('mutation_motif') is None):
-            print("\nPlease install mutation motif module or module load the Morrell version of python 3.6.1.\n")
+            print("\nPlease install mutation motif module or module load the Morrell Lab version of python 3.6.1.\n")
+            print("With this command: " + "module load python3_ML/3.6.0\n")
             print("\nExiting...\n")
-            quit()
+            exit()
 
 def start():
     # windowCounter = 0
