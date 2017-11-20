@@ -16,15 +16,20 @@ def initModLoad():
     subprocess.call("module load bedtools_ML/2.23.0")
 
 def pythonVersionCheck():
+    print(gate)
     if(sys.version_info[0] == 3):
+        print(1.1)
         import importlib as lib
         if(lib.find_loader('mutation_motif') is None):
-                return("\nPlease install mutation motif module or module load the Morrell version of python 3.6.1\n")
+            print(1.2)
+            return("\nPlease install mutation motif module or module load the Morrell version of python 3.6.1\n")
     elif(sys.version_info[0] == 2):
+        print(2.1)
         import pkgutil as lib
         # import imp as lib
         if(lib.find_loader('mutation_motif') is None):
-                return("\nPlease install mutation motif module or module load the Morrell version of python 3.6.1\n")
+            print(2.2)
+            return("\nPlease install mutation motif module or module load the Morrell version of python 3.6.1\n")
 
 def start():
     # windowCounter = 0
