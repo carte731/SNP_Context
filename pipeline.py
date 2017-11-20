@@ -10,6 +10,8 @@ from subprocess import call
 import logging
 
 def initModLoad():
+    if(sys.version_info[0:] != 3.6.1):
+        print("Please load python 3.6.1")
     # subprocess.call("python3_ML/3.6.0")
     subprocess.call("module load bedops_ML/2.4.20")
     subprocess.call("module load bedtools_ML/2.23.0")
@@ -17,8 +19,8 @@ def initModLoad():
 def start():
     # windowCounter = 0
     fileIO = 0
-    leftWindow = 0
-    rightWindow = 0
+    # leftWindow = 0
+    # rightWindow = 0
     totalWindowLength = 0
     intputFile = None
     outputFileDir = None
@@ -34,7 +36,7 @@ def start():
                 outputFileDir = argInput
                 fileIO += 1
         if((type(argInput) == str) and (path != False)): #clean this up, only have one argument fo rwindow length, choose the lenght on both ends. ALSO CHECK ON HOW TO CHECK IF OBJECT IS A STRING!!!
-            leftWitotalWindowLengthndow = argInput
+            totalWindowLength = argInput
             # windowCounter += 1
         # if((argInput.type(int)) and (windowCounter == 1) and (path != False)):
         #     rightWindow = argInput
