@@ -16,7 +16,7 @@ def initModLoad():
     subprocess.call("module load bedtools_ML/2.23.0")
 
 def pythonVersionCheck():
-        if(sys.version_info[0] == 3):
+    if(sys.version_info[0] == 3):
         import importlib as lib
         if(lib.find_loader('mutation_motif') == None):
                 return("\nPlease install mutation motif module or module load the Morrell version of python 3.6.1\n")
