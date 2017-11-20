@@ -22,7 +22,7 @@ def pythonVersionCheck():
             print("\nPlease install mutation motif module or module load the Morrell Lab version of python 3.6.1.\n")
             print("With this command: " + "module load python3_ML/3.6.0\n")
             print("\nExiting...\n")
-            exit()
+            sys.exit
     elif(sys.version_info[0] == 2):
         import pkgutil as lib
         # import imp as lib
@@ -30,7 +30,7 @@ def pythonVersionCheck():
             print("\nPlease install mutation motif module or module load the Morrell Lab version of python 3.6.1.\n")
             print("With this command: " + "module load python3_ML/3.6.0\n")
             print("\nExiting...\n")
-            exit()
+            sys.exit
 
 def start():
     # windowCounter = 0
