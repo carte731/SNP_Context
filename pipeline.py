@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 ###File conversion V1.0
 
 import os
@@ -11,7 +11,12 @@ import logging
 
 def initModLoad():
     # vCheck = sys.version_info[0:3]
-    if(sys.version_info[0] == 3):
+    # subprocess.call("python3_ML/3.6.0")
+    subprocess.call("module load bedops_ML/2.4.20")
+    subprocess.call("module load bedtools_ML/2.23.0")
+
+def pythonVersionCheck():
+        if(sys.version_info[0] == 3):
         import importlib as lib
         if(lib.find_loader('mutation_motif') == None):
                 return("\nPlease install mutation motif module or module load the Morrell version of python 3.6.1\n")
@@ -19,9 +24,6 @@ def initModLoad():
         import lib
         if(lib.find_loader('mutation_motif') == None):
                 return("\nPlease install mutation motif module or module load the Morrell version of python 3.6.1\n")
-    # subprocess.call("python3_ML/3.6.0")
-    subprocess.call("module load bedops_ML/2.4.20")
-    subprocess.call("module load bedtools_ML/2.23.0")
 
 def start():
     # windowCounter = 0
@@ -74,6 +76,7 @@ def fileConvert(inputFile, outputFileDir):
 
 def main(intputFile, outputFileDir, leftWindow, rightWindow, totalWindowLength):
     try:
+        pythonVersionCheck()
         initModLoad()
         fileConvert(inputFile, outputFileDir)
     except(Exception) as error: #Logs crashes from the program
