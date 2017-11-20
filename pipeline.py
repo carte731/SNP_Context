@@ -11,8 +11,8 @@ import logging
 
 def initModLoad():
     print(sys.version_info)
-    # if(sys.version_info[0:] != 3.6.1):
-    #     print("Please load python 3.6.1")
+    if(sys.version_info[0:3] != 3.6.1):
+        print("Please load python 3.6.1")
     # subprocess.call("python3_ML/3.6.0")
     subprocess.call("module load bedops_ML/2.4.20")
     subprocess.call("module load bedtools_ML/2.23.0")
