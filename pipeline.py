@@ -16,7 +16,7 @@ def initModLoad():
     subprocess.call("module load bedtools_ML/2.23.0")
 
 def pythonVersionCheck():
-    print(gate)
+    print("gate")
     if(sys.version_info[0] == 3):
         print(1.1)
         import importlib as lib
