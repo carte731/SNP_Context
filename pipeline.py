@@ -23,7 +23,7 @@ def pythonVersionCheck():
     elif(sys.version_info[0] == 2):
         # import pkgutil as lib
         import imp as lib
-        if(lib.load_module('mutation_motif') is not None):
+        if(lib.find_module('mutation_motif') is not None):
                 return("\nPlease install mutation motif module or module load the Morrell version of python 3.6.1\n")
 
 def start():
