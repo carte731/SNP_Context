@@ -81,11 +81,12 @@ def main(intputFile, outputFileDir, totalWindowLength):
         initModLoad()
         fileConvert(inputFile, outputFileDir)
     except(Exception) as error: #Logs crashes from the program
-        now = datetime.datetime.now()
-        sslog.write('\n')
-        logging.basicConfig(filename=outputFileDir,filemode='a', format='%(msecs)d %(name)s %(levelname)s %(message)s', level=logging.DEBUG)
-        logging.info('\n' + "PYTHON ERRORS: " + "\n" + (now.strftime("%Y-%m-%d %H:%M:%S")) + '\n' + '-----------')
-        logger = logging.getLogger(__name__)
-        logger.error(error, exc_info=True)
+        with open(outputFileDir, '+a') as sslog:
+            now = datetime.datetime.now()
+            sslog.write('\n')
+            logging.basicConfig(filename=outputFileDir,filemode='a', format='%(msecs)d %(name)s %(levelname)s %(message)s', level=logging.DEBUG)
+            logging.info('\n' + "PYTHON ERRORS: " + "\n" + (now.strftime("%Y-%m-%d %H:%M:%S")) + '\n' + '-----------')
+            logger = logging.getLogger(__name__)
+            logger.error(error, exc_info=True)
 
 start() #Starts program
