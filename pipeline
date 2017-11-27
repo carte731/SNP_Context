@@ -81,7 +81,7 @@ def main(intputFile, outputFileDir, totalWindowLength):
         initModLoad()
         fileConvert(inputFile, outputFileDir)
     except(Exception) as error: #Logs crashes from the program
-        with open(outputFileDir, '+a') as sslog:
+        with open(outputFileDir, 'a') as sslog:
             now = datetime.datetime.now()
             sslog.write('\n')
             logging.basicConfig(filename=outputFileDir,filemode='a', format='%(msecs)d %(name)s %(levelname)s %(message)s', level=logging.DEBUG)
