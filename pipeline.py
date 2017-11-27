@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 ###File conversion V1.0
 
 import os
@@ -10,38 +10,35 @@ from subprocess import call
 import logging
 
 def initModLoad():
-    # vCheck = sys.version_info[0:3]
-    # subprocess.call("python3_ML/3.6.0")
     subprocess.call("module load bedops_ML/2.4.20")
     subprocess.call("module load bedtools_ML/2.23.0")
 
-def pythonVersionCheck():
+def pythonStarter(intputFile, outputFileDir, totalWindowLength):
+    subprocess.call("python3_ML/3.6.1")
+    subprocess.call("./pipeline " + intputFile + outputFileDir + totalWindowLength)
+    
+def pythonVersionCheck(intputFile, outputFileDir, totalWindowLength):
     if(sys.version_info[0] == 3):
         import importlib as lib
         if(lib.find_loader('mutation_motif') is None):
             print("\nPlease install mutation motif module or module load the Morrell Lab version of python 3.6.1.\n")
-            print("With this command: " + "module load python3_ML/3.6.0\n")
-            print("\nExiting...\n")
-            sys.exit
+            # print("With this command and try again: " + "module load python3_ML/3.6.1\n")
+            print("loading Morrell Lab version of Python 3.6.1 module...\n")
+            pythonStarter(intputFile, outputFileDir, totalWindowLength)
     elif(sys.version_info[0] == 2):
         import pkgutil as lib
-        # import imp as lib
         if(lib.find_loader('mutation_motif') is None):
             print("\nPlease install mutation motif module or module load the Morrell Lab version of python 3.6.1.\n")
-            print("With this command: " + "module load python3_ML/3.6.0\n")
-            print("\nExiting...\n")
-            sys.exit
+            # print("With this command and try again: " + "module load python3_ML/3.6.1\n")
+            print("loading Morrell Lab version of Python 3.6.1 module...\n")
+            pythonStarter(intputFile, outputFileDir, totalWindowLength)
 
 def start():
-    # windowCounter = 0
     fileIO = 0
-    # leftWindow = 0
-    # rightWindow = 0
     totalWindowLength = 0
     intputFile = None
     outputFileDir = None
     for x in range(len(sys.argv[0:])):
-        # indexPos = sys.argv.index(x)
         argInput = sys.argv[x]
         path = os.path.isfile(argInput)
         if(path == True):
@@ -53,16 +50,12 @@ def start():
                 fileIO += 1
         if((type(argInput) == str) and (path != False)): #clean this up, only have one argument fo rwindow length, choose the lenght on both ends. ALSO CHECK ON HOW TO CHECK IF OBJECT IS A STRING!!!
             totalWindowLength = argInput
-            # windowCounter += 1
-        # if((argInput.type(int)) and (windowCounter == 1) and (path != False)):
-        #     rightWindow = argInput
-        #     totalWindowLength = leftWindow + rightWindow
     if(fileIO < 2):
         outputFileDir = intputFile
     if(fileIO == 0):
         print("\nNo file or working directory specified.\n")
     elif(__name__ == '__main__'):
-        main(intputFile, outputFileDir, leftWindow, rightWindow, totalWindowLength)
+        main(intputFile, outputFileDir, totalWindowLength)
 
 def fileConvert(inputFile, outputFileDir):
     now = datetime.datetime.now()
@@ -81,9 +74,9 @@ def fileConvert(inputFile, outputFileDir):
     print("\nFile conversion FAILED... Check extension.\n")
     return(output)
 
-def main(intputFile, outputFileDir, leftWindow, rightWindow, totalWindowLength):
+def main(intputFile, outputFileDir, totalWindowLength):
     try:
-        pythonVersionCheck()
+        pythonVersionCheck(intputFile, outputFileDir, totalWindowLength)
         initModLoad()
         fileConvert(inputFile, outputFileDir)
     except(Exception) as error: #Logs crashes from the program
@@ -94,5 +87,4 @@ def main(intputFile, outputFileDir, leftWindow, rightWindow, totalWindowLength):
         logger = logging.getLogger(__name__)
         logger.error(error, exc_info=True)
 
-# start() #Starts program
-pythonVersionCheck()
+start() #Starts program
