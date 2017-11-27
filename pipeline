@@ -90,4 +90,4 @@ def main(intputFile, outputFileDir, totalWindowLength):
 
 # start() #Starts program
 
-pythonStarter()
+pythonStarter(intputFile, outputFileDir, totalWindowLength)
