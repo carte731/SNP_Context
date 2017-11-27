@@ -14,22 +14,23 @@ def initModLoad():
     subprocess.call("module load bedtools_ML/2.23.0")
 
 def pythonStarter(intputFile, outputFileDir, totalWindowLength):
-    subprocess.call("python3_ML/3.6.1")
-    subprocess.call("./pipeline " + intputFile + " " + outputFileDir + " " + totalWindowLength)
+    gate = subprocess.call("uname -n")
+    if(gate[-1:-4] == ".edu"):
+        subprocess.call("module load python3_ML/3.6.1")
+        subprocess.call("./pipeline " + intputFile + " " + outputFileDir + " " + totalWindowLength)
+    else:
+        print("Cannot load module... Cluster not detected.\n")
+        print("If you're on a local system please install mutation motif module OR \n if on MSI manually module load the Morrell Lab version of python 3.6.1.\n")
     
 def pythonVersionCheck(intputFile, outputFileDir, totalWindowLength):
     if(sys.version_info[0] == 3):
         import importlib as lib
         if(lib.find_loader('mutation_motif') is None):
-            print("\nPlease install mutation motif module or module load the Morrell Lab version of python 3.6.1.\n")
-            # print("With this command and try again: " + "module load python3_ML/3.6.1\n")
             print("loading Morrell Lab version of Python 3.6.1 module...\n")
             pythonStarter(intputFile, outputFileDir, totalWindowLength)
     elif(sys.version_info[0] == 2):
         import pkgutil as lib
         if(lib.find_loader('mutation_motif') is None):
-            print("\nPlease install mutation motif module or module load the Morrell Lab version of python 3.6.1.\n")
-            # print("With this command and try again: " + "module load python3_ML/3.6.1\n")
             print("loading Morrell Lab version of Python 3.6.1 module...\n")
             pythonStarter(intputFile, outputFileDir, totalWindowLength)
 
