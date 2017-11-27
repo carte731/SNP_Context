@@ -88,6 +88,4 @@ def main(intputFile, outputFileDir, totalWindowLength):
         logger = logging.getLogger(__name__)
         logger.error(error, exc_info=True)
 
-# start() #Starts program
-
-pythonStarter(intputFile, outputFileDir, totalWindowLength)
+start() #Starts program
