@@ -6,6 +6,7 @@ import sys
 import datetime
 import time
 import subprocess
+from subprocess import check_output
 import logging
 
 def initModLoad():
