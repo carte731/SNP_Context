@@ -10,12 +10,13 @@ from subprocess import call
 import logging
 
 def initModLoad():
+    print("INIT_GATE")
     subprocess.call("module load bedops_ML/2.4.20")
     subprocess.call("module load bedtools_ML/2.23.0")
 
 def pythonStarter(intputFile, outputFileDir, totalWindowLength):
+    print("FRONT_GATE")
     gate = subprocess.call("uname -n")
-    print(gate)
     if(gate[-1:-4] == ".edu"):
         print("G1")
         print("loading Morrell Lab version of Python 3.6.1 module...\n")
@@ -27,6 +28,7 @@ def pythonStarter(intputFile, outputFileDir, totalWindowLength):
         print("If you're on a local system please install mutation motif module OR \n if on MSI manually module load the Morrell Lab version of python 3.6.1.\n")
     
 def pythonVersionCheck(intputFile, outputFileDir, totalWindowLength):
+    print('PYTHONVERSION_GATE')
     if(sys.version_info[0] == 3):
         import importlib as lib
         if(lib.find_loader('mutation_motif') is None):
@@ -39,6 +41,7 @@ def pythonVersionCheck(intputFile, outputFileDir, totalWindowLength):
             pythonStarter(intputFile, outputFileDir, totalWindowLength)
 
 def start():
+    print('START_GATE')
     fileIO = 0
     totalWindowLength = 0
     intputFile = None
@@ -63,6 +66,7 @@ def start():
         main(intputFile, outputFileDir, totalWindowLength)
 
 def fileConvert(inputFile, outputFileDir):
+    print("FILECON_GATE")
     now = datetime.datetime.now()
     dateTime = (now.strftime("%Y-%m-%d %H:%M:%S"))
     output = False
@@ -80,6 +84,7 @@ def fileConvert(inputFile, outputFileDir):
     return(output)
 
 def main(intputFile, outputFileDir, totalWindowLength):
+    print("MAIN_GATE")
     try:
         pythonVersionCheck(intputFile, outputFileDir, totalWindowLength)
         initModLoad()
