@@ -6,7 +6,7 @@ import sys
 import datetime
 import time
 import subprocess
-from subprocess import call 
+from subprocess
 import logging
 
 def initModLoad():
@@ -16,7 +16,7 @@ def initModLoad():
 
 def pythonStarter(intputFile, outputFileDir, totalWindowLength):
     print("FRONT_GATE")
-    gate = subprocess.call("uname -n")
+    gate = subprocess.check_output(["uname", "-n"])
     print("POST_GATE_CHECK")
     if(gate[-1:-4] == ".edu"):
         print("G1")
