@@ -67,7 +67,7 @@ def fileConvert(inputFile, outputFileDir):
     dateTime = (now.strftime("%Y-%m-%d %H:%M:%S"))
     output = False
     if(inputFile.endswith('.vcf')):
-        subprocess.call("vcf2bed <" + inputFile + " >" + outputFileDir + "ouput_" + dateTime + ".bed") #calls Bedops and input directory path from args //CHECK IF THEY WANT THE FILE SORTED AND BROKEN APART
+        subprocess.call("vcf2bed < " + inputFile + " > " + outputFileDir + "ouput_" + dateTime + ".bed") #calls Bedops and input directory path from args //CHECK IF THEY WANT THE FILE SORTED AND BROKEN APART
         print("\nVCF to BED conversion complete.\n")
         output = True
         return(output)
