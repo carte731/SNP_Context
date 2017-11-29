@@ -86,9 +86,13 @@ def fileConvert(inputFile, outputFileDir):
 def main(intputFile, outputFileDir, totalWindowLength):
     print("MAIN_GATE")
     try:
+        print(1)
         pythonVersionCheck(intputFile, outputFileDir, totalWindowLength)
+        print(2)
         initModLoad()
+        print(3)
         fileConvert(inputFile, outputFileDir)
+        print(4 + " end")
     except(Exception) as error: #Logs crashes from the program
         with open(outputFileDir, 'a') as sslog:
             now = datetime.datetime.now()
