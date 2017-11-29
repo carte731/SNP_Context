@@ -17,6 +17,7 @@ def initModLoad():
 def pythonStarter(intputFile, outputFileDir, totalWindowLength):
     print("FRONT_GATE")
     gate = subprocess.call("uname -n")
+    print("POST_GATE_CHECK")
     if(gate[-1:-4] == ".edu"):
         print("G1")
         print("loading Morrell Lab version of Python 3.6.1 module...\n")
