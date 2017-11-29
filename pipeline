@@ -17,12 +17,12 @@ def pythonStarter(intputFile, outputFileDir, totalWindowLength):
     gate = subprocess.call("uname -n")
     print(gate)
     if(gate[-1:-4] == ".edu"):
-        print(G1)
+        print("G1")
         print("loading Morrell Lab version of Python 3.6.1 module...\n")
         subprocess.call("module load python3_ML/3.6.1")
         subprocess.call("./pipeline " + intputFile + " " + outputFileDir + " " + totalWindowLength)
     else:
-        print(G2)
+        print('G2')
         print("Cannot load module... Cluster not detected.\n")
         print("If you're on a local system please install mutation motif module OR \n if on MSI manually module load the Morrell Lab version of python 3.6.1.\n")
     
