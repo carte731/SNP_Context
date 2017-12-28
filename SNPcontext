@@ -10,7 +10,7 @@ starter(){ #grabs the arguments
             if [["${i##*.}" = '.vcf'] && [-e "$i"]]; then
                 inputFile="$i";
                 filename="${i%.*}";
-            else if [-d "$i"]
+            elif [-d "$i"]
                 outputLoc="$i";
             else
                 windowLength="$i";
