@@ -1,42 +1,42 @@
 #!/bin/bash
 
 starter(){ #grabs the arguments
-    windowLength=0;
-    inputFile='';
-    # outputLoc=inputFile;
-    filename='';
-    if ![ "$#" -ne 1]; then
+    windowLength=0
+    inputFile=''
+    outputLoc=''
+    filename=''
+    if ![ $# -ne 1]; then
         for i in $@; do
-            if [["${i##*.}" = '.vcf'] && [-e "$i"]]; then
-                inputFile="$i";
-                filename="${i%.*}";
-            elif [-d "$i"]; then
-                outputLoc="$i";
+            if [[${i##*.} == .vcf] && [-e $i]]; then
+                inputFile=$i
+                filename=${i%.*}
+            elif [-d $i]; then
+                outputLoc=$i
             else
-                windowLength="$i";
+                windowLength=$i
             fi
     else
-        echo "\nNo file or working directory specified.\n";
-        echo "EXITING...\n";
-        exit 1;
+        echo "\nNo file or working directory specified.\n"
+        echo "EXITING...\n"
+        exit 1
     fi
-    outputLoc="${inputFile%/*}";
+    outputLoc=${inputFile%/*}
     # echo $windowLength $inputFile $filename $outputLoc;
 }
 
 moduleLoader(){ #load modules need for operations
 
-    module load R;
+    module load R
     vcftools_ML/0.1.14 
-    module load python3_ML/3.6.1;
-    module load bedops_ML/2.4.20;
-    module load bedtools_ML/2.23.0;
+    module load python3_ML/3.6.1
+    module load bedops_ML/2.4.20
+    module load bedtools_ML/2.23.0
 
 }
 
 fileConverter(){
-    if ["${i##*.}" = '.vcf']; then
-        vcf2bed --input=vcf < $inputFile > $outputLoc/sorted-{"$filename"}.bed;
+    if [${i##*.} == .vcf]; then
+        vcf2bed --input=vcf < $inputFile > $outputLoc/sorted-{"$filename"}.bed
         #Add BED to FASTA conversion here
     # else if ["${i##*.}" = '.bed']
         #Use this to convert from bed to FASTA
@@ -44,8 +44,8 @@ fileConverter(){
 }
 
 mainOne(){
-    moduleLoader();
-    starter();
+    moduleLoader()
+    starter()
     # windowLength inputFile filename outputLoc=$(starter); #Saves results of function
 }
 
