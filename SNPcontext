@@ -5,7 +5,7 @@ starter(){ #grabs the arguments
     inputFile=''
     outputLoc=''
     filename=''
-    if ![ $# -ne 1]; then
+    if [ $# > 0 ]; then
         for i in $@; do
             if [[ ${i##*.} == ".vcf" && -e "$i" ]] ;then
                 inputFile=$i
@@ -15,6 +15,7 @@ starter(){ #grabs the arguments
             else
                 windowLength=$i
             fi
+        done
     else
         echo "\nNo file or working directory specified.\n"
         echo "EXITING...\n"
@@ -35,17 +36,18 @@ moduleLoader(){ #load modules need for operations
 }
 
 fileConverter(){
-    if [[ ${i##*.} == ".vcf" ] ;then
+    if [[ ${i##*.} == ".vcf" ]] ;then
         vcf2bed --input=vcf < $inputFile > $outputLoc/sorted-{"$filename"}.bed
         #Add BED to FASTA conversion here
     # else if ["${i##*.}" = '.bed']
         #Use this to convert from bed to FASTA
+    fi
 
 }
 
 mainOne(){
-    moduleLoader()
-    starter()
+    moduleLoader
+    starter
     # windowLength inputFile filename outputLoc=$(starter); #Saves results of function
 }
 
