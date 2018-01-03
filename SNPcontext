@@ -1,10 +1,10 @@
 #!/bin/bash
 
 starter(){ #grabs the arguments
-    local windowLength=0;
-    local inputFile='';
+    windowLength=0;
+    inputFile='';
     # outputLoc=inputFile;
-    local filename='';
+    filename='';
     if ![ "$#" -ne 1]; then
         for i in $@; do
             if [["${i##*.}" = '.vcf'] && [-e "$i"]]; then
@@ -20,8 +20,8 @@ starter(){ #grabs the arguments
         echo "EXITING...\n";
         exit 1;
     fi
-    local outputLoc="${in%/*}";
-    echo $windowLength $inputFile $filename $outputLoc;
+    outputLoc="${inputFile%/*}";
+    # echo $windowLength $inputFile $filename $outputLoc;
 }
 
 moduleLoader(){ #load modules need for operations
@@ -36,7 +36,7 @@ moduleLoader(){ #load modules need for operations
 
 fileConverter(){
     if ["${i##*.}" = '.vcf']; then
-        vcf2bed "< $inputFile > $in sorted-  {"$filename"}  .bed";
+        vcf2bed --input=vcf < $inputFile > $outputLoc/sorted-{"$filename"}.bed;
         #Add BED to FASTA conversion here
     # else if ["${i##*.}" = '.bed']
         #Use this to convert from bed to FASTA
@@ -45,8 +45,8 @@ fileConverter(){
 
 mainOne(){
     moduleLoader();
-    # starter();
-    windowLength inputFile filename outputLoc=$(starter); #Saves results of function
+    starter();
+    # windowLength inputFile filename outputLoc=$(starter); #Saves results of function
 }
 
 mainOne
