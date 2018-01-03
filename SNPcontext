@@ -7,10 +7,10 @@ starter(){ #grabs the arguments
     filename=''
     if ![ $# -ne 1]; then
         for i in $@; do
-            if [[${i##*.} == .vcf] && [-e $i]]; then
+            if [[ ${i##*.} == .vcf ] && [ -e $i ]]; then
                 inputFile=$i
                 filename=${i%.*}
-            elif [-d $i]; then
+            elif [ -d $i ]; then
                 outputLoc=$i
             else
                 windowLength=$i
@@ -35,7 +35,7 @@ moduleLoader(){ #load modules need for operations
 }
 
 fileConverter(){
-    if [${i##*.} == .vcf]; then
+    if [ ${i##*.} == .vcf ]; then
         vcf2bed --input=vcf < $inputFile > $outputLoc/sorted-{"$filename"}.bed
         #Add BED to FASTA conversion here
     # else if ["${i##*.}" = '.bed']
