@@ -5,7 +5,7 @@ starter(){ #grabs the arguments
     inputFile=''
     outputLoc=''
     filename=''
-    if [ "$#" -ge 2 ]; then
+    if [ "$#" -ge 1 ]; then
         for i in $@; do
             if [[ ${i##*.} == ".vcf" && -e "$i" ]]; then
                 inputFile=$i
@@ -47,11 +47,11 @@ fileConverter(){
 
 mainOne(){
     moduleLoader
-    starter
+    starter "$@"
     # windowLength inputFile filename outputLoc=$(starter); #Saves results of function
 }
 
-mainOne
+mainOne "$@"
 
 # python3 <<END_OF_PYTHON
 
