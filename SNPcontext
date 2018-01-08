@@ -1,33 +1,35 @@
 #!/bin/bash
 
 starter(){ #grabs the arguments
-    echo -e "TEST"
     windowLength=0
     inputFile=''
+    inputLoc=''
     outputLoc=''
     filename=''
     if [ "$#" -ge 1 ]; then
         for i in $@; do
-            if [[ ${i##*.} == ".vcf" && -e "$i" ]]; then
-                echo -e "TEST"
+            if [ "${i##*.}" == "vcf" ]; then
+                inputLoc=${i%/*}
                 inputFile=$i
-                filename=${i%.*}
-                echo -e ${inputFile}
-                echo -e ${filename}
-            elif [[ -d "$i" ]]; then
+            elif [[ -d "$i" && ! -e "$i" ]]; then
                 outputLoc=$i
             else
                 windowLength=$i
             fi
         done
+        if [ -z "$filename" ]; then
+            arg1=$1
+            filename=${arg1%.*}
+            filename=${filename##*/}
+        fi
+        if [ -z "$outputLoc" ]; then
+            outputLoc=${inputFile%/*}
+        fi
     else
         echo -e "\nNo file or working directory specified."
         echo -e "EXITING...\n"
         exit 1
     fi
-    outputLoc=${inputFile%/*}
-    echo -e ${outputLoc}
-    # echo $windowLength $inputFile $filename $outputLoc;
 }
 
 moduleLoader(){ #load modules need for operations
@@ -42,7 +44,7 @@ moduleLoader(){ #load modules need for operations
 
 fileConverter(){
     if [[ ${i##*.} == ".vcf" ]] ;then
-        vcf2bed --input=vcf < $inputFile > $outputLoc/sorted-{"$filename"}.bed
+        vcf2bed --input=vcf < "${inputFile}" > "${outputLoc}"/sorted-"${$filename}".bed
         #Add BED to FASTA conversion here
     # else if ["${i##*.}" = '.bed']
         #Use this to convert from bed to FASTA
