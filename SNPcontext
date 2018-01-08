@@ -44,7 +44,7 @@ moduleLoader(){ #load modules need for operations
 }
 
 fileConverter(){
-    vcf2bed --input=vcf < "${inputFile}" > "${outputLoc}"/sorted-"${filename}".bed
+    vcf2bed --input=vcf --output=bed < "${inputFile}" > "${outputLoc}"/sorted-"${filename}"
     
     # if [[ ${i##*.} == ".vcf" ]] ;then
     #     vcf2bed --input=vcf < "${inputFile}" > "${outputLoc}"/sorted-"${$filename}".bed
