@@ -49,7 +49,7 @@ fileConverter(){
         #Add BED to FASTA conversion here
     # else if ["${i##*.}" = '.bed']
         #Use this to convert from bed to FASTA
-    fi
+    # fi
 
 }
 
