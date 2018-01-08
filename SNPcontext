@@ -10,6 +10,8 @@ starter(){ #grabs the arguments
             if [[ ${i##*.} == ".vcf" && -e "$i" ]]; then
                 inputFile=$i
                 filename=${i%.*}
+                echo -e ${inputFile}
+                echo -e ${filename}
             elif [[ -d "$i" ]]; then
                 outputLoc=$i
             else
@@ -22,6 +24,7 @@ starter(){ #grabs the arguments
         exit 1
     fi
     outputLoc=${inputFile%/*}
+    echo -e ${outputLoc}
     # echo $windowLength $inputFile $filename $outputLoc;
 }
 
