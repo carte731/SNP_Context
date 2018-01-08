@@ -37,6 +37,7 @@ moduleLoader(){ #load modules need for operations
     module load R
     module load gatk_ML/3.8.0 
     module load vcftools_ML/0.1.14
+    module load python3_ML/2.7.13
     module load python3_ML/3.6.1
     module load bedops_ML/2.4.20
     module load bedtools_ML/2.23.0
@@ -44,7 +45,7 @@ moduleLoader(){ #load modules need for operations
 }
 
 fileConverter(){
-    vcf2bed --input=vcf --output=bed < "${inputFile}" > "${outputLoc}"/sorted-"${filename}"
+    vcf2bed --input=vcf --output=bed < "${inputFile}" > "${outputLoc}"/sorted-"${filename}".bed
     
     # if [[ ${i##*.} == ".vcf" ]] ;then
     #     vcf2bed --input=vcf < "${inputFile}" > "${outputLoc}"/sorted-"${$filename}".bed
