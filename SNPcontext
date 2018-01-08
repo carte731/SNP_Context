@@ -5,7 +5,7 @@ starter(){ #grabs the arguments
     inputFile=''
     outputLoc=''
     filename=''
-    if [ "$#" >= 1 ]; then
+    if [ "$#" -ge 1 ]; then
         for i in $@; do
             if [[ ${i##*.} == ".vcf" && -e "$i" ]]; then
                 inputFile=$i
