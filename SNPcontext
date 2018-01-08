@@ -43,8 +43,9 @@ moduleLoader(){ #load modules need for operations
 }
 
 fileConverter(){
-    if [[ ${i##*.} == ".vcf" ]] ;then
-        vcf2bed --input=vcf < "${inputFile}" > "${outputLoc}"/sorted-"${$filename}".bed
+    vcf2bed --input=vcf < "${inputFile}" > "${outputLoc}"/sorted-"${filename}".bed    
+    # if [[ ${i##*.} == ".vcf" ]] ;then
+    #     vcf2bed --input=vcf < "${inputFile}" > "${outputLoc}"/sorted-"${$filename}".bed
         #Add BED to FASTA conversion here
     # else if ["${i##*.}" = '.bed']
         #Use this to convert from bed to FASTA
@@ -53,8 +54,9 @@ fileConverter(){
 }
 
 mainOne(){
-    # moduleLoader
+    moduleLoader
     starter "$@"
+    fileConverter "$inputFile" "$outputLoc" "$filename"
     # windowLength inputFile filename outputLoc=$(starter); #Saves results of function
 }
 
