@@ -1,6 +1,7 @@
 #!/bin/bash
 
 starter(){ #grabs the arguments
+    echo -e "TEST"
     windowLength=0
     inputFile=''
     outputLoc=''
@@ -8,6 +9,7 @@ starter(){ #grabs the arguments
     if [ "$#" -ge 1 ]; then
         for i in $@; do
             if [[ ${i##*.} == ".vcf" && -e "$i" ]]; then
+                echo -e "TEST"
                 inputFile=$i
                 filename=${i%.*}
                 echo -e ${inputFile}
@@ -49,7 +51,7 @@ fileConverter(){
 }
 
 mainOne(){
-    moduleLoader
+    # moduleLoader
     starter "$@"
     # windowLength inputFile filename outputLoc=$(starter); #Saves results of function
 }
