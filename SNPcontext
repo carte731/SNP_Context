@@ -45,8 +45,10 @@ moduleLoader(){ #load modules need for operations
 }
 
 fileConverter(){
-    vcf2bed --input=vcf --output=bed < "${inputFile}" > "${outputLoc}"/sorted-"${filename}".bed
-    
+    vcf2bed < "${inputFile}" > "${outputLoc}"/sorted-"${filename}".bed
+    # vcf2bed -i vcf -o bed < "${inputFile}" > "${outputLoc}"/sorted-"${filename}".bed
+    # vcf2bed < CBF3.vcf > test.bed
+
     # if [[ ${i##*.} == ".vcf" ]] ;then
     #     vcf2bed --input=vcf < "${inputFile}" > "${outputLoc}"/sorted-"${$filename}".bed
         #Add BED to FASTA conversion here
