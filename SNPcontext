@@ -70,8 +70,11 @@ fileConverter(){
 # }
 
 pythonBEDScanner(){
-    tableOut=$(python - << "print(test flight)")
-    # echo -e "TEST"
+    tableOut=${python - <<END_OF_PYTHON
+    print "Test"
+    END_OF_PYTHON
+    }
+
     eval $tableOut
     echo -e ${tableOut}
 }
