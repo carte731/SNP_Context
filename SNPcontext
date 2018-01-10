@@ -82,11 +82,13 @@ fileConverter(){
 # }
 
 pythonBEDScanner(){
-myvar=$(python - <<EOF
+listing=
+eval myvar=$(python - <<EOF
 testList=[1,2,3,4,5,6,7]
+'listing={}'.format(testList)
 EOF
 )
-echo $myvar
+echo $listing
 }
 
 mainOne(){
