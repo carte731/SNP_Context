@@ -59,10 +59,10 @@ fileConverter(){
 pythonBEDScanner(){
 python <<END_OF_PYTHON
     
-    def main():
-        print("Hello world")
+def main():
+    print("Hello world")
 
-    main()
+main()
 
 END_OF_PYTHON
 }
