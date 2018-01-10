@@ -71,6 +71,7 @@ mainOne(){
     starter "$@"
     fileConverter "$inputFile" "$outputLoc" "$filename"
     pythonBEDScanner
+    eval table
     echo -e "${table}"
 }
 
