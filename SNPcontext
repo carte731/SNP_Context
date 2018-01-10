@@ -70,10 +70,12 @@ fileConverter(){
 # }
 
 pythonBEDScanner(){
-    tableOut=${python - <<END_OF_PYTHON
-    print "Test"
-    END_OF_PYTHON
-    }
+    test=''
+    tableOut=$(python - <<END_OF_PYTHON
+    var="Test"
+    print('test={}'.format(var))
+END_OF_PYTHON
+    )
 
     eval $tableOut
     echo -e ${tableOut}
