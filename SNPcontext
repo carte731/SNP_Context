@@ -60,7 +60,7 @@ pythonBEDScanner(){
 tableOut=$(python -<<END_OF_PYTHON
     
 table="Hello world"
-print("tableOut=''".format(table))
+print("tableOut={}".format(table))
 
 END_OF_PYTHON
 )
