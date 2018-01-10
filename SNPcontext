@@ -64,6 +64,8 @@ print("tableOut=''".format(table))
 
 END_OF_PYTHON
 )
+    eval $tableOut
+    echo -e ${tableOut}
 }
 
 mainOne(){
@@ -71,8 +73,6 @@ mainOne(){
     starter "$@"
     fileConverter "$inputFile" "$outputLoc" "$filename"
     pythonBEDScanner
-    eval $tableOut
-    echo -e ${tableOut}
 }
 
 mainOne "$@"
