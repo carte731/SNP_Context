@@ -69,8 +69,8 @@ mainOne(){
     moduleLoader
     starter "$@"
     fileConverter "$inputFile" "$outputLoc" "$filename"
-    pythonBEDScanner
-    eval ${table}
+    eval table=$(pythonBEDScanner)
+    # eval ${table}
     echo -e "${table}"
 }
 
