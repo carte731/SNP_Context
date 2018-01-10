@@ -57,7 +57,7 @@ fileConverter(){
 }
 
 pythonBEDScanner(){
-tableOut=$(python <<END_OF_PYTHON
+tableOut=$(python -<<END_OF_PYTHON
     
 table="Hello world"
 print("tableOut=''".format(table))
@@ -71,8 +71,8 @@ mainOne(){
     starter "$@"
     fileConverter "$inputFile" "$outputLoc" "$filename"
     pythonBEDScanner
-    eval $table
-    echo -e ${table}
+    eval $tableOut
+    echo -e ${tableOut}
 }
 
 mainOne "$@"
