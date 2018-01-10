@@ -64,8 +64,9 @@ print("tableOut=''".format(table))
 
 END_OF_PYTHON
 )
-    eval $tableOut
-    echo -e ${tableOut}
+    echo -e "TEST"
+    # eval $tableOut
+    # echo -e ${tableOut}
 }
 
 mainOne(){
