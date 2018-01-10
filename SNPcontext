@@ -69,16 +69,24 @@ fileConverter(){
 #     echo -e ${tableOut}
 # }
 
-pythonBEDScanner(){
-    test=''
-    tableOut=$(python3 - <<END_OF_PYTHON
-var="Test"
-test={}.format(var)
-END_OF_PYTHON
-    )
+# pythonBEDScanner(){
+#     test=''
+#     tableOut=$(python3 - <<END_OF_PYTHON
+# var="Test"
+# test={}.format(var)
+# END_OF_PYTHON
+#     )
 
-    eval $tableOut
-    echo -e ${tableOut}
+#     eval $tableOut
+#     echo -e ${tableOut}
+# }
+
+pythonBEDScanner(){
+myvar=$(python - <<EOF
+print "second"
+EOF
+)
+echo $myvar
 }
 
 mainOne(){
