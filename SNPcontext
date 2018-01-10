@@ -1,6 +1,6 @@
 #!/bin/bash
 
-referenceGenome=
+global referenceGenome='/home/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
 
 starter(){ #grabs the arguments
     windowLength=0
@@ -37,7 +37,7 @@ starter(){ #grabs the arguments
 moduleLoader(){ #load modules need for operations
 
     module load R
-    module load gatk_ML/3.8.0 
+    module load gatk_ML/3.8.0
     module load vcftools_ML/0.1.14
     # module load python3_ML/2.7.13
     module load python3_ML/3.6.1
@@ -48,6 +48,7 @@ moduleLoader(){ #load modules need for operations
 
 fileConverter(){
     vcf2bed < "${inputFile}" > "${outputLoc}"/sorted-"${filename}".bed
+    bedtools getfasta -fi ${referenceGenome} -bed "${outputLoc}"/sorted-"${filename}".bed -fo auto_test.fasta.out
     # vcf2bed -i vcf -o bed < "${inputFile}" > "${outputLoc}"/sorted-"${filename}".bed
     # vcf2bed < CBF3.vcf > test.bed
 
