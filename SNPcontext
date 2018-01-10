@@ -47,7 +47,7 @@ moduleLoader(){ #load modules need for operations
 fileConverter(){
     referenceGenome='/home/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
     vcf2bed < "${inputFile}" > "${outputLoc}"/sorted-"${filename}".bed
-    bedtools getfasta -fi "${referenceGenome}" -bed "${outputLoc}"/sorted-"${filename}".bed -fo auto_test.fasta.out
+    getFastaFromBed -fi "${referenceGenome}" -bed "${outputLoc}"/sorted-"${filename}".bed -fo auto_test.fasta.out
     # vcf2bed -i vcf -o bed < "${inputFile}" > "${outputLoc}"/sorted-"${filename}".bed
     # vcf2bed < CBF3.vcf > test.bed
 
