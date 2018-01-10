@@ -45,9 +45,8 @@ moduleLoader(){ #load modules need for operations
 }
 
 fileConverter(){
-    referenceGenome='/home/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
     vcf2bed < "${inputFile}" > "${outputLoc}"/sorted-"${filename}".bed
-    bedtools getfasta -fi /home/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta -bed sorted-CBF3_unfiltered.bed -fo test.fasta.out
+    # bedtools getfasta -fi /home/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta -bed sorted-CBF3_unfiltered.bed -fo test.fasta.out
     # bedtools getfasta -fi "${referenceGenome}" -bed "${outputLoc}"/sorted-"${filename}".bed -fo auto_test.fasta.out
     # bedtools getfasta -fi "${referenceGenome}" -bed "${outputLoc}"/sorted-CBF3_unfiltered.bed -fo auto_test.fasta.out
     # vcf2bed -i vcf -o bed < "${inputFile}" > "${outputLoc}"/sorted-"${filename}".bed
@@ -62,10 +61,16 @@ fileConverter(){
 
 }
 
+fileFastaConvert(){
+    referenceGenome='/home/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
+    bedtools getfasta -fi "${referenceGenome}" -bed "${outputLoc}"/sorted-"${filename}".bed -fo auto_test.fasta.out
+}
+
 mainOne(){
     moduleLoader
     starter "$@"
     fileConverter "$inputFile" "$outputLoc" "$filename"
+    fileFastaConvert "$inputFile" "$outputLoc" "$filename"
 }
 
 mainOne "$@"
