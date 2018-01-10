@@ -58,8 +58,11 @@ fileConverter(){
 
 pythonBEDScanner(){
 python <<END_OF_PYTHON
-print("Hello world")
+    
+    def main():
+        print("Hello world")
 
+    main()
 
 END_OF_PYTHON
 }
