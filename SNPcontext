@@ -56,14 +56,21 @@ fileConverter(){
     # fi
 }
 
-pythonBEDScanner(){
-tableOut=$(python -<<END_OF_PYTHON
+# pythonBEDScanner(){
+# tableOut=$(python -<<END_OF_PYTHON
     
-table="Hello world"
-print("tableOut={}".format(table))
+# table="Hello world"
+# print("tableOut={}".format(table))
 
-END_OF_PYTHON
-)
+# END_OF_PYTHON
+# )
+#     # echo -e "TEST"
+#     eval $tableOut
+#     echo -e ${tableOut}
+# }
+
+pythonBEDScanner(){
+    tableOut=$(python - << "print(test flight)")
     # echo -e "TEST"
     eval $tableOut
     echo -e ${tableOut}
