@@ -62,8 +62,6 @@ table=$(python <<END_OF_PYTHON
 def main():
     print("Hello world")
 
-main()
-
 END_OF_PYTHON
 )
 }
