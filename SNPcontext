@@ -72,8 +72,8 @@ fileConverter(){
 pythonBEDScanner(){
     test=''
     tableOut=$(python - <<END_OF_PYTHON
-    var="Test"
-    print('test={}'.format(var))
+var="Test"
+print('test={}'.format(var))
 END_OF_PYTHON
     )
 
