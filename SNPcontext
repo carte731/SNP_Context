@@ -73,7 +73,7 @@ pythonBEDScanner(){
     test=''
     tableOut=$(python3 - <<END_OF_PYTHON
 var="Test"
-test={}.format(var))
+test={}.format(var)
 END_OF_PYTHON
     )
 
