@@ -96,12 +96,13 @@ def intervalExpander(bedMapper, interval):
         if((bedMapper[i][2]) and (bedMapper[i][4])):
             try:
                 if((type(int(bedMapper[i][2])) == int) and (type(int(bedMapper[i][4])) == int)):
-                    bedMapper[i][2] = str(int(bedMapper[i][2]) - interval)
-                    bedMapper[i][4] = str(int(bedMapper[i][4]) + interval)
+                        a=bedMapper[i][2]
+                        b=bedMapper[i][4]
+                        bedMapper[i][2] = str(a - interval)
+                        bedMapper[i][4] = str(b + interval)
             except:
                 print("\nPython interval expanson error on line: " + bedMapper.index(i) + ". Adding error notation to error logs")
                 #Add stuff for logging error to text file
-                pass
     expandedList=intervalLister(bedMapper)
     return(bedMapper, masterList, expandedList)
 
