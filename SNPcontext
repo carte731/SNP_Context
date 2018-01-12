@@ -173,11 +173,11 @@ def bashInputs():
     return(outputLoc, filename, windowLength, inputFile)
 
 def main():
-    outputLoc, filename, interval, inputFile=bashInputs()
+    outputLoc, filename, windowLength, inputFile=bashInputs()
     bedMap=bedMapper(filename, outputLoc)
-    bedMap, masterList, expandedList=intervalExpander(bedMap, interval)
-    fileSaver(bedMapper, outputLoc, filename)
-    typeOneTwo(expandedList, masterList, interval, outputLoc)  
+    bedMap, masterList, expandedList=intervalExpander(bedMap, windowLength)
+    fileSaver(bedMap, outputLoc, filename)
+    typeOneTwo(expandedList, masterList, windowLength, outputLoc)  
 
 main()
 
