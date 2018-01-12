@@ -62,8 +62,8 @@ pythonBEDScanner(){
     inputFile="$inputFile" outputLoc="$outputLoc" filename="$filename" windowLength="$windowLength" python3 - <<END_OF_PYTHON
     
 import os
-# from itertools import chain
-import itertools
+from itertools import chain
+# import itertools
 import datetime
 
 def bedMapper(filename, outputLoc):
