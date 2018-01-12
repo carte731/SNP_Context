@@ -59,7 +59,7 @@ fileConverter(){
 }
 
 pythonBEDScanner(){
-    inputFile="$inputFile" outputLoc="$outputLoc" filename="$filename" windowLength="$windowLength" python3 - <<END_OF_PYTHON
+    inputFile="$inputFile" outputLoc="$outputLoc" filename="$filename" windowLength="$windowLength" python - <<END_OF_PYTHON
     
 import os
 # from itertools import chain
@@ -99,8 +99,8 @@ def intervalExpander(bedMapper, interval):
             try:
                 if((type(int(bedMapper[i][2])) == int) and (type(int(bedMapper[i][4])) == int)):
                     print("\n"+type(interval)+"\n")
-                    a=int(bedMapper[i][2]) - interval
-                    b=int(bedMapper[i][4]) + interval
+                    a=int(bedMapper[i][2] - interval)
+                    b=int(bedMapper[i][4] + interval)
                     bedMapper[i][2] = str(a)
                     bedMapper[i][4] = str(b)
             except:
