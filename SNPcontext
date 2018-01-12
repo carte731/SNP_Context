@@ -1,7 +1,8 @@
 #!/bin/bash
 
 starter(){ #grabs the arguments
-    windowLength=0
+    # windowLength=0
+    windowLength=5    
     inputFile=''
     inputLoc=''
     outputLoc=''
@@ -97,10 +98,11 @@ def intervalExpander(bedMapper, interval):
         if((bedMapper[i][2]) and (bedMapper[i][4])):
             try:
                 if((type(int(bedMapper[i][2])) == int) and (type(int(bedMapper[i][4])) == int)):
-                        a=int(bedMapper[i][2]) - interval
-                        b=int(bedMapper[i][4]) + interval
-                        bedMapper[i][2] = str(a)
-                        bedMapper[i][4] = str(b)
+                    print("\n"+type(interval)+"\n")
+                    a=int(bedMapper[i][2]) - interval
+                    b=int(bedMapper[i][4]) + interval
+                    bedMapper[i][2] = str(a)
+                    bedMapper[i][4] = str(b)
             except:
                 print("\nPython interval expanson error on line: " + bedMapper.index(i) + ". Adding error notation to error logs")
                 #Add stuff for logging error to text file
@@ -168,10 +170,6 @@ def bashInputs():
     filename=str(os.environ['filename'])
     windowLength=str(os.environ['windowLength'])
     inputFile=str(os.environ['inputFile'])
-    print(outputLoc)
-    print(filename)
-    print(windowLength)
-    print(inputFile)
     return(outputLoc, filename, windowLength, inputFile)
 
 def main():
