@@ -128,7 +128,7 @@ def typeOneTwo(expandedList, inputList, interval, outputLoc):
                 subMB=inputList[j][1]
                 if((comparisonA != subMA) and (comparisonB != subMB)): ##Add id() check
                     if(i != j):
-                        gateOne, tempResults=binaryIntersect(typeOT, a, b, subMA, subMB, gate)
+                        gateOne, tempResults=binaryIntersect(typeOT, a, b, subMA, subMB, gateOne)
                         results+=tempResults
         results += "\n-----\n"
         typeOT="TWO"
@@ -141,7 +141,7 @@ def typeOneTwo(expandedList, inputList, interval, outputLoc):
             for j in range(i+1, len(expandedList)):
                 subEA=expandedList[j][0]
                 subEB=expandedList[j][1]
-                gateTwo, tempResults=binaryIntersect(typeOT, a2, b2, subEA, subEB, gate)
+                gateTwo, tempResults=binaryIntersect(typeOT, a2, b2, subEA, subEB, gateTwo)
                 results+=tempResults
         if(gateTwo):
             results+="\nNo " + typeOT + " window overlaps detected.\n"
