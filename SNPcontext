@@ -146,7 +146,7 @@ def typeOneTwo(expandedList, inputList, interval, outputLoc):
         if(gateTwo):
             results+="\nNo " + typeOT + " window overlaps detected.\n"
     results += "\nEND OF INTERVAL CHECKS.\n**********************\n"
-    if((gateOne != True) or (gateTwo != True)):
+    if((gateOne == True) or (gateTwo == True)):
         print("\nNO overlaps dectected. Results saved to 'WindowOverlap.txt' in your output directory.\n")
     else:
         print("\nTYPE ONE OR TWO OVERLAPS DETECTED. Check 'WindowOverlap.txt' in your output directory for saved results.\n")
@@ -172,9 +172,9 @@ def binaryIntersect(typeOT, a, b, subTA, subTB, gate):
             resultsBI+="\n--TYPE " + typeOT + " at: " + str(a) + "-" + str(b) + " is equal or encapsulating " + str(subTA) + "-" + str(subTB)
         elif((binary == [1,1,1,0]) or (binary == [0,1,1,1])):
             if(binary == [1,1,1,0]):
-                resultsBI+="\n--TYPE " + typeOT + " at: " + str(a) + "-" + str(b) + " SNP window is overlapping " + str(subTA) + "-" + str(subTB) + ". Overlaps occurring on the right of SNP, between " + str(b) + " and " + str(subTA)
+                resultsBI+="\n--TYPE " + typeOT + " at: " + str(a) + "-" + str(b) + " is overlapping with " + str(subTA) + "-" + str(subTB) + ". on the right, between " + str(b) + " and " + str(subTA)
             elif(binary == [0,1,1,1]):
-                resultsBI+="\n--TYPE " + typeOT + " at: " + str(a) + "-" + str(b) + " SNP window is overlapping " + str(subTA) + "-" + str(subTB) + ". Overlaps occurring on the left of SNP, between " + str(a) + " and " + str(subTB)
+                resultsBI+="\n--TYPE " + typeOT + " at: " + str(a) + "-" + str(b) + " is overlapping with " + str(subTA) + "-" + str(subTB) + ". on the left, between " + str(a) + " and " + str(subTB)
     return(gate, resultsBI)
         
 def bashInputs():
