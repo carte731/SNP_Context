@@ -53,7 +53,7 @@ fileConverter(){
         vcf2bed < "${inputFile}" > "${outputLoc}"/"${filename}".bed
         gate="bedTOfasta"
     elif [ "$gate" == "bedTOfasta" ]; then
-        bedtools getfasta -fi "${referenceGenome}" -bed "${outputLoc}"/sorted-"${filename}".bed -fo "${outputLoc}"/"${filename}".fasta 
+        bedtools getfasta -fi "${referenceGenome}" -bed "${outputLoc}"/"${filename}".bed -fo "${outputLoc}"/"${filename}".fasta 
     fi
 }
 
@@ -135,6 +135,7 @@ def typeOneTwo(expandedList, inputList, interval, outputLoc):
         if(gateOne):
             results+="\nNo " + typeOT + " window overlaps detected.\n"
     if(typeOT == "TWO"): #Checks for Type Two window overlaps (EXTENDED INTERVAL CHECK)
+        results += '\nType Two: overlap into Windows\n------------------\n'
         for i in range(len(expandedList)):
             a2=expandedList[i][0]
             b2=expandedList[i][1]
