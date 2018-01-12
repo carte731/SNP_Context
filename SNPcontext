@@ -106,8 +106,8 @@ def intervalExpander(bedMapper, interval):
     expandedList=intervalLister(bedMapper)
     return(bedMapper, masterList, expandedList)
 
-def fileSaver(bedMapper, outputLoc, filename):
-    output="".join(chain.from_iterable(bedMapper))
+def fileSaver(bedMapp, outputLoc, filename):
+    output="".join(chain.from_iterable(bedMapp))
     with open(outputLoc + "/" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
         newBed.write(output)
 
