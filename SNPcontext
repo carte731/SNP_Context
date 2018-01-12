@@ -162,7 +162,7 @@ def binaryIntersect(BinaryNum, typeOT, a, b, subTA, subTB):
     return(resultsBI)    
         
 def bashInputs():
-    outputLoc=str(os.environ['outputLoc'])windowLength
+    outputLoc=str(os.environ['outputLoc'])
     filename=str(os.environ['filename'])
     windowLength=str(os.environ['windowLength'])
     inputFile=str(os.environ['inputFile'])
