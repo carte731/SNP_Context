@@ -99,7 +99,7 @@ def intervalExpander(bedMapper, interval):
                     bedMapper[i][2] = str(int(bedMapper[i][2]) - interval)
                     bedMapper[i][4] = str(int(bedMapper[i][4]) + interval)
             except:
-                print("\nPython interval expanson error on line: " + str(bedMapper[i]) + ". Adding error notation to error logs")
+                print("\nPython interval expanson error on line: " + bedMapper.index(i) + ". Adding error notation to error logs")
                 #Add stuff for logging error to text file
                 pass
     expandedList=intervalLister(bedMapper)
