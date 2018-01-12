@@ -1,8 +1,8 @@
 #!/bin/bash
 
 starter(){ #grabs the arguments
-    windowLength=0
-    # windowLength=1   
+    # windowLength=0
+    windowLength=1   
     inputFile=''
     inputLoc=''
     outputLoc=''
@@ -93,15 +93,16 @@ def intervalLister(bedMap):
 
 def intervalExpander(bedMap, interval):
     masterList=intervalLister(bedMap)
-    for i in range(len(bedMap)):
-        if((bedMap[i][2]) and (bedMap[i][4])):
-            try:
-                if((type(int(bedMap[i][2])) == int) and (type(int(bedMap[i][4])) == int)):
-                    bedMap[i][2] = str(int(bedMap[i][2]) - interval)
-                    bedMap[i][4] = str(int(bedMap[i][4]) + interval)
-            except:
-                print("\nPython interval expanson error on line: " + bedMap.index(i) + ". Adding error notation to error logs")
-                #Add stuff for logging error to text file
+    if(interval > 0):
+        for i in range(len(bedMap)):
+            if((bedMap[i][2]) and (bedMap[i][4])):
+                try:
+                    if((type(int(bedMap[i][2])) == int) and (type(int(bedMap[i][4])) == int)):
+                        bedMap[i][2] = str(int(bedMap[i][2]) - interval)
+                        bedMap[i][4] = str(int(bedMap[i][4]) + interval)
+                except:
+                    print("\nPython interval expanson error on line: " + bedMap.index(i) + ". Adding error notation to error logs")
+                    #Add stuff for logging error to text file
     expandedList=intervalLister(bedMap)
     return(bedMap, masterList, expandedList)
 
@@ -115,14 +116,18 @@ def typeOneTwo(expandedList, inputList, interval, outputLoc):
     gateOne=True
     gateTwo=True
     typeOT = "ONE"
-    results = '\n**********************\nTYPE ONE AND TYPE TWO CHECKS FOR: ' + now.strftime("%Y-%m-%d, %H:%M") + '\n----------------------------------------------------\n' ##ADD PROJECT NAME TO THIS    
+    results = '\n**********************\nTYPE ONE and TYPE TWO CHECKS FOR: ' + now.strftime("%Y-%m-%d, %H:%M") + '\n----------------------------------------------------n' ##ADD PROJECT NAME TO THIS    
     if(typeOT == "ONE"):
-        results += '\n**Type One: overlap into SNP**\n----------------------------\n'
+        results += '\n**Type One: overlap into SNP\n-------------------------------n'
         for i in range(len(expandedList)): #Checks for Type One SNP overlaps (ORIGINAL INTERVAL CHECK)
             a=expandedList[i][0]
             b=expandedList[i][1]
-            comparisonA=a+interval
-            comparisonB=b-interval
+            if(interval > 0):
+                comparisonA=a+interval
+                comparisonB=b-interval
+            else:
+                comparisonA=a
+                comparisonB=b
             for j in range(len(inputList)):
                 subMA=inputList[j][0]
                 subMB=inputList[j][1]
@@ -130,11 +135,11 @@ def typeOneTwo(expandedList, inputList, interval, outputLoc):
                     if(i != j):
                         gateOne, tempResults=binaryIntersect(typeOT, a, b, subMA, subMB, gateOne)
                         results+=tempResults
+        typeOT="TWO"
         if(gateOne):
             results+="\nNo Type " + typeOT + " window overlaps detected.\n"
-    typeOT="TWO"
-    if(typeOT == "TWO"): #Checks for Type Two window overlaps (EXTENDED INTERVAL CHECK)
-        results += '\n**Type Two: overlap into Windows**\n---------------------------------\n'
+    if((typeOT == "TWO") and (interval > 0)): #Checks for Type Two window overlaps (EXTENDED INTERVAL CHECK)
+        results += '\n**Type Two: overlap into Windows\n-------------------------------n'
         for i in range(len(expandedList)):
             a2=expandedList[i][0]
             b2=expandedList[i][1]
@@ -143,11 +148,11 @@ def typeOneTwo(expandedList, inputList, interval, outputLoc):
                 subEB=expandedList[j][1]
                 gateTwo, tempResults=binaryIntersect(typeOT, a2, b2, subEA, subEB, gateTwo)
                 results+=tempResults
-        if(gateTwo):
-            results+="\nNo Type " + typeOT + " window overlaps detected.\n"
+    if(gateTwo):
+        results+="\nNo Type " + typeOT + " window overlaps detected.\n"
     results += "\n"
-    results += "\nEND OF INTERVAL CHECKS.\nXXXXXXXXXXXXXXXXXXXXXX\n\n\n"
-    if((gateOne == True) and (gateTwo == True)):
+    results += "\nEND OF INTERVAL CHECKS.\nXXXXXXXXXXXXXXXXXXXXXX\n"
+    if((gateOne == True) or (gateTwo == True)):
         print("\nNO overlaps dectected. Results saved to 'WindowOverlap.txt' in your output directory.\n")
     else:
         print("\nTYPE ONE OR TYPE TWO OVERLAPS DETECTED. Check 'WindowOverlap.txt' in your output directory for saved results.\n")
@@ -186,7 +191,6 @@ def bashInputs():
     return(outputLoc, filename, windowLength, inputFile)
 
 def main():
-    completedOne=[]
     outputLoc, filename, interval, inputFile=bashInputs()
     bedMap=bedMapper(filename, outputLoc)
     bedMap, masterList, expandedList=intervalExpander(bedMap, interval)
