@@ -51,6 +51,7 @@ fileConverter(){
     referenceGenome='/home/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
     if [ "$gate" == "vcfTObed" ]; then
         vcf2bed < "${inputFile}" > "${outputLoc}"/"${filename}".bed
+        gate="bedTOfasta"
     elif [ "$gate" == "bedTOfasta" ]; then
         bedtools getfasta -fi "${referenceGenome}" -bed "${outputLoc}"/sorted-"${filename}".bed -fo "${outputLoc}"/"${filename}".fasta 
     fi
