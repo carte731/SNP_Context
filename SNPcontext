@@ -147,7 +147,7 @@ def typeOneTwo(expandedList, inputList, interval, outputLoc):
             results+="\nNo Type " + typeOT + " window overlaps detected.\n"
     results += "\n"
     results += "\nEND OF INTERVAL CHECKS.\nXXXXXXXXXXXXXXXXXXXXXX\n\n\n"
-    if((gateOne == True) or (gateTwo == True)):
+    if((gateOne == True) and (gateTwo == True)):
         print("\nNO overlaps dectected. Results saved to 'WindowOverlap.txt' in your output directory.\n")
     else:
         print("\nTYPE ONE OR TYPE TWO OVERLAPS DETECTED. Check 'WindowOverlap.txt' in your output directory for saved results.\n")
