@@ -14,7 +14,8 @@ starter(){ #grabs the arguments
             elif [[ -d "$i" && ! -e "$i" ]]; then
                 outputLoc=$i
             else
-                windowLength=$i
+                # windowLength=$i
+                windowLength=5
             fi
         done
         if [ -z "$filename" ]; then
@@ -167,6 +168,10 @@ def bashInputs():
     filename=str(os.environ['filename'])
     windowLength=str(os.environ['windowLength'])
     inputFile=str(os.environ['inputFile'])
+    print(outputLoc)
+    print(filename)
+    print(windowLength)
+    print(inputFile)
     return(outputLoc, filename, windowLength, inputFile)
 
 def main():
@@ -174,7 +179,7 @@ def main():
     bedMap=bedMapper(filename, outputLoc)
     bedMap, masterList, expandedList=intervalExpander(bedMap, interval)
     fileSaver(bedMapper, outputLoc, filename)
-    typeOneTwo(expandedList, masterList, interval, outputLoc)
+    typeOneTwo(expandedList, masterList, interval, outputLoc)  
 
 main()
 
