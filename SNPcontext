@@ -63,7 +63,7 @@ pythonBEDScanner(){
     
 import os
 from itertools import chain
-# import itertools
+import itertools
 import datetime
 
 def bedMapper(filename, outputLoc):
@@ -107,7 +107,7 @@ def intervalExpander(bedMapper, interval):
     return(bedMapper, masterList, expandedList)
 
 def fileSaver(bedMapper, outputLoc, filename):
-    output=''.join(chain.from_iterable(bedMapper))
+    output="".join(chain.from_iterable(bedMapper))
     with open(outputLoc + "/" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
         newBed.write(output)
 
