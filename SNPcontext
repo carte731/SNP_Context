@@ -2,7 +2,7 @@
 
 starter(){ #grabs the arguments
     # windowLength=0
-    windowLength=5    
+    windowLength=1    
     inputFile=''
     inputLoc=''
     outputLoc=''
@@ -112,7 +112,8 @@ def fileSaver(bedMapp, outputLoc, filename):
 
 def typeOneTwo(expandedList, inputList, interval, outputLoc):
     now = datetime.datetime.now()
-    gate=True
+    gateOne=True
+    gateTwo=True
     typeOT = "ONE"
     results = '\nType One and Two Checks for: ' + now.strftime("%Y-%m-%d, %H:%M") + '\n---------------\n' ##ADD PROJECT NAME TO THIS    
     if(typeOT == "ONE"):
@@ -127,13 +128,12 @@ def typeOneTwo(expandedList, inputList, interval, outputLoc):
                 subMB=inputList[j][1]
                 if((comparisonA != subMA) and (comparisonB != subMB)): ##Add id() check
                     if(i != j):
-                        gate, tempResults=binaryIntersect(typeOT, a, b, subMA, subMB, gate)
+                        gateOne, tempResults=binaryIntersect(typeOT, a, b, subMA, subMB, gate)
                         results+=tempResults
         results += "\n-----\n"
         typeOT="TWO"
-        if(gate):
+        if(gateOne):
             results+="\nNo " + typeOT + " window overlaps detected.\n"
-        gate=True
     if(typeOT == "TWO"): #Checks for Type Two window overlaps (EXTENDED INTERVAL CHECK)
         for i in range(len(expandedList)):
             a2=expandedList[i][0]
@@ -141,13 +141,15 @@ def typeOneTwo(expandedList, inputList, interval, outputLoc):
             for j in range(i+1, len(expandedList)):
                 subEA=expandedList[j][0]
                 subEB=expandedList[j][1]
-                gate, tempResults=binaryIntersect(typeOT, a2, b2, subEA, subEB, gate)
+                gateTwo, tempResults=binaryIntersect(typeOT, a2, b2, subEA, subEB, gate)
                 results+=tempResults
-        if(gate):
+        if(gateTwo):
             results+="\nNo " + typeOT + " window overlaps detected.\n"
     results += "\nEND OF INTERVAL CHECKS.\n**********************\n"
-    print(results)
-    print("\nCheck 'WindowOverlap.txt' in your output directory for saved results.\n")
+    if((gateOne != True) or (gateTwo != True)):
+        print("NO overlaps dectected. Results saved to 'WindowOverlap.txt' in your output directory.")
+    else:
+        print("\nTYPE ONE OR TWO OVERLAPS DETECTED. Check 'WindowOverlap.txt' in your output directory for saved results.\n")
     with open(outputLoc + "/WindowOverlap.txt", 'a+') as window: ##CHANGE TO OUTPUT DIR
             window.write(results)
 
