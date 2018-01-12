@@ -149,7 +149,7 @@ def typeOneTwo(expandedList, inputList, interval, outputLoc):
     if((gateOne == True) or (gateTwo == True)):
         print("\nNO overlaps dectected. Results saved to 'WindowOverlap.txt' in your output directory.\n")
     else:
-        print("\nTYPE ONE OR TWO OVERLAPS DETECTED. Check 'WindowOverlap.txt' in your output directory for saved results.\n")
+        print("\nTYPE ONE OR TYPE TWO OVERLAPS DETECTED. Check 'WindowOverlap.txt' in your output directory for saved results.\n")
     with open(outputLoc + "/WindowOverlap.txt", 'a+') as window: ##CHANGE TO OUTPUT DIR
             window.write(results)
 
