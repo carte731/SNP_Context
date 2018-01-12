@@ -1,8 +1,8 @@
 #!/bin/bash
 
 starter(){ #grabs the arguments
-    # windowLength=0
-    windowLength=1   
+    windowLength=0
+    # windowLength=1   
     inputFile=''
     inputLoc=''
     outputLoc=''
