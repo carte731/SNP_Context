@@ -132,7 +132,7 @@ def typeOneTwo(expandedList, inputList, interval, outputLoc):
                         results+=tempResults
         if(gateOne):
             results+="\nNo Type " + typeOT + " window overlaps detected.\n"
-        typeOT="TWO"
+    typeOT="TWO"
     if(typeOT == "TWO"): #Checks for Type Two window overlaps (EXTENDED INTERVAL CHECK)
         results += '\n**Type Two: overlap into Windows**\n---------------------------------\n'
         for i in range(len(expandedList)):
