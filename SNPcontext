@@ -126,7 +126,7 @@ def typeOneTwo(expandedList, inputList, interval, outputLoc):
                 subMA=inputList[j][0]
                 subMB=inputList[j][1]
                 if((comparisonA != subMA) and (comparisonB != subMB)): ##Add id() check
-                    if(i != J):
+                    if(i != j):
                         gate, tempResults=binaryIntersect(binary, typeOT, a, b, subMA, subMB)
                         results+=tempResults
         results += "\n-----\n"
