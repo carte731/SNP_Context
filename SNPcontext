@@ -59,7 +59,7 @@ fileConverter(){
 }
 
 pythonBEDScanner(){
-    inputFile="$inputFile" outputLoc="$outputLoc" filename="$filename" windowLength="$windowLength" python3 - <<END_OF_PYTHON
+    inputFile="$inputFile" outputLoc="$outputLoc" filename="$filename" windowLength="$windowLength" python3.6 - <<END_OF_PYTHON
     
 import os
 from itertools import chain
