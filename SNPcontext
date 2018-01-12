@@ -164,14 +164,14 @@ def binaryIntersect(typeOT, a, b, subTA, subTB):
         binary[3]=1
     if((binary != [1,1,0,0]) and (binary != [0,0,1,1])):
         gate=False
-        if(BinaryNum == [0,1,1,0]):
+        if(binary == [0,1,1,0]):
             resultsBI+="\n--TYPE " + typeOT + "at :" + str(a) + "-" + str(b) + " SNP is encapsulated within " + str(subTA) + "-" + str(subTB)
-        elif(BinaryNum == [1,1,1,1]):
+        elif(binary == [1,1,1,1]):
             resultsBI+="\n--TYPE " + typeOT + " at: " + str(a) + "-" + str(b) + " is equal or encapsulating " + str(subTA) + "-" + str(subTB)
-        elif((BinaryNum == [1,1,1,0]) or (BinaryNum == [0,1,1,1])):
-            if(BinaryNum == [1,1,1,0]):
+        elif((binary == [1,1,1,0]) or (binary == [0,1,1,1])):
+            if(binary == [1,1,1,0]):
                 resultsBI+="\n--TYPE " + typeOT + " at: " + str(a) + "-" + str(b) + " SNP window is overlapping " + str(subTA) + "-" + str(subTB) + ". Overlaps occurring on the right of SNP, between " + str(b) + " and " + str(subTA)
-            elif(BinaryNum == [0,1,1,1]):
+            elif(binary == [0,1,1,1]):
                 resultsBI+="\n--TYPE " + typeOT + " at: " + str(a) + "-" + str(b) + " SNP window is overlapping " + str(subTA) + "-" + str(subTB) + ". Overlaps occurring on the left of SNP, between " + str(a) + " and " + str(subTB)
     return(gate, resultsBI)
         
