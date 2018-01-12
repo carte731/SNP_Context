@@ -67,7 +67,7 @@ import itertools
 import datetime
 
 def bedMapper(filename, outputLoc):
-    bedMapper=[]
+    bedMap=[]
     with open(outputLoc + "/" + filename + ".bed", "r") as bed_test: ##Change to input variables
         for i in bed_test:
             sub=[]
@@ -79,32 +79,32 @@ def bedMapper(filename, outputLoc):
                     sub.append(final)
                     final=''
                     sub.append(u)
-            bedMapper.append(sub)
-    return(bedMapper)
+            bedMap.append(sub)
+    return(bedMap)
 
-def intervalLister(bedMapper):
+def intervalLister(bedMap):
     masterList=[]
-    for i in range(len(bedMapper)):
+    for i in range(len(bedMap)):
         temp=[]
-        temp.append(int(bedMapper[i][4]))
-        temp.append(int(bedMapper[i][2]))
+        temp.append(int(bedMap[i][4]))
+        temp.append(int(bedMap[i][2]))
         temp.sort()
         masterList.append(temp)
     return(masterList)
 
-def intervalExpander(bedMapper, interval):
-    masterList=intervalLister(bedMapper)
-    for i in range(len(bedMapper)):
-        if((bedMapper[i][2]) and (bedMapper[i][4])):
+def intervalExpander(bedMap, interval):
+    masterList=intervalLister(bedMap)
+    for i in range(len(bedMap)):
+        if((bedMap[i][2]) and (bedMap[i][4])):
             try:
-                if((type(int(bedMapper[i][2])) == int) and (type(int(bedMapper[i][4])) == int)):
-                    bedMapper[i][2] = str(int(bedMapper[i][2]) - interval)
-                    bedMapper[i][4] = str(int(bedMapper[i][4]) + interval)
+                if((type(int(bedMap[i][2])) == int) and (type(int(bedMap[i][4])) == int)):
+                    bedMap[i][2] = str(int(bedMap[i][2]) - interval)
+                    bedMap[i][4] = str(int(bedMap[i][4]) + interval)
             except:
-                print("\nPython interval expanson error on line: " + bedMapper.index(i) + ". Adding error notation to error logs")
+                print("\nPython interval expanson error on line: " + bedMap.index(i) + ". Adding error notation to error logs")
                 #Add stuff for logging error to text file
-    expandedList=intervalLister(bedMapper)
-    return(bedMapper, masterList, expandedList)
+    expandedList=intervalLister(bedMap)
+    return(bedMap, masterList, expandedList)
 
 def fileSaver(bedMapp, outputLoc, filename):
     output="".join(chain.from_iterable(bedMapp))
@@ -173,7 +173,7 @@ def main():
     outputLoc, filename, interval, inputFile=bashInputs()
     bedMap=bedMapper(filename, outputLoc)
     bedMap, masterList, expandedList=intervalExpander(bedMap, interval)
-    fileSaver(bedMapper, outputLoc, filename)
+    fileSaver(bedMap, outputLoc, filename)
     typeOneTwo(expandedList, masterList, interval, outputLoc)  
 
 main()
