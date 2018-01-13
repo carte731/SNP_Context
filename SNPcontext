@@ -252,10 +252,11 @@ def bashInputs():
     filename=str(os.environ['filename'])
     windowLength=int(os.environ['windowLength'])
     inputFile=str(os.environ['inputFile'])
-    return(outputLoc, filename, windowLength, inputFile)
+    projectName=str(os.environ['projectName'])
+    return(outputLoc, filename, windowLength, inputFile, projectName)
 
 def main():
-    outputLoc, filename, interval, inputFile=bashInputs()
+    outputLoc, filename, interval, inputFile, projectName=bashInputs()
     bedMap=bedMapper(filename, outputLoc, projectName)
     bedMap, masterList, expandedList=intervalExpander(bedMap, interval)
     fileSaver(bedMap, outputLoc, filename)
