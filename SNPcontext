@@ -120,7 +120,7 @@ fileConverter(){
         bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic["outputLoc"]}"/"${projectDic["projectName"]}"_"${projectDic["filename"]}"_new_interval.bed -fo ${projectDic[outputLoc]}/${projectDic["projectName"]}_${projectDic[filename]}.fasta
         projectDic["OperationalStage"]="alnToCounts"
         if [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
-            declare -a dir=["AtoC","AtoG","AtoT","CtoA","CtoG","CtoT","GtoA","GtoC","GtoT","TtoA","TtoC","TtoG"]
+            declare -a dir=("AtoC","AtoG","AtoT","CtoA","CtoG","CtoT","GtoA","GtoC","GtoT","TtoA","TtoC","TtoG")
             for d in "${dir[@]}"; do
                 aln_to_counts --align_path "${projectDic[outputLoc]}"/"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta --output_path "${projectDic[outputLoc]}" --flank_size "${projectDic[flanks]}" --direction "${dir[d]}"
             done
