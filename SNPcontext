@@ -1,36 +1,95 @@
 #!/bin/bash
 
+declare -A projectDic=( ##Dictionary
+    ["windowLength"]=0 #-w
+    ["inputFile"]='' #-i
+    ["inputLoc"]=''
+    ["outputLoc"]='' #-o
+    ["filename"]=''
+    ["projectName"]='_' #-p
+    ["flanks"]=0 #-f
+    ["referenceGenome"]='' #-r
+    ["OperationalStage"]='vcfTObed' #-r
+)
+
 starter(){ #grabs the arguments
-    windowLength=0
-    # windowLength=1   
-    inputFile=''
-    inputLoc=''
-    outputLoc=''
-    filename=''
-    if [ "$#" -ge 1 ]; then
+    local args=("$@")
+    if [ "$#" -gt 0 ]; then
+        local frontgate=0
+        local indexPos=0
         for i in $@; do
-            if [ "${i##*.}" == "vcf" ]; then
-                inputLoc=${i%/*}
-                inputFile=$i
-            elif [[ -d "$i" && ! -e "$i" ]]; then
-                outputLoc=$i
-            else
-                # windowLength=$i
-                windowLength=5
+            if [[ "${i,,}" == "-w" ]]; then ##Window expansion size
+                local var=${args[${indexPos}+1]}
+                if [[ "$var" =~ ^[0-9]+$ ]]; then ##Checks if it's a number, max expansion of 1000.
+                    ((projectDic["windowLength"]+="$var"))
+                    frontgate=1
+                else
+                    echo -e "\nPlease enter a valid integer for window expansion size, defaulting to ZERO.\n"
+                fi
+            elif [[ "${i,,}" == "-i" ]]; then ##Input file which grabs the input file name, location and complete file path 
+                local var=${args[${indexPos}+1]}
+                if [[ "${var##*.}" == "vcf" ]] && [ -f "$var" ]; then ##Checks if it's VCF and if file exist
+                    projectDic["inputFile"]+="$var"
+                    projectDic["inputLoc"]+="${var%/*}"
+                    local filename=${var%.*}
+                    filename=${filename##*/}
+                    projectDic["filename"]+="$filename"
+                    frontgate=1
+                else
+                    echo -e "\nERROR. Incorrect file input. Check file or directory path. (Input (.vcf) only)\nEXITING...\n"
+                    exit 1
+                fi
+            elif [[ "${i,,}" == "-o" ]]; then ##output location info
+                local var=${args[${indexPos}+1]}
+                if [ -d "$var" ]; then ##Checks if directory exist, if not it will save to input file location
+                    projectDic["outputLoc"]+="$var"
+                    frontgate=1
+                fi
+            elif [[ "${i,,}" == "-p" ]]; then ##Project name
+                local var=${args[${indexPos}+1]}
+                projectDic["projectName"]="$var"
+                frontgate=1
+            elif [[ "${i,,}" == "-f" ]]; then ##Flank sizes for mutation motif's aln_to_counts func
+                local var=${args[${indexPos}+1]}
+                frontgate=1
+                if [[ "$var" =~ ^[0-2]+$ ]]; then ##Checks if it's a number and if it's between 0 and 2
+                    ((projectDic["flanks"]+="$var"))
+                else
+                    echo -e "\nFlanks have to be between: 0 - 2. Defaulting to 0.\n"
+                fi
+            elif [[ "${i,,}" == "-r" ]]; then ##Which reference genome needed for FASTA file creation
+                local var=${args[${indexPos}+1]}
+                referenceAssignment ${var}
+                frontgate=1
             fi
+            ((indexPos+=1))
         done
-        if [ -z "$filename" ]; then
-            arg1=$1
-            filename=${arg1%.*}
-            filename=${filename##*/}
+        if ((${frontgate} <= 0)); then
+            echo -e "\nPlease enter valid arguments. None where valid.\n"
         fi
-        if [ -z "$outputLoc" ]; then
-            outputLoc=${inputFile%/*}
+        if [[ ${projectDic["inputFile"]} == '' ]]; then
+            echo -e "\nNo input file or working directory specified.\nEXITING...\n"
+            exit 1
         fi
-        gate="vcfTObed"
+        if [[ -z ${projectDic["outputLoc"]} ]] && [[ ${projectDic["inputFile"]} != '' ]]; then
+            echo -e "\nNot a valid output location. Re-routing to input file location.\n"
+            projectDic["outputLoc"]+=${projectDic["inputFile"]%/*}
+        fi
     else
-        echo -e "\nNo file or working directory specified."
-        echo -e "EXITING...\n"
+        echo -e "\nArgument's not inputted correctly.\nEXITING...\n"
+        exit 1
+    fi
+}
+
+referenceAssignment(){
+    if [[ ${var,,} == "barley" ]] || [[ ${var,,} == "b" ]]; then ##forced lowercase with ,,
+        ref='/home/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
+        echo ${ref}
+    elif [[ ${var,,} == "soy bean" ]] || [[ ${var,,} == "s" ]] || [[ ${var,,} == "soy" ]]; then
+        ref="soy/temp/path/to/reference/" ##ADD FUNCTION
+        echo ${ref}
+    else
+        echo -e "\nPlease enter a valid reference genome. (barley(b) or Soy(s)).\nEXITING..\n"
         exit 1
     fi
 }
@@ -40,7 +99,6 @@ moduleLoader(){ #load modules need for operations
     module load R
     module load gatk_ML/3.8.0
     module load vcftools_ML/0.1.14
-    # module load python3_ML/2.7.13
     module load python3_ML/3.6.1
     module load bedops_ML/2.4.20
     module load bedtools_ML/2.23.0
@@ -48,17 +106,17 @@ moduleLoader(){ #load modules need for operations
 }
 
 fileConverter(){
-    referenceGenome='/home/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
-    if [ "$gate" == "vcfTObed" ]; then
-        vcf2bed < "${inputFile}" > "${outputLoc}"/"${filename}".bed
-        gate="bedTOfasta"
-    elif [ "$gate" == "bedTOfasta" ]; then
-        bedtools getfasta -fi "${referenceGenome}" -bed "${outputLoc}"/"${filename}".bed -fo "${outputLoc}"/"${filename}".fasta 
+    if [ "${projectDic[OperationalStage]}" == "vcfTObed" ]; then
+        vcf2bed < ${projectDic[inputFile]} > ${projectDic[outputLoc]}/${projectDic[filename]}.bed
+        projectDic["OperationalStage"]="bedTOfasta"
+    elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
+        bedtools getfasta -fi "${projectDic[referenceGenome]}" -bed "${projectDic[outputLoc]}"/"${projectDic[filename]}".bed -fo "${projectDic[outputLoc]}"/"${projectDic[filename]}".fasta
+        projectDic["OperationalStage"]="alnToCounts"
     fi
 }
 
 pythonBEDScanner(){
-    inputFile="$inputFile" outputLoc="$outputLoc" filename="$filename" windowLength="$windowLength" python3.6 - <<END_OF_PYTHON
+    inputFile="${projectDic[inputFile]}" outputLoc="${projectDic[outputLoc]}" filename="${projectDic[filename]}" windowLength="${projectDic[windowLength}" python3.6 - <<END_OF_PYTHON
     
 import os
 from itertools import chain
@@ -206,9 +264,9 @@ END_OF_PYTHON
 mainOne(){
     moduleLoader
     starter "$@"
-    fileConverter "$inputFile" "$outputLoc" "$filename" "$gate"
-    pythonBEDScanner "$inputFile" "$outputLoc" "$filename" "$windowLength"
-    fileConverter "$inputFile" "$outputLoc" "$filename" "$gate"
+    fileConverter
+    pythonBEDScanner
+    fileConverter
 }
 
 mainOne "$@"
