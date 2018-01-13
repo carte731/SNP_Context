@@ -122,7 +122,7 @@ fileConverter(){
         if [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
             declare -a dir=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
             for d in "${dir[@]}"; do
-                aln_to_counts --align_path "${projectDic[outputLoc]}"/"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta --output_path "${projectDic[outputLoc]}" --flank_size "${projectDic[flanks]}" --direction "${dir[d]}"
+                aln_to_counts --align_path "${projectDic[outputLoc]}"/"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta --output_path "${projectDic[outputLoc]}"/"${projectDic["projectName"]}"_"${projectDic[filename]}"_"${dir[d]}" --flank_size "${projectDic[flanks]}" --direction "${dir[d]}"
             done
             projectDic["OperationalStage"]="DONE..."
         fi
