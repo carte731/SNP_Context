@@ -175,7 +175,7 @@ def fileSaver(bedMapp, outputLoc, filename, projectName):
     with open(outputLoc + "/" + projectName + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
         newBed.write(output)
 
-def typeOneTwo(expandedList, inputList, interval, outputLoc):
+def typeOneTwo(expandedList, inputList, interval, outputLoc, projectName):
     now = datetime.datetime.now()
     gateOne=True
     gateTwo=True
@@ -260,7 +260,7 @@ def main():
     bedMap=bedMapper(filename, outputLoc, projectName)
     bedMap, masterList, expandedList=intervalExpander(bedMap, interval)
     fileSaver(bedMap, outputLoc, filename, projectName)
-    typeOneTwo(expandedList, masterList, interval, outputLoc)
+    typeOneTwo(expandedList, masterList, interval, outputLoc, projectName)
 
 main()
 
