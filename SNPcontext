@@ -79,13 +79,14 @@ starter(){ #grabs the arguments
             referenceAssignment
         fi
     elif [[ ${args[0],,} == "--help" ]] || [[ ${args[0],,} == "-h" ]]; then
-        local helpPrintOut=$'\tSNP context\n\tList of commands:\n\t------------------------\n'
+        local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
         helpPrintOut+=$'\n\t./SNPcontext -i <input> -o <output> -r <reference genome> -w <expansion size> -f <alignment window flank]> -p <project name>\n'
         helpPrintOut+=$'\n\t------------------------\n'
         helpPrintOut+=$'\n\t-i [File input, VCF only]\n\t-o [output location (defaults to input location if not stated)]'
         helpPrintOut+=$'\n\t-r [Reference genome]\n\t-w [window expansion size]\n\t-f [mutation motif window flank]'
         helpPrintOut+=$'\n\t-p [project name]\n'
         echo "$helpPrintOut"
+        exit -0
     fi
 }
 
