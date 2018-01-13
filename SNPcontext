@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -A projectDic=( ##Dictionary
+declare -A projectDic=(
     ["windowLength"]=0 #-w
     ["inputFile"]='' #-i
     ["inputLoc"]=''
@@ -122,7 +122,7 @@ fileConverter(){
 }
 
 pythonBEDScanner(){
-    inputFile="${projectDic[inputFile]}" outputLoc="${projectDic[outputLoc]}" filename="${projectDic[filename]}" projectName="${projectDic[filename]}" windowLength="${projectDic[windowLength}" python3.6 - <<END_OF_PYTHON
+    inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" python3.6 - <<END_OF_PYTHON
     
 import os
 from itertools import chain
