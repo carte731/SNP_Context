@@ -113,10 +113,10 @@ moduleLoader(){ #load modules need for operations
 
 fileConverter(){
     if [ "${projectDic[OperationalStage]}" == "vcfTObed" ]; then
-        vcf2bed < ${projectDic[inputFile]} > ${projectDic[outputLoc]}/${projectDic["projectName"]}_${projectDic[filename]}.bed
+        vcf2bed < ${projectDic["inputFile"]} > ${projectDic["outputLoc"]}/${projectDic["projectName"]}_${projectDic["filename"]}.bed
         projectDic["OperationalStage"]="bedTOfasta"
     elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
-        bedtools getfasta -fi ${projectDic[referenceGenome]} -bed ${projectDic[outputLoc]}/${projectDic["projectName"]}_${projectDic[filename]}_new_interval.bed -fo ${projectDic[outputLoc]}/${projectDic["projectName"]}_${projectDic[filename]}.fasta
+        bedtools getfasta -fi ${projectDic["referenceGenome"]} -bed ${projectDic["outputLoc"]}/${projectDic["projectName"]}_${projectDic["filename"]}_new_interval.bed -fo ${projectDic[outputLoc]}/${projectDic["projectName"]}_${projectDic[filename]}.fasta
         projectDic["OperationalStage"]="alnToCounts"
     fi
 }
