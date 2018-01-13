@@ -216,11 +216,11 @@ def typeOneTwo(expandedList, inputList, interval, outputLoc, projectName):
         results+="\nNo Type " + typeOT + " window overlaps detected.\n"
     results += "\n"
     results += "\nEND OF INTERVAL CHECKS.\nXXXXXXXXXXXXXXXXXXXXXX\n"
-    if((gateOne == True) or (gateTwo == True)):
+    if((gateOne == True) and (gateTwo == True)):
         print("\nNO overlaps dectected. Results saved to 'WindowOverlap.txt' in your output directory.\n")
     else:
         print("\nTYPE ONE OR TYPE TWO OVERLAPS DETECTED. Check 'WindowOverlap.txt' in your output directory for saved results.\n")
-    with open(outputLoc + "/" + projectName + "WindowOverlap.txt", 'a+') as window:
+    with open(outputLoc + "/" + projectName + "_" + "WindowOverlap.txt", 'a+') as window:
         window.write(results)
 
 def binaryIntersect(typeOT, a, b, subTA, subTB, gate):
