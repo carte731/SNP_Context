@@ -6,15 +6,15 @@ declare -A projectDic=( ##Dictionary
     ["inputLoc"]=''
     ["outputLoc"]='' #-o
     ["filename"]=''
-    ["projectName"]='_' #-p
+    ["projectName"]='out' #-p
     ["flanks"]=0 #-f
     ["referenceGenome"]='' #-r
-    ["OperationalStage"]='vcfTObed' #-r
+    ["OperationalStage"]='vcfTObed'
 )
 
 starter(){ #grabs the arguments
     local args=("$@")
-    if [ "$#" -gt 0 ]; then
+    if [[ "$#" > 1 ]]; then
         local frontgate=0
         local indexPos=0
         for i in $@; do
@@ -75,22 +75,28 @@ starter(){ #grabs the arguments
             echo -e "\nNot a valid output location. Re-routing to input file location.\n"
             projectDic["outputLoc"]+=${projectDic["inputFile"]%/*}
         fi
-    else
-        echo -e "\nArgument's not inputted correctly.\nEXITING...\n"
-        exit 1
+        if [[ ${projectDic["referenceGenome"]} == "" ]]; then
+            referenceAssignment
+        fi
+    elif [[ ${args[0],,} == "--help" ]] || [[ ${args[0],,} == "-h" ]]; then
+        local helpPrintOut=$'\tSNP context\n\tList of commands:\n\t------------------------\n'
+        helpPrintOut+=$'\n\t./SNPcontext -i <input> -o <output> -r <reference genome> -w <expansion size> -f <alignment window flank]> -p <project name>\n'
+        helpPrintOut+=$'\n\t------------------------\n'
+        helpPrintOut+=$'\n\t-i [File input, VCF only]\n\t-o [output location (defaults to input location if not stated)]'
+        helpPrintOut+=$'\n\t-r [Reference genome]\n\t-w [window expansion size]\n\t-f [mutation motif window flank]'
+        helpPrintOut+=$'\n\t-p [project name]\n'
+        echo "$helpPrintOut"
     fi
 }
 
 referenceAssignment(){
     if [[ ${var,,} == "barley" ]] || [[ ${var,,} == "b" ]]; then ##forced lowercase with ,,
-        ref='/home/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
-        echo ${ref}
+        projectDic["referenceGenome"]+='/home/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
     elif [[ ${var,,} == "soy bean" ]] || [[ ${var,,} == "s" ]] || [[ ${var,,} == "soy" ]]; then
-        ref="soy/temp/path/to/reference/" ##ADD FUNCTION
-        echo ${ref}
+        projectDic["referenceGenome"]+="soy/temp/path/to/reference/" ##ADD FUNCTION
     else
-        echo -e "\nPlease enter a valid reference genome. (barley(b) or Soy(s)).\nEXITING..\n"
-        exit 1
+        echo -e "\nPlease enter a valid reference genome. Defaulting to Barley reference.\n"
+        projectDic["referenceGenome"]+='/home/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
     fi
 }
 
@@ -107,16 +113,16 @@ moduleLoader(){ #load modules need for operations
 
 fileConverter(){
     if [ "${projectDic[OperationalStage]}" == "vcfTObed" ]; then
-        vcf2bed < ${projectDic[inputFile]} > ${projectDic[outputLoc]}/${projectDic[filename]}.bed
+        vcf2bed < ${projectDic[inputFile]} > ${projectDic[outputLoc]}/${projectDic["projectName"]}_${projectDic[filename]}.bed
         projectDic["OperationalStage"]="bedTOfasta"
     elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
-        bedtools getfasta -fi "${projectDic[referenceGenome]}" -bed "${projectDic[outputLoc]}"/"${projectDic[filename]}".bed -fo "${projectDic[outputLoc]}"/"${projectDic[filename]}".fasta
+        bedtools getfasta -fi ${projectDic[referenceGenome]} -bed ${projectDic[outputLoc]}/${projectDic["projectName"]}_${projectDic[filename]}_new_interval.bed -fo ${projectDic[outputLoc]}/${projectDic["projectName"]}_${projectDic[filename]}.fasta
         projectDic["OperationalStage"]="alnToCounts"
     fi
 }
 
 pythonBEDScanner(){
-    inputFile="${projectDic[inputFile]}" outputLoc="${projectDic[outputLoc]}" filename="${projectDic[filename]}" windowLength="${projectDic[windowLength}" python3.6 - <<END_OF_PYTHON
+    inputFile="${projectDic[inputFile]}" outputLoc="${projectDic[outputLoc]}" filename="${projectDic[filename]}" projectName="${projectDic[filename]}" windowLength="${projectDic[windowLength}" python3.6 - <<END_OF_PYTHON
     
 import os
 from itertools import chain
@@ -125,7 +131,7 @@ import datetime
 
 def bedMapper(filename, outputLoc):
     bedMap=[]
-    with open(outputLoc + "/" + filename + ".bed", "r") as bed_test: ##Change to input variables
+    with open(outputLoc + "/" + projectName + "_" + filename + ".bed", "r") as bed_test: ##Change to input variables
         for i in bed_test:
             sub=[]
             final=''
@@ -166,7 +172,7 @@ def intervalExpander(bedMap, interval):
 
 def fileSaver(bedMapp, outputLoc, filename):
     output="".join(chain.from_iterable(bedMapp))
-    with open(outputLoc + "/" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
+    with open(outputLoc + "/" + projectName + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
         newBed.write(output)
 
 def typeOneTwo(expandedList, inputList, interval, outputLoc):
@@ -214,7 +220,7 @@ def typeOneTwo(expandedList, inputList, interval, outputLoc):
         print("\nNO overlaps dectected. Results saved to 'WindowOverlap.txt' in your output directory.\n")
     else:
         print("\nTYPE ONE OR TYPE TWO OVERLAPS DETECTED. Check 'WindowOverlap.txt' in your output directory for saved results.\n")
-    with open(outputLoc + "/WindowOverlap.txt", 'a+') as window: ##CHANGE TO OUTPUT DIR
+    with open(outputLoc + "/" + projectName + "_" WindowOverlap.txt", 'a+') as window: ##CHANGE TO OUTPUT DIR
             window.write(results)
 
 def binaryIntersect(typeOT, a, b, subTA, subTB, gate):
