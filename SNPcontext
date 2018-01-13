@@ -129,7 +129,7 @@ from itertools import chain
 # import itertools
 import datetime
 
-def bedMapper(filename, outputLoc):
+def bedMapper(filename, outputLoc, projectName):
     bedMap=[]
     with open(outputLoc + "/" + projectName + "_" + filename + ".bed", "r") as bed_test: ##Change to input variables
         for i in bed_test:
@@ -256,7 +256,7 @@ def bashInputs():
 
 def main():
     outputLoc, filename, interval, inputFile=bashInputs()
-    bedMap=bedMapper(filename, outputLoc)
+    bedMap=bedMapper(filename, outputLoc, projectName)
     bedMap, masterList, expandedList=intervalExpander(bedMap, interval)
     fileSaver(bedMap, outputLoc, filename)
     typeOneTwo(expandedList, masterList, interval, outputLoc)
