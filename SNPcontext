@@ -113,16 +113,29 @@ moduleLoader(){ #load modules need for operations
 }
 
 fileConverter(){
-    declare -a dir=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
     if [ "${projectDic[OperationalStage]}" == "vcfTObed" ]; then
         vcf2bed < "${projectDic["inputFile"]}" > "${projectDic["outputLoc"]}"/"${projectDic["projectName"]}"_"${projectDic["filename"]}".bed
         projectDic["OperationalStage"]="bedTOfasta"
     elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
-        bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic["outputLoc"]}"/"${projectDic["projectName"]}"_"${projectDic["filename"]}"_new_interval.bed -fo ${projectDic[outputLoc]}/${projectDic["projectName"]}_${projectDic[filename]}.fasta
+        declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
+        declare -A aln_out
+        splitDir=(${projectDic[outputLoc]}*_split_${projectDic["projectName"]}_${projectDic[filename]}.bed)
+        for gDir in ${dirL[@]}; do
+            comSDir="${gDir}"_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".bed
+            counter=0
+            for sp in ${splitDir[@]}; do
+                # sp=${t[$counter]##*/} ##Strips directory
+                if [[ "${splitDir[$counter]##*/}" == "${comSDir}" ]]; then
+                    bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic["outputLoc"]}"/"${comSDir}" -fo "${projectDic[outputLoc]}"/"${gDir}"_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta
+                    aln_out+=( ["${gDir}"]="${projectDic[outputLoc]}"/"${gDir}"_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta )
+                fi
+                ((counter+=1))
+            done
+        done
         projectDic["OperationalStage"]="alnToCounts"
         if [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
-            for d in "${dir[@]}"; do
-                aln_to_counts --align_path "${projectDic[outputLoc]}"/"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta --output_path "${projectDic[outputLoc]}" --flank_size "${projectDic[flanks]}" --direction "${dir[d]}"
+            for d in "${!aln_out[@]}"; do
+                aln_to_counts --align_path "${aln_out[$d]}" --output_path "${projectDic[outputLoc]}" --flank_size "${projectDic[flanks]}" --direction "${d}"
             done
             projectDic["OperationalStage"]="DONE..."
         fi
@@ -195,8 +208,8 @@ def fileSaver(bedMapp, outputLoc, filename, projectName, dirC):
         with open(outputLoc + "/" + projectName + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
             newBed.write(output)
     else:
-        output="".join(chain.from_iterable(bedMapp))
-        with open(outputLoc + "/" + "split_" + dirC + "_" + projectName + "_" + filename + ".bed", "w") as splitBed: ##Change to input variables
+        output="".join(chain.from_iterable(bedMapp)) ##
+        with open(outputLoc + "/" + dirC + "_" + "split" + "_" + projectName + "_" + filename + ".bed", "w") as splitBed: ##Change to input variables
             splitBed.write(output)
 
 def typeOneTwo(expandedList, inputList, interval, outputLoc, projectName):
