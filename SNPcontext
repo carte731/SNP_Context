@@ -81,6 +81,8 @@ starter(){ #grabs the arguments
         fi
         mkdir "${projectDic["outputLoc"]}"/"${projectDic["projectName"]^^}"_"${DATE}"/
         projectDic["outputLoc"]="${projectDic["outputLoc"]}"/"${projectDic["projectName"]^^}"_"${DATE}"/
+        mkdir "${projectDic["outputLoc"]}"/FASTA_SPLIT
+        mkdir "${projectDic["outputLoc"]}"/BED_SPLIT
     else
         local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
         helpPrintOut+=$'\n\t./SNPcontext -i <input> -o <output> -r <reference genome> -w <expansion size> -f <alignment window flank]> -p <project name>\n'
@@ -122,13 +124,13 @@ fileConverter(){
     elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
         declare -A aln_out
         declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
-        splitDir=("${projectDic[outputLoc]}"*_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".bed*)
+        splitDir=("${projectDic[outputLoc]}"/BED_SPLIT*_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".bed*)
         for gDir in ${dirL[@]}; do
             comSDir="${gDir}"_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".bed
             counter=0
             for sp in ${splitDir[@]}; do
                 if [[ "${splitDir[$counter]##*/}" == "${comSDir}" ]]; then
-                    bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic["outputLoc"]}"/"${comSDir}" -fo "${projectDic[outputLoc]}"/"${gDir}"_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta
+                    bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic["outputLoc"]}"/BED_SPLIT/"${comSDir}" -fo "${projectDic[outputLoc]}"/FASTA_SPLIT/"${gDir}"_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta
                     aln_out+=( ["${gDir}"]="${projectDic[outputLoc]}"/"${gDir}"_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta )
                 fi
                 ((counter+=1))
@@ -212,7 +214,7 @@ def fileSaver(bedMapp, outputLoc, filename, projectName, dirC):
             newBed.write(output)
     else:
         output="".join(chain.from_iterable(bedMapp)) ##
-        with open(outputLoc + "/" + dirC + "_" + "split" + "_" + projectName + "_" + filename + ".bed", "w") as splitBed: ##Change to input variables
+        with open(outputLoc + "/BED_SPLIT/" + dirC + "_" + "split" + "_" + projectName + "_" + filename + ".bed", "w") as splitBed: ##Change to input variables
             splitBed.write(output)
 
 def typeOneTwo(expandedList, inputList, interval, outputLoc, projectName):
