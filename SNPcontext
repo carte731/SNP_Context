@@ -42,7 +42,7 @@ starter(){ #grabs the arguments
             elif [[ "${i,,}" == "-o" ]]; then ##output location info
                 local var=${args[${indexPos}+1]}
                 if [ -d "$var" ]; then ##Checks if directory exist, if not it will save to input file location
-                    projectDic["outputLoc"]+="$var"
+                    projectDic["outputLoc"]+="$var"/
                     frontgate=1
                 fi
             elif [[ "${i,,}" == "-p" ]]; then ##Project name
@@ -73,7 +73,7 @@ starter(){ #grabs the arguments
         fi
         if [[ -z ${projectDic["outputLoc"]} ]] && [[ ${projectDic["inputFile"]} != '' ]]; then
             echo -e "\nNot a valid output location. Re-routing to input file location.\n"
-            projectDic["outputLoc"]+=${projectDic["inputFile"]%/*}
+            projectDic["outputLoc"]+=${projectDic["inputFile"]%/*}/
         fi
         if [[ ${projectDic["referenceGenome"]} == "" ]]; then
             referenceAssignment
@@ -122,7 +122,8 @@ fileConverter(){
         declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
         splitDir=("${projectDic[outputLoc]}"*_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".bed*)
         echo -e ${projectDic[outputLoc]}
-        # echo -e ${splitDir[@]}
+        echo -e "-BREAK-"
+        echo -e ${splitDir[@]}
         for gDir in ${dirL[@]}; do
             comSDir="${gDir}"_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".bed
             counter=0
@@ -139,7 +140,7 @@ fileConverter(){
         projectDic["OperationalStage"]="alnToCounts"
         if [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
             for d in "${!aln_out[@]}"; do
-                aln_to_counts --align_path "${aln_out[$d]}" --output_path "${projectDic[outputLoc]}" --flank_size "${projectDic[flanks]}" --direction "${d}"
+                aln_to_counts --align_path "${aln_out[$d]}" --output_path "${projectDic[outputLoc]}" --flank_size "${projectDic[flanks]}" --direction "${d}" -F
             done
             projectDic["OperationalStage"]="DONE..."
         fi
