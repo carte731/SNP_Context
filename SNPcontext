@@ -122,7 +122,7 @@ fileConverter(){
         if [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
             declare -a dir=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
             for d in "${dir[@]}"; do
-                aln_to_counts --align_path "${projectDic[outputLoc]}"/"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta --output_path "${projectDic[outputLoc]}"/"${projectDic["projectName"]}"_"${projectDic[filename]}"_"${dir[d]}" --flank_size "${projectDic[flanks]}" --direction "${dir[d]}"
+                aln_to_counts --align_path "${projectDic[outputLoc]}"/"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta --output_path "${projectDic[outputLoc]}" --flank_size "${projectDic[flanks]}" --direction "${dir[d]}"
             done
             projectDic["OperationalStage"]="DONE..."
         fi
@@ -178,10 +178,26 @@ def intervalExpander(bedMap, interval):
     expandedList=intervalLister(bedMap)
     return(bedMap, masterList, expandedList)
 
-def fileSaver(bedMapp, outputLoc, filename, projectName):
-    output="".join(chain.from_iterable(bedMapp))
-    with open(outputLoc + "/" + projectName + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
-        newBed.write(output)
+def fastaSpliter(bedMapper):
+    directions=["AtoC","AtoG","AtoT","CtoA","CtoG","CtoT","GtoA","GtoC","GtoT","TtoA","TtoC","TtoG"]
+    for j in directions:
+        masterList=[]
+        for i in range(len(bedMapper)):
+            dirC=bedMapper[i][10] + "to" + bedMapper[i][12]
+            if(dirC == j):
+                masterList.append(bedMapper[i])
+        if(len(masterList) > 0):
+            fileSaver(bedMapp, outputLoc, filename, projectName, dirC)
+
+def fileSaver(bedMapp, outputLoc, filename, projectName, dirC):
+    if(dirC == None):
+        output="".join(chain.from_iterable(bedMapp))
+        with open(outputLoc + "/" + projectName + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
+            newBed.write(output)
+    else:
+        output="".join(chain.from_iterable(bedMapp))
+        with open(outputLoc + "/" + projectName + "_" + filename + "_split_" + dirC + ".bed", "w") as splitBed: ##Change to input variables
+            splitBed.write(output)
 
 def typeOneTwo(expandedList, inputList, interval, outputLoc, projectName):
     now = datetime.datetime.now()
@@ -267,7 +283,7 @@ def main():
     outputLoc, filename, interval, inputFile, projectName=bashInputs()
     bedMap=bedMapper(filename, outputLoc, projectName)
     bedMap, masterList, expandedList=intervalExpander(bedMap, interval)
-    fileSaver(bedMap, outputLoc, filename, projectName)
+    fileSaver(bedMap, outputLoc, filename, projectName, None)
     typeOneTwo(expandedList, masterList, interval, outputLoc, projectName)
 
 main()
