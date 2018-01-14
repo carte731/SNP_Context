@@ -13,7 +13,7 @@ declare -A projectDic=(
 )
 
 starter(){ #grabs the arguments
-    DATE='date +"%Y%m%d-%k%M"'
+    DATE=`date +"%Y%m%d-%k%M"`
     local args=("$@")
     if [[ "$#" > 1 ]] && [[ ${args[0],,} != "--help" ]] && [[ ${args[0],,} != "-h" ]]; then
         local frontgate=0
