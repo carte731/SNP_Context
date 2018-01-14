@@ -122,8 +122,8 @@ fileConverter(){
         declare -A aln_out
         splitDir=(${projectDic[outputLoc]}*_split_${projectDic["projectName"]}_${projectDic[filename]}.bed)
         for gDir in ${dirL[@]}; do
-            echo -e "TEST_2"
             comSDir="${gDir}"_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".bed
+            echo -e "${comSDir}"
             counter=0
             for sp in ${splitDir[@]}; do
                 # sp=${t[$counter]##*/} ##Strips directory
