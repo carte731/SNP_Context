@@ -121,7 +121,7 @@ fileConverter(){
         declare -A aln_out
         declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
         declare -a splitDir=(${projectDic[outputLoc]}*_split_${projectDic["projectName"]}_${projectDic[filename]}.bed)
-        echo ${splitDir[@]}
+        echo -e ${splitDir[@]}
         for gDir in ${dirL[@]}; do
             comSDir="${gDir}"_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".bed
             counter=0
