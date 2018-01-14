@@ -191,14 +191,14 @@ def intervalExpander(bedMap, interval):
     expandedList=intervalLister(bedMap)
     return(bedMap, masterList, expandedList)
 
-def fastaSpliter(bedMapper):
+def fastaSpliter(bedMapp):
     directions=["AtoC","AtoG","AtoT","CtoA","CtoG","CtoT","GtoA","GtoC","GtoT","TtoA","TtoC","TtoG"]
     for j in directions:
         masterList=[]
-        for i in range(len(bedMapper)):
-            dirC=bedMapper[i][10] + "to" + bedMapper[i][12]
+        for i in range(len(bedMapp)):
+            dirC=bedMapp[i][10] + "to" + bedMapp[i][12]
             if(dirC == j):
-                masterList.append(bedMapper[i])
+                masterList.append(bedMapp[i])
         if(len(masterList) > 0):
             fileSaver(bedMapp, outputLoc, filename, projectName, dirC)
 
