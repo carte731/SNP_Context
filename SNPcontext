@@ -123,9 +123,9 @@ fileConverter(){
         splitDir=(${projectDic[outputLoc]}*_split_${projectDic["projectName"]}_${projectDic[filename]}.bed)
         for gDir in ${dirL[@]}; do
             comSDir="${gDir}"_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".bed
-            echo -e "${comSDir}"
             counter=0
             for sp in ${splitDir[@]}; do
+                echo -e "${splitDir[$counter]##*/}"
                 # sp=${t[$counter]##*/} ##Strips directory
                 if [[ "${splitDir[$counter]##*/}" == "${comSDir}" ]]; then
                     bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic["outputLoc"]}"/"${comSDir}" -fo "${projectDic[outputLoc]}"/"${gDir}"_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta
