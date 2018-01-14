@@ -121,12 +121,13 @@ fileConverter(){
         declare -A aln_out
         declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
         splitDir=("${projectDic[outputLoc]}"*_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".bed*)
-        echo -e ${splitDir[@]}
+        echo -e ${projectDic[outputLoc]}
+        # echo -e ${splitDir[@]}
         for gDir in ${dirL[@]}; do
             comSDir="${gDir}"_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".bed
             counter=0
             for sp in ${splitDir[@]}; do
-                echo -e "${splitDir[$counter]##*/}"
+                # echo -e "${splitDir[$counter]##*/}"
                 # sp=${t[$counter]##*/} ##Strips directory
                 if [[ "${splitDir[$counter]##*/}" == "${comSDir}" ]]; then
                     bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic["outputLoc"]}"/"${comSDir}" -fo "${projectDic[outputLoc]}"/"${gDir}"_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta
