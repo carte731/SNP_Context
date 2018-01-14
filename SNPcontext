@@ -117,6 +117,7 @@ fileConverter(){
         vcf2bed < "${projectDic["inputFile"]}" > "${projectDic["outputLoc"]}"/"${projectDic["projectName"]}"_"${projectDic["filename"]}".bed
         projectDic["OperationalStage"]="bedTOfasta"
     elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
+        echo -e "TEST"
         declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
         declare -A aln_out
         splitDir=(${projectDic[outputLoc]}*_split_${projectDic["projectName"]}_${projectDic[filename]}.bed)
