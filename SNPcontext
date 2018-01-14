@@ -298,7 +298,7 @@ def main():
     bedMap, masterList, expandedList=intervalExpander(bedMap, interval)
     fileSaver(bedMap, outputLoc, filename, projectName, None)
     typeOneTwo(expandedList, masterList, interval, outputLoc, projectName)
-    fastaSpliter(bedMapp, outputLoc, filename, projectName, dirC)
+    fastaSpliter(bedMap, outputLoc, filename, projectName, dirC)
 
 main()
 
