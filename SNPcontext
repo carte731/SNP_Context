@@ -196,7 +196,7 @@ def fileSaver(bedMapp, outputLoc, filename, projectName, dirC):
             newBed.write(output)
     else:
         output="".join(chain.from_iterable(bedMapp))
-        with open(outputLoc + "/" + projectName + "_" + filename + "_split_" + dirC + ".bed", "w") as splitBed: ##Change to input variables
+        with open(outputLoc + "/" + "split_" + dirC + "_" + projectName + "_" + filename + ".bed", "w") as splitBed: ##Change to input variables
             splitBed.write(output)
 
 def typeOneTwo(expandedList, inputList, interval, outputLoc, projectName):
@@ -285,6 +285,7 @@ def main():
     bedMap, masterList, expandedList=intervalExpander(bedMap, interval)
     fileSaver(bedMap, outputLoc, filename, projectName, None)
     typeOneTwo(expandedList, masterList, interval, outputLoc, projectName)
+    fastaSpliter(bedMap)
 
 main()
 
