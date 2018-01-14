@@ -44,7 +44,7 @@ starter(){ #grabs the arguments
                 local var=${args[${indexPos}+1]}
                 if [ -d "$var" ]; then ##Checks if directory exist, if not it will save to input file location
                     mkdir "$var"/"${projectDic["projectName"^^]}"_"${DATE}"
-                    projectDic["outputLoc"]+="$var"/"${projectDic["projectName"^^]}"_"${DATE}"/
+                    projectDic["outputLoc"]+="$var"/"${projectDic["projectName"]^^}"_"${DATE}"/
                     frontgate=1
                 fi
             elif [[ "${i,,}" == "-p" ]]; then ##Project name
@@ -76,7 +76,7 @@ starter(){ #grabs the arguments
         if [[ -z ${projectDic["outputLoc"]} ]] && [[ ${projectDic["inputFile"]} != '' ]]; then
             echo -e "\nNot a valid output location. Re-routing to input file location.\n"
             mkdir "${projectDic["projectName"^^]}"_"${DATE}"
-            projectDic["outputLoc"]+=${projectDic["inputLoc"]}/"${projectDic["projectName"^^]}"_"${DATE}"/
+            projectDic["outputLoc"]+=${projectDic["inputLoc"]}/"${projectDic["projectName"]^^}"_"${DATE}"/
         fi
         if [[ ${projectDic["referenceGenome"]} == "" ]]; then
             referenceAssignment
