@@ -138,7 +138,7 @@ fileConverter(){
         if [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
             mkdir "${projectDic[outputLoc]}"/COUNTS_TABLES
             for d in "${!aln_out[@]}"; do
-                aln_to_counts --align_path /directions/"${aln_out[$d]}" --output_path "${projectDic[outputLoc]}"/COUNTS_TABLES --flank_size "${projectDic[flanks]}" --direction "${d}" -F
+                aln_to_counts --align_path "${aln_out[$d]}" --output_path "${projectDic[outputLoc]}"/COUNTS_TABLES --flank_size "${projectDic[flanks]}" --direction "${d}" -F
             done
             projectDic["OperationalStage"]="DONE..."
         fi
