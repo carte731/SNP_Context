@@ -13,7 +13,7 @@ declare -A projectDic=(
 )
 
 starter(){ #grabs the arguments
-    DATE=`date +"%Y%m%d-%k%M"`
+    DATE=`date +"%m%d%Y-%k%M"`
     local args=("$@")
     if [[ "$#" > 1 ]] && [[ ${args[0],,} != "--help" ]] && [[ ${args[0],,} != "-h" ]]; then
         local frontgate=0
@@ -131,7 +131,7 @@ fileConverter(){
             for sp in ${splitDir[@]}; do
                 if [[ "${splitDir[$counter]##*/}" == "${comSDir}" ]]; then
                     bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic["outputLoc"]}"/BED_SPLIT/"${comSDir}" -fo "${projectDic[outputLoc]}"/FASTA_SPLIT/"${gDir}"_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta
-                    aln_out+=( ["${gDir}"]="${projectDic[outputLoc]}"/"${gDir}"_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta )
+                    aln_out+=( ["${gDir}"]="${projectDic[outputLoc]}"/FASTA_SPLIT/"${gDir}"_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta )
                 fi
                 ((counter+=1))
             done
