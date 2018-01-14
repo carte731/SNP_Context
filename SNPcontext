@@ -42,7 +42,8 @@ starter(){ #grabs the arguments
             elif [[ "${i,,}" == "-o" ]]; then ##output location info
                 local var=${args[${indexPos}+1]}
                 if [ -d "$var" ]; then ##Checks if directory exist, if not it will save to input file location
-                    projectDic["outputLoc"]+="$var"/
+                    mkdir "${projectDic["projectName"^^]}"
+                    projectDic["outputLoc"]+="$var"/"${projectDic["projectName"^^]}"/
                     frontgate=1
                 fi
             elif [[ "${i,,}" == "-p" ]]; then ##Project name
@@ -73,7 +74,8 @@ starter(){ #grabs the arguments
         fi
         if [[ -z ${projectDic["outputLoc"]} ]] && [[ ${projectDic["inputFile"]} != '' ]]; then
             echo -e "\nNot a valid output location. Re-routing to input file location.\n"
-            projectDic["outputLoc"]+=${projectDic["inputFile"]%/*}/
+            mkdir "${projectDic["projectName"^^]}"
+            projectDic["outputLoc"]+=${projectDic["inputLoc"]}/"${projectDic["projectName"^^]}"/
         fi
         if [[ ${projectDic["referenceGenome"]} == "" ]]; then
             referenceAssignment
@@ -88,6 +90,10 @@ starter(){ #grabs the arguments
         echo "$helpPrintOut"
         exit -0
     fi
+}
+
+makeDir(){
+    mkdir "${projectDic[outputLoc]}"/"${projectDic["projectName"]}"
 }
 
 referenceAssignment(){
@@ -133,8 +139,9 @@ fileConverter(){
         done
         projectDic["OperationalStage"]="alnToCounts"
         if [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
+            mkdir COUNTS_TABLES
             for d in "${!aln_out[@]}"; do
-                aln_to_counts --align_path /directions/"${aln_out[$d]}" --output_path "${projectDic[outputLoc]}" --flank_size "${projectDic[flanks]}" --direction "${d}" -F
+                aln_to_counts --align_path /directions/"${aln_out[$d]}" --output_path "${projectDic[outputLoc]}"/COUNTS_TABLES --flank_size "${projectDic[flanks]}" --direction "${d}" -F
             done
             projectDic["OperationalStage"]="DONE..."
         fi
