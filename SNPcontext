@@ -43,8 +43,7 @@ starter(){ #grabs the arguments
             elif [[ "${i,,}" == "-o" ]]; then ##output location info
                 local var=${args[${indexPos}+1]}
                 if [ -d "$var" ]; then ##Checks if directory exist, if not it will save to input file location
-                    mkdir "$var"/"${projectDic["projectName"^^]}"_"${DATE}"
-                    projectDic["outputLoc"]+="$var"/"${projectDic["projectName"]^^}"_"${DATE}"/
+                    projectDic["outputLoc"]+="$var"
                     frontgate=1
                 fi
             elif [[ "${i,,}" == "-p" ]]; then ##Project name
@@ -75,12 +74,13 @@ starter(){ #grabs the arguments
         fi
         if [[ -z ${projectDic["outputLoc"]} ]] && [[ ${projectDic["inputFile"]} != '' ]]; then
             echo -e "\nNot a valid output location. Re-routing to input file location.\n"
-            mkdir "${projectDic["projectName"^^]}"_"${DATE}"
-            projectDic["outputLoc"]+=${projectDic["inputLoc"]}/"${projectDic["projectName"]^^}"_"${DATE}"/
+            projectDic["outputLoc"]+=${projectDic["inputLoc"]}
         fi
         if [[ ${projectDic["referenceGenome"]} == "" ]]; then
             referenceAssignment
         fi
+        mkdir "${projectDic["outputLoc"]}"/"${projectDic["projectName"]^^}"_"${DATE}"/
+        projectDic["outputLoc"]="${projectDic["outputLoc"]}"/"${projectDic["projectName"]^^}"_"${DATE}"/
     else
         local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
         helpPrintOut+=$'\n\t./SNPcontext -i <input> -o <output> -r <reference genome> -w <expansion size> -f <alignment window flank]> -p <project name>\n'
