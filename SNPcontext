@@ -94,7 +94,7 @@ referenceAssignment(){
     if [[ ${var,,} == "barley" ]] || [[ ${var,,} == "b" ]]; then ##forced lowercase with ,,
         projectDic["referenceGenome"]+='/home/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
     elif [[ ${var,,} == "soy bean" ]] || [[ ${var,,} == "s" ]] || [[ ${var,,} == "soy" ]]; then
-        projectDic["referenceGenome"]+="soy/temp/path/to/reference/" ##ADD FUNCTION
+        projectDic["referenceGenome"]+="soy/temp/path/to/reference/"
     else
         echo -e "\nPlease enter a valid reference genome. Defaulting to Barley reference.\n"
         projectDic["referenceGenome"]+='/home/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
@@ -104,8 +104,8 @@ referenceAssignment(){
 moduleLoader(){ #load modules need for operations
 
     module load R
-    module load gatk_ML/3.8.0
-    module load vcftools_ML/0.1.14
+    # module load gatk_ML/3.8.0
+    # module load vcftools_ML/0.1.14
     module load python3_ML/3.6.1
     module load bedops_ML/2.4.20
     module load bedtools_ML/2.23.0
@@ -113,6 +113,7 @@ moduleLoader(){ #load modules need for operations
 }
 
 fileConverter(){
+    declare -a dir=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
     if [ "${projectDic[OperationalStage]}" == "vcfTObed" ]; then
         vcf2bed < "${projectDic["inputFile"]}" > "${projectDic["outputLoc"]}"/"${projectDic["projectName"]}"_"${projectDic["filename"]}".bed
         projectDic["OperationalStage"]="bedTOfasta"
@@ -120,7 +121,6 @@ fileConverter(){
         bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic["outputLoc"]}"/"${projectDic["projectName"]}"_"${projectDic["filename"]}"_new_interval.bed -fo ${projectDic[outputLoc]}/${projectDic["projectName"]}_${projectDic[filename]}.fasta
         projectDic["OperationalStage"]="alnToCounts"
         if [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
-            declare -a dir=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
             for d in "${dir[@]}"; do
                 aln_to_counts --align_path "${projectDic[outputLoc]}"/"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta --output_path "${projectDic[outputLoc]}" --flank_size "${projectDic[flanks]}" --direction "${dir[d]}"
             done
