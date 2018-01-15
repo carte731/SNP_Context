@@ -131,7 +131,7 @@ moduleLoader(){ #load modules need for operations
 
 fileConverter(){
     if [ "${projectDic[OperationalStage]}" == "vcfTObed" ]; then
-        vcf2bed --do-not-sort < "${projectDic["inputFile"]}" > "${projectDic["outputLoc"]}"/"${projectDic["projectName"]}"_"${projectDic["filename"]}".bed ##sort later
+        vcf2bed < "${projectDic["inputFile"]}" > "${projectDic["outputLoc"]}"/"${projectDic["projectName"]}"_"${projectDic["filename"]}".bed ##sort later
         projectDic["OperationalStage"]="bedTOfasta"
     elif [ "${projectDic[OperationalStage]}" == "...." ]; then ##OLD CODE, MOST LIKELY WILL REMOVE
         local declare -A aln_out
@@ -351,12 +351,14 @@ END_OF_PYTHON
 }
 
 mainOne(){
-    moduleLoader
-    starter "$@"
-    fileConverter
-    pythonBEDScanner
-    fastaSpliter
-    fileConverter
+    moduleLoader ##LOADS CORRECT MODULES
+    starter "$@" ##ASSIGNS INPUTS TO HASHMAP
+    fileConverter ##MAKES BED FILE
+    pythonBEDScanner ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
+    fileConverter ##CREATES FASTA FILE
+    fastaSpliter ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
+    fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
+    ##DONE...
 }
 
 mainOne "$@"
