@@ -91,6 +91,7 @@ starter(){ #grabs the arguments
         mkdir "${projectDic[outputLoc]}"COUNTS_TABLES
         mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS
         # mkdir "${projectDic["outputLoc"]}"BED_SPLIT
+        # echo -e "${projectDic["outputLoc"]}" ###
     else
         local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
         helpPrintOut+=$'\n\t./SNPcontext -i <input> -o <output> -r <reference genome> -w <expansion size> -f <alignment window flank]> -p <project name>\n'
@@ -170,7 +171,7 @@ fileConverter(){
             local counter=0
             for sp in ${splitDir[@]}; do
                 if [[ "${splitDir[$counter]##*/}" == "${comSDir}" ]]; then
-                    aln_to_counts --align_path "${comSDir}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES --flank_size "${projectDic[flanks]}" --direction "${gDir}" -F
+                    aln_to_counts --align_path "${splitDir[$counter]}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES --flank_size "${projectDic[flanks]}" --direction "${gDir}" -F
                 fi
                 ((counter+=1))
             done
