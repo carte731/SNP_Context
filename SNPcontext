@@ -124,7 +124,8 @@ fileConverter(){
     elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
         declare -A aln_out
         declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
-        splitDir=("${projectDic[outputLoc]}"BED_SPLIT*_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".bed*)
+        temp="${projectDic[outputLoc]}"BED_SPLIT
+        splitDir=("${temp}"*_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".bed*)
         echo -e ${splitDir[@]}
         for gDir in ${dirL[@]}; do
             comSDir="${gDir}"_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".bed
