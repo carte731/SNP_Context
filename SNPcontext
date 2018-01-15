@@ -123,7 +123,7 @@ moduleLoader(){ #load modules need for operations
 
 fileConverter(){
     if [ "${projectDic[OperationalStage]}" == "vcfTObed" ]; then
-        vcf2bed --do-not-sort < "${projectDic["inputFile"]}" > "${projectDic["outputLoc"]}"/"${projectDic["projectName"]}"_"${projectDic["filename"]}".bed ##sort later
+        vcf2bed < "${projectDic["inputFile"]}" > "${projectDic["outputLoc"]}"/"${projectDic["projectName"]}"_"${projectDic["filename"]}".bed ##sort later
         projectDic["OperationalStage"]="bedTOfasta"
     elif [ "${projectDic[OperationalStage]}" == "...." ]; then ##OLD CODE, MOST LIKELY WILL REMOVE
         declare -A aln_out
