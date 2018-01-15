@@ -147,6 +147,8 @@ fileConverter(){
             for d in "${!aln_out[@]}"; do
                 aln_to_counts --align_path "${aln_out[$d]}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES --flank_size "${projectDic[flanks]}" --direction "${d}" -F
             done
+            mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS
+            mv "${projectDic[outputLoc]}"COUNTS_TABLES/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS
             projectDic["OperationalStage"]="DONE..."
         fi
     fi
