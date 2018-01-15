@@ -125,7 +125,7 @@ fileConverter(){
     if [ "${projectDic[OperationalStage]}" == "vcfTObed" ]; then
         vcf2bed < "${projectDic["inputFile"]}" > "${projectDic["outputLoc"]}"/"${projectDic["projectName"]}"_"${projectDic["filename"]}".bed
         projectDic["OperationalStage"]="bedTOfasta"
-    elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
+    elif [ "${projectDic[OperationalStage]}" == "...." ]; then
         declare -A aln_out
         declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
         temp="${projectDic[outputLoc]}"BED_SPLIT/
@@ -151,6 +151,34 @@ fileConverter(){
             mv "${projectDic[outputLoc]}"COUNTS_TABLES/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS
             projectDic["OperationalStage"]="DONE..."
         fi
+    elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
+        declare -A aln_out
+        declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
+        temp="${projectDic[outputLoc]}"BED_SPLIT/
+        splitDir=("${temp}"*_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".bed*)
+        for gDir in ${dirL[@]}; do
+            comSDir="${gDir}"_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".bed
+            counter=0
+            for sp in ${splitDir[@]}; do
+                if [[ "${splitDir[$counter]##*/}" == "${comSDir}" ]]; then
+                    bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic["outputLoc"]}"BED_SPLIT/"${comSDir}" -fo "${projectDic[outputLoc]}"FASTA_SPLIT/"${gDir}"_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta
+                    aln_out+=( ["${gDir}"]="${projectDic[outputLoc]}"BED_SPLIT/"${gDir}"_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta )
+                fi
+                ((counter+=1))
+            done
+        done
+        projectDic["OperationalStage"]="alnToCounts"
+        if [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
+            mkdir "${projectDic[outputLoc]}"COUNTS_TABLES
+            for d in "${!aln_out[@]}"; do
+                aln_to_counts --align_path "${aln_out[$d]}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES --flank_size "${projectDic[flanks]}" --direction "${d}" -F
+            done
+            mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS
+            mv "${projectDic[outputLoc]}"COUNTS_TABLES/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS
+            all_counts -c "${projectDic[outputLoc]}COUNTS_TABLES/*.txt*" -o "${projectDic[outputLoc]}"
+            projectDic["OperationalStage"]="DONE..."
+        fi
+         
     fi
 }
 
@@ -213,6 +241,12 @@ def fastaSpliter(bedMapp, outputLoc, filename, projectName):
                 masterList.append(bedMapp[i])
         if(len(masterList) > 0):
             fileSaver(masterList, outputLoc, filename, projectName, j)
+
+def bedSpliter(bedMapp, outputLoc, filename, projectName):
+    directions=["AtoC","AtoG","AtoT","CtoA","CtoG","CtoT","GtoA","GtoC","GtoT","TtoA","TtoC","TtoG"]
+    for j in directions:
+        if(masterList != None):
+            fileSaver(bedMapp, outputLoc, filename, projectName, j)            
 
 def fileSaver(bedMapp, outputLoc, filename, projectName, dirC):
     if(dirC == None):
@@ -310,7 +344,8 @@ def main():
     bedMap, masterList, expandedList=intervalExpander(bedMap, interval)
     fileSaver(bedMap, outputLoc, filename, projectName, None)
     typeOneTwo(expandedList, masterList, interval, outputLoc, projectName)
-    fastaSpliter(bedMap, outputLoc, filename, projectName)
+    bedSpliter(bedMap, outputLoc, filename, projectName)
+    # fastaSpliter(bedMap, outputLoc, filename, projectName)
 
 main()
 
