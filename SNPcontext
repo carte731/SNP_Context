@@ -183,12 +183,12 @@ fileConverter(){
         bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic[outputLoc]}""${projectDic["projectName"]}"_"${projectDic["filename"]}"_new_interval.bed -fo "${projectDic[outputLoc]}""${projectDic["projectName"]}"_"${projectDic[filename]}".fasta    
         projectDic["OperationalStage"]="alnToCounts"
         if [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
-        fastaLoc="${projectDic[outputLoc]}""${projectDic["projectName"]}"_"${projectDic[filename]}".fasta
-        wcFile="${projectDic["projectName"]}"_"${projectDic[filename]}".txt
-            for gDir in ${dirL[@]}; do
-                aln_to_counts --align_path "${fastaLoc}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES --flank_size "${projectDic[flanks]}" --direction "${gDir}" -F
-                mv "${projectDic[outputLoc]}"COUNTS_TABLES/wcFile "${projectDic[outputLoc]}"COUNTS_TABLES/"${gDir}"_wcFilewcFile
-            done
+            fastaLoc="${projectDic[outputLoc]}""${projectDic["projectName"]}"_"${projectDic[filename]}".fasta
+            wcFile="${projectDic["projectName"]}"_"${projectDic[filename]}".txt
+                for gDir in ${dirL[@]}; do
+                    aln_to_counts --align_path "${fastaLoc}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES --flank_size "${projectDic[flanks]}" --direction "${gDir}" -F
+                    mv "${projectDic[outputLoc]}"COUNTS_TABLES/wcFile "${projectDic[outputLoc]}"COUNTS_TABLES/"${gDir}"_"${wcFilewcFile}"
+                done
             mv "${projectDic[outputLoc]}"COUNTS_TABLES/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS
             all_counts -c ${projectDic[outputLoc]}COUNTS_TABLES/"*.txt*" -o "${projectDic[outputLoc]}"
             projectDic["OperationalStage"]="DONE..."
