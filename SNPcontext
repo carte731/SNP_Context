@@ -104,7 +104,7 @@ starter(){ #grabs the arguments
 }
 
 fastaSpliter(){
-    for y in ${dirL}; do
+    for y in ${dirL[@]}; do
         cp "${projectDic[outputLoc]}""${projectDic["projectName"]}"_"${projectDic[filename]}".fasta "${projectDic["outputLoc"]}"FASTA_SPLIT/"${y}"_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta
     done
 }
