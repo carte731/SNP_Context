@@ -12,6 +12,8 @@ declare -A projectDic=(
     ["OperationalStage"]='vcfTObed'
 )
 
+declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
+
 starter(){ #grabs the arguments
     DATE=`date +"%m%d%Y-%k%M"`
     local args=("$@")
@@ -102,7 +104,6 @@ starter(){ #grabs the arguments
 }
 
 fastaSpliter(){
-    local declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
     for y in ${dirL}; do
         cp "${projectDic[outputLoc]}""${projectDic["projectName"]}"_"${projectDic[filename]}".fasta "${projectDic["outputLoc"]}"FASTA_SPLIT/"${y}"_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta
     done
@@ -122,8 +123,6 @@ referenceAssignment(){
 moduleLoader(){ #load modules need for operations
 
     module load R
-    # module load gatk_ML/3.8.0
-    # module load vcftools_ML/0.1.14
     module load python3_ML/3.6.1
     module load bedops_ML/2.4.20
     module load bedtools_ML/2.23.0
@@ -164,7 +163,6 @@ fileConverter(){
             bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic[outputLoc]}""${projectDic["projectName"]}"_"${projectDic["filename"]}"_new_interval.bed -fo "${projectDic[outputLoc]}""${projectDic["projectName"]}"_"${projectDic[filename]}".fasta    
             projectDic["OperationalStage"]="alnToCounts"
     elif [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
-        local declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
         local temp="${projectDic[outputLoc]}"FASTA_SPLIT/
         local splitDir=("${temp}"*_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta*)
         for gDir in ${dirL[@]}; do
@@ -241,9 +239,9 @@ def bedSpliter(bedMapp, outputLoc, filename, projectName):
             if(dirC == j):
                 masterList.append(bedMapp[i])
         if(len(masterList) > 0):
-            fileSaver(masterList, outputLoc, filename, projectName, j)          
+            fileSaver(masterList, outputLoc, filename, projectName, j) 
 
-def fileSaver(bedMapp, outputLoc, filename, projectName, dirC):
+def fileSaverTwo(bedMapp, outputLoc, filename, projectName, dirC):
     if(dirC == None):
         output="".join(chain.from_iterable(bedMapp))
         with open(outputLoc + "/" + projectName + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
@@ -251,7 +249,12 @@ def fileSaver(bedMapp, outputLoc, filename, projectName, dirC):
     else:
         output="".join(chain.from_iterable(bedMapp)) ##
         with open(outputLoc + "/BED_SPLIT/" + dirC + "_" + "split" + "_" + projectName + "_" + filename + ".bed", "w") as splitBed: ##Change to input variables
-            splitBed.write(output)
+            splitBed.write(output)         
+
+def fileSaver(bedMapp, outputLoc, filename, projectName):
+        output="".join(chain.from_iterable(bedMapp))
+        with open(outputLoc + projectName + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
+            newBed.write(output)
 
 def typeOneTwo(expandedList, inputList, interval, outputLoc, projectName):
     now = datetime.datetime.now()
@@ -337,7 +340,7 @@ def main():
     outputLoc, filename, interval, inputFile, projectName=bashInputs()
     bedMap=bedMapper(filename, outputLoc, projectName)
     bedMap, masterList, expandedList=intervalExpander(bedMap, interval)
-    fileSaver(bedMap, outputLoc, filename, projectName, None)
+    fileSaver(bedMap, outputLoc, filename, projectName)
     typeOneTwo(expandedList, masterList, interval, outputLoc, projectName)
     # bedSpliter(bedMap, outputLoc, filename, projectName)
 
