@@ -245,7 +245,7 @@ def fastaSpliter(bedMapp, outputLoc, filename, projectName):
 def bedSpliter(bedMapp, outputLoc, filename, projectName):
     directions=["AtoC","AtoG","AtoT","CtoA","CtoG","CtoT","GtoA","GtoC","GtoT","TtoA","TtoC","TtoG"]
     for j in directions:
-        if(masterList != None):
+        if(bedMapp != None):
             fileSaver(bedMapp, outputLoc, filename, projectName, j)            
 
 def fileSaver(bedMapp, outputLoc, filename, projectName, dirC):
