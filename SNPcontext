@@ -125,7 +125,7 @@ fileConverter(){
     if [ "${projectDic[OperationalStage]}" == "vcfTObed" ]; then
         vcf2bed < "${projectDic["inputFile"]}" > "${projectDic["outputLoc"]}"/"${projectDic["projectName"]}"_"${projectDic["filename"]}".bed
         projectDic["OperationalStage"]="bedTOfasta"
-    elif [ "${projectDic[OperationalStage]}" == "...." ]; then
+    elif [ "${projectDic[OperationalStage]}" == "...." ]; then ##OLD CODE, MOST LIKELY WILL REMOVE
         declare -A aln_out
         declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
         temp="${projectDic[outputLoc]}"BED_SPLIT/
@@ -162,7 +162,7 @@ fileConverter(){
             for sp in ${splitDir[@]}; do
                 if [[ "${splitDir[$counter]##*/}" == "${comSDir}" ]]; then
                     bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic["outputLoc"]}"BED_SPLIT/"${comSDir}" -fo "${projectDic[outputLoc]}"FASTA_SPLIT/"${gDir}"_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta
-                    aln_out+=( ["${gDir}"]="${projectDic[outputLoc]}"BED_SPLIT/"${gDir}"_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta )
+                    aln_out+=( ["${gDir}"]="${projectDic[outputLoc]}"FASTA_SPLIT/"${gDir}"_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta )
                 fi
                 ((counter+=1))
             done
@@ -175,7 +175,7 @@ fileConverter(){
             done
             mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS
             mv "${projectDic[outputLoc]}"COUNTS_TABLES/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS
-            all_counts -c "${projectDic[outputLoc]}COUNTS_TABLES/*.txt*" -o "${projectDic[outputLoc]}"
+            all_counts -c ${projectDic[outputLoc]}COUNTS_TABLES/"*.txt*" -o "${projectDic[outputLoc]}"
             projectDic["OperationalStage"]="DONE..."
         fi
          
