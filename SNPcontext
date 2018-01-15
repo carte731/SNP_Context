@@ -43,7 +43,11 @@ starter(){ #grabs the arguments
             elif [[ "${i,,}" == "-o" ]]; then ##output location info
                 local var=${args[${indexPos}+1]}
                 if [ -d "$var" ]; then ##Checks if directory exist, if not it will save to input file location
-                    projectDic["outputLoc"]+="$var"
+                    if [[ "${var: -1}" == "/" ]]; then
+                        projectDic["outputLoc"]+="$var"
+                    else
+                        projectDic["outputLoc"]+="$var"/
+                    fi
                     frontgate=1
                 fi
             elif [[ "${i,,}" == "-p" ]]; then ##Project name
@@ -79,10 +83,10 @@ starter(){ #grabs the arguments
         if [[ ${projectDic["referenceGenome"]} == "" ]]; then
             referenceAssignment
         fi
-        mkdir "${projectDic["outputLoc"]}"/"${projectDic["projectName"]^^}"_"${DATE}"/
-        projectDic["outputLoc"]="${projectDic["outputLoc"]}"/"${projectDic["projectName"]^^}"_"${DATE}"/
-        mkdir "${projectDic["outputLoc"]}"/FASTA_SPLIT
-        mkdir "${projectDic["outputLoc"]}"/BED_SPLIT
+        mkdir "${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
+        projectDic["outputLoc"]="${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
+        mkdir "${projectDic["outputLoc"]}"FASTA_SPLIT
+        mkdir "${projectDic["outputLoc"]}"BED_SPLIT
     else
         local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
         helpPrintOut+=$'\n\t./SNPcontext -i <input> -o <output> -r <reference genome> -w <expansion size> -f <alignment window flank]> -p <project name>\n'
@@ -124,7 +128,7 @@ fileConverter(){
     elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
         declare -A aln_out
         declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
-        temp="${projectDic[outputLoc]}"BED_SPLIT
+        temp="${projectDic[outputLoc]}"BED_SPLIT/
         splitDir=("${temp}"*_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".bed*)
         echo -e ${splitDir[@]}
         for gDir in ${dirL[@]}; do
@@ -132,8 +136,8 @@ fileConverter(){
             counter=0
             for sp in ${splitDir[@]}; do
                 if [[ "${splitDir[$counter]##*/}" == "${comSDir}" ]]; then
-                    bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic["outputLoc"]}"/BED_SPLIT/"${comSDir}" -fo "${projectDic[outputLoc]}"/FASTA_SPLIT/"${gDir}"_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta
-                    aln_out+=( ["${gDir}"]="${projectDic[outputLoc]}"/FASTA_SPLIT/"${gDir}"_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta )
+                    bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic["outputLoc"]}"BED_SPLIT/"${comSDir}" -fo "${projectDic[outputLoc]}"FASTA_SPLIT/"${gDir}"_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta
+                    aln_out+=( ["${gDir}"]="${projectDic[outputLoc]}"FASTA_SPLIT/"${gDir}"_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta )
                 fi
                 ((counter+=1))
             done
@@ -142,7 +146,7 @@ fileConverter(){
         if [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
             mkdir "${projectDic[outputLoc]}"/COUNTS_TABLES
             for d in "${!aln_out[@]}"; do
-                aln_to_counts --align_path "${aln_out[$d]}" --output_path "${projectDic[outputLoc]}"/COUNTS_TABLES --flank_size "${projectDic[flanks]}" --direction "${d}" -F
+                aln_to_counts --align_path "${aln_out[$d]}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES --flank_size "${projectDic[flanks]}" --direction "${d}" -F
             done
             projectDic["OperationalStage"]="DONE..."
         fi
