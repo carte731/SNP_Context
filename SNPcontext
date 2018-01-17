@@ -241,7 +241,7 @@ def bedMapper(interval, outputLoc, projectName, filename):
                 temp=[]
         return(bedMapper, masterList)
 
-def binaryIntersect(expandedList, interval):
+def binaryIntersect(expandedList, interval, outputLoc, projectName, filename):
     gateA=True
     gateB=True
     now = datetime.datetime.now()
@@ -353,7 +353,7 @@ def bashInputs():
 def main():
     outputLoc, filename, interval, inputFile, projectName=bashInputs()
     bedmap, masterList=bedMapper(interval, outputLoc, projectName, filename)
-    binaryIntersect(masterList, interval)
+    binaryIntersect(masterList, interval, outputLoc, projectName, filename)
     fileSaver(bedmap, outputLoc, filename, projectName)
 main()
 
