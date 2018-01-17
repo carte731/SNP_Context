@@ -132,7 +132,7 @@ moduleLoader(){ #load modules need for operations
 
 fileConverter(){
     if [ "${projectDic[OperationalStage]}" == "vcfTObed" ]; then
-        vcf2bed -d < "${projectDic["inputFile"]}" > "${projectDic["outputLoc"]}"/"${projectDic["projectName"]}"_"${projectDic["filename"]}".bed ##sort later
+        vcf2bed < "${projectDic["inputFile"]}" > "${projectDic["outputLoc"]}"/"${projectDic["projectName"]}"_"${projectDic["filename"]}".bed ##sort later
         projectDic["OperationalStage"]="bedTOfasta"
     # elif [ "${projectDic[OperationalStage]}" == "...." ]; then ##OLD CODE, MOST LIKELY WILL REMOVE
     #     local declare -A aln_out
@@ -204,145 +204,139 @@ from itertools import chain
 # import itertools
 import datetime
 
-def bedMapper(filename, outputLoc, projectName):
-    bedMap=[]
-    with open(outputLoc + "/" + projectName + "_" + filename + ".bed", "r") as bed_test: ##Change to input variables
-        for i in bed_test:
-            sub=[]
-            final=''
-            for u in i:
-                if((u != '\t') and (u != "\n")):
-                    final = final + str(u)
-                else:
-                    sub.append(final)
-                    final=''
-                    sub.append(u)
-            bedMap.append(sub)
-    return(bedMap)
-
-def intervalLister(bedMap):
+def bedMapper(interval):
+    bedMapper=[]
     masterList=[]
-    for i in range(len(bedMap)):
-        temp=[]
-        temp.append(int(bedMap[i][4]))
-        temp.append(int(bedMap[i][2]))
-        temp.sort()
-        masterList.append(temp)
-    return(masterList)
+    sub=[] ##FOR BEDMAPPER
+    temp=[] ##FOR MASTERLIST
+    final=''
+    with open(outputLoc + "/" + projectName + "_" + filename + ".bed", "rb") as bed_test: ##Change to input variables
+        bedmap=bed_test.read()
+        for asii in bedmap:
+            element = chr(asii)
+            if((element != '\t') and (element != '\n')):
+                final = final + element
+            elif((element == '\t') and (element != '\n')):
+                sub.append(final)
+                final=''
+                sub.append(element)
+            if(element == "\n"):
+                sub.append(final)
+                sub.append(element)
+                sub[2] = str(int(sub[2]) - interval)
+                sub[4] = str(int(sub[4]) + interval)
+                a = sub[2]
+                b = sub[4]
+                temp.append(int(a))
+                temp.append(int(b))
+                temp.sort()
+                bedMapper.append(sub)
+                masterList.append(temp)
+                final=''
+                sub=[]
+                temp=[]
+        return(bedMapper, masterList)
 
-def intervalExpander(bedMap, interval):
-    masterList=intervalLister(bedMap)
-    if(interval > 0):
-        for i in range(len(bedMap)):
-            if((bedMap[i][2]) and (bedMap[i][4])):
-                try:
-                    if((type(int(bedMap[i][2])) == int) and (type(int(bedMap[i][4])) == int)):
-                        bedMap[i][2] = str(int(bedMap[i][2]) - interval)
-                        bedMap[i][4] = str(int(bedMap[i][4]) + interval)
-                except:
-                    print("\nPython interval expanson error on line: " + bedMap.index(i) + ". Adding error notation to error logs")
-                    #Add stuff for logging error to text file
-    expandedList=intervalLister(bedMap)
-    return(bedMap, masterList, expandedList)
-
-def bedSpliter(bedMapp, outputLoc, filename, projectName):
-    directions=["AtoC","AtoG","AtoT","CtoA","CtoG","CtoT","GtoA","GtoC","GtoT","TtoA","TtoC","TtoG"]
-    for j in directions:
-        masterList=[]
-        for i in range(len(bedMapp)):
-            dirC=bedMapp[i][10] + "to" + bedMapp[i][12]
-            if(dirC == j):
-                masterList.append(bedMapp[i])
-        if(len(masterList) > 0):
-            fileSaver(masterList, outputLoc, filename, projectName, j) 
-
-def fileSaverTwo(bedMapp, outputLoc, filename, projectName, dirC):
-    if(dirC == None):
-        output="".join(chain.from_iterable(bedMapp))
-        with open(outputLoc + "/" + projectName + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
-            newBed.write(output)
-    else:
-        output="".join(chain.from_iterable(bedMapp)) ##
-        with open(outputLoc + "/BED_SPLIT/" + dirC + "_" + "split" + "_" + projectName + "_" + filename + ".bed", "w") as splitBed: ##Change to input variables
-            splitBed.write(output)         
-
-def fileSaver(bedMapp, outputLoc, filename, projectName):
-        output="".join(chain.from_iterable(bedMapp))
-        with open(outputLoc + "/" + projectName + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
-            newBed.write(output)
-        # os.rename(outputLoc + "/" + projectName + "_" + filename + ".bed", outputLoc + "/" + projectName + "_" + filename + "_new_interval.bed")
-
-def typeOneTwo(expandedList, inputList, interval, outputLoc, projectName):
+def binaryIntersect(expandedList, interval):
+    gateA=True
+    gateB=True
     now = datetime.datetime.now()
-    gateOne=True
-    gateTwo=True
-    typeOT = "ONE"
-    results = '\n**********************\nTYPE ONE and TYPE TWO CHECKS FOR: ' + now.strftime("%Y-%m-%d, %H:%M") + '\n----------------------------------------------------\n' ##ADD PROJECT NAME TO THIS    
-    if(typeOT == "ONE"):
-        results += '\n**Type One: overlap into SNP\n-------------------------------\n'
-        for i in range(len(expandedList)): #Checks for Type One SNP overlaps (ORIGINAL INTERVAL CHECK)
-            a=expandedList[i][0]
-            b=expandedList[i][1]
+    results = '\n**********************\nTYPE ONE and TYPE TWO CHECKS FOR: ' + now.strftime("%Y-%m-%d, %H:%M") + '\n----------------------------------------------------\n' ##ADD PROJECT NAME TO THIS
+    resultsA = '\n**TYPE ONE: OVERLAPS INTO ORIGINAL SNP**\n------------------------------------\n'
+    resultsB = '\n**TYPE TWO: OVERLAPS INTO SNP EXPANSION WINDOWS**\n-------------------------------------\n'
+    for i in range(len(expandedList)-1): #Checks for Type One SNP overlaps (ORIGINAL INTERVAL CHECK)
+            a=expandedList[i][0] ##A= left side
+            b=expandedList[i][1] ##B= right side
+            subTA=expandedList[i+1][0]+interval ##TYPE ONE
+            subTB=expandedList[i+1][1]-interval ##TYPE ONE
+            subMA=expandedList[i+1][0] ##TYPE TWO
+            subMB=expandedList[i+1][1] ##TYPE TWO
+            binary=[0,0,0,0]
+            binaryMB=[0,0,0,0]
+            if(a <= subTA):
+                binary[0]=1
+            if(a <= subTB):
+                binary[1]=1
+            if(b >= subTA):
+                binary[2]=1
+            if(b >= subTB):
+                binary[3]=1
+            if(a <= subMA): ##
+                binaryMB[0]=1
+            if(a <= subMB):
+                binaryMB[1]=1
+            if(b >= subMA):
+                binaryMB[2]=1
+            if(b >= subMB):
+                binaryMB[3]=1
+            if((binary != [1,1,0,0]) and (binary != [0,0,1,1])):
+                gateA=False
+                if(binary == [0,1,1,0]):
+                    resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " SNP is encapsulated within " + str(subTA) + "-" + str(subTB) + '.'
+                elif(binary == [1,1,1,1]):
+                    resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " is equal or encapsulating " + str(subTA) + "-" + str(subTB) + '.'
+                elif((binary == [1,1,1,0]) or (binary == [0,1,1,1])):
+                    if(binary == [1,1,1,0]):
+                        resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subTA) + "-" + str(subTB) + ". on the right, between " + str(b) + " and " + str(subTA) + '.'
+                    elif(binary == [0,1,1,1]):
+                        resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subTA) + "-" + str(subTB) + ". on the left, between " + str(a) + " and " + str(subTB) + '.' 
             if(interval > 0):
-                comparisonA=a+interval
-                comparisonB=b-interval
-            else:
-                comparisonA=a
-                comparisonB=b
-            for j in range(len(inputList)):
-                subMA=inputList[j][0]
-                subMB=inputList[j][1]
-                if((comparisonA != subMA) and (comparisonB != subMB)): ##Add id() check
-                    if(i != j):
-                        gateOne, tempResults=binaryIntersect(typeOT, a, b, subMA, subMB, gateOne)
-                        results+=tempResults
-        typeOT="TWO"
-        if(gateOne):
-            results+="\nNo Type " + typeOT + " window overlaps detected.\n"
-    if((typeOT == "TWO") and (interval > 0)): #Checks for Type Two window overlaps (EXTENDED INTERVAL CHECK)
-        results += '\n\n**Type Two: overlap into Windows\n-------------------------------\n'
-        for i in range(len(expandedList)):
-            a2=expandedList[i][0]
-            b2=expandedList[i][1]
-            for j in range(i+1, len(expandedList)):
-                subEA=expandedList[j][0]
-                subEB=expandedList[j][1]
-                gateTwo, tempResults=binaryIntersect(typeOT, a2, b2, subEA, subEB, gateTwo)
-                results+=tempResults
-    if(gateTwo):
-        results+="\nNo Type " + typeOT + " window overlaps detected.\n"
-    results += "\n"
+                if((binaryMB != [1,1,0,0]) and (binaryMB != [0,0,1,1])):
+                    gateB=False
+                    if(binaryMB == [0,1,1,0]):
+                        resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " SNP is encapsulated within " + str(subMA) + "-" + str(subMB) + '.'
+                    elif(binaryMB == [1,1,1,1]):
+                        resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is equal or encapsulating " + str(subMA) + "-" + str(subMB) + '.'
+                    elif((binaryMB == [1,1,1,0]) or (binaryMB == [0,1,1,1])):
+                        if(binaryMB == [1,1,1,0]):
+                            resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subMA) + "-" + str(subMB) + ". on the right, between " + str(b) + " and " + str(subMA) + '.'
+                        elif(binaryMB == [0,1,1,1]):
+                            resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subMA) + "-" + str(subMB) + ". on the left, between " + str(a) + " and " + str(subMB) + '.' 
+    if(gateA):
+        print("\nNo Type ONE window overlaps detected.\n")
+        resultsA+="\nNo Type ONE window overlaps detected.\n"
+    else:
+        print("\nTYPE ONE OVERLAPS DETECTED.")
+    if(gateB):
+        print("\nNo Type TWO window overlaps detected.\n")
+        resultsB+="\nNo Type TWO window overlaps detected.\n"
+    else:
+        print("\nTYPE TWO OVERLAPS DETECTED.")
+    results += resultsA + "\n" + resultsB + "\n"
     results += "\nEND OF INTERVAL CHECKS.\nXXXXXXXXXXXXXXXXXXXXXX\n"
-    if((gateOne == True) and (gateTwo == True)):
+    if((gateA == True) and (gateB == True)):
         print("\nNO overlaps dectected. Results saved to 'WindowOverlap.txt' in your output directory.\n")
     else:
         print("\nTYPE ONE AND/OR TYPE TWO OVERLAPS DETECTED. Check 'WindowOverlap.txt' in your output directory for saved results.\n")
     with open(outputLoc + "/" + projectName + "_" + "WindowOverlap.txt", 'a+') as window:
         window.write(results)
 
-def binaryIntersect(typeOT, a, b, subTA, subTB, gate):
-    resultsBI=''
-    binary=[0,0,0,0]
-    if(a <= subTA):
-        binary[0]=1 
-    if(a <= subTB):
-        binary[1]=1
-    if(b >= subTA):
-        binary[2]=1
-    if(b >= subTB):
-        binary[3]=1
-    if((binary != [1,1,0,0]) and (binary != [0,0,1,1])):
-        gate=False
-        if(binary == [0,1,1,0]):
-            resultsBI+="\n--TYPE " + typeOT + "at :" + str(a) + "-" + str(b) + " SNP is encapsulated within " + str(subTA) + "-" + str(subTB)
-        elif(binary == [1,1,1,1]):
-            resultsBI+="\n--TYPE " + typeOT + " at: " + str(a) + "-" + str(b) + " is equal or encapsulating " + str(subTA) + "-" + str(subTB)
-        elif((binary == [1,1,1,0]) or (binary == [0,1,1,1])):
-            if(binary == [1,1,1,0]):
-                resultsBI+="\n--TYPE " + typeOT + " at: " + str(a) + "-" + str(b) + " is overlapping with " + str(subTA) + "-" + str(subTB) + ". on the right, between " + str(b) + " and " + str(subTA)
-            elif(binary == [0,1,1,1]):
-                resultsBI+="\n--TYPE " + typeOT + " at: " + str(a) + "-" + str(b) + " is overlapping with " + str(subTA) + "-" + str(subTB) + ". on the left, between " + str(a) + " and " + str(subTB)
-    return(gate, resultsBI)
+# def fileSaverTwo(bedMapp, outputLoc, filename, projectName, dirC):
+#     if(dirC == None):
+#         output="".join(chain.from_iterable(bedMapp))
+#         with open(outputLoc + "/" + projectName + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
+#             newBed.write(output)
+#     else:
+#         output="".join(chain.from_iterable(bedMapp)) ##
+#         with open(outputLoc + "/BED_SPLIT/" + dirC + "_" + "split" + "_" + projectName + "_" + filename + ".bed", "w") as splitBed: ##Change to input variables
+#             splitBed.write(output)
+
+# def bedSpliter(bedMapp, outputLoc, filename, projectName):
+#     directions=["AtoC","AtoG","AtoT","CtoA","CtoG","CtoT","GtoA","GtoC","GtoT","TtoA","TtoC","TtoG"]
+#     for j in directions:
+#         masterList=[]
+#         for i in range(len(bedMapp)):
+#             dirC=bedMapp[i][10] + "to" + bedMapp[i][12]
+#             if(dirC == j):
+#                 masterList.append(bedMapp[i])
+#         if(len(masterList) > 0):
+#             fileSaver(masterList, outputLoc, filename, projectName, j)  
+
+def fileSaver(bedMapp, outputLoc, filename, projectName):
+        output="".join(chain.from_iterable(bedMapp))
+        with open(outputLoc + "/" + projectName + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
+            newBed.write(output)
+        # os.rename(outputLoc + "/" + projectName + "_" + filename + ".bed", outputLoc + "/" + projectName + "_" + filename + "_new_interval.bed")
         
 def bashInputs():
     outputLoc=str(os.environ['outputLoc'])
@@ -354,12 +348,9 @@ def bashInputs():
 
 def main():
     outputLoc, filename, interval, inputFile, projectName=bashInputs()
-    bedMap=bedMapper(filename, outputLoc, projectName)
-    bedMap, masterList, expandedList=intervalExpander(bedMap, interval)
-    fileSaver(bedMap, outputLoc, filename, projectName)
-    typeOneTwo(expandedList, masterList, interval, outputLoc, projectName)
-    # bedSpliter(bedMap, outputLoc, filename, projectName)
-
+    bedmap, masterList=bedMapper(interval)
+    binaryIntersect(masterList, interval)
+    fileSaver(bedmap, outputLoc, filename, projectName)
 main()
 
 END_OF_PYTHON
