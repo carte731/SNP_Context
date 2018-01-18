@@ -191,7 +191,7 @@ fileConverter(){
             wcFile="${projectDic["projectName"]}"_"${projectDic[filename]}".txt
                 for gDir in ${dirL[@]}; do
                     aln_to_counts --align_path "${fastaLoc}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES --flank_size "${projectDic[flanks]}" --direction "${gDir}" -F
-                    mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${wcFile}" "${projectDic[outputLoc]}"COUNTS_TABLES/"${gDir}"_"${wcFile}"
+                    "${projectDic[outputLoc]}"COUNTS_TABLES/"${wcFile}" renamed as "${projectDic[outputLoc]}"COUNTS_TABLES/"${gDir}"_"${wcFile}"
                 done
             mv "${projectDic[outputLoc]}"COUNTS_TABLES/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS
             all_counts -c ${projectDic[outputLoc]}COUNTS_TABLES/"*.txt*" -o "${projectDic[outputLoc]}"
