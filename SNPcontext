@@ -362,16 +362,16 @@ END_OF_PYTHON
 }
 
 jobCreator(){
-    echo -e "\nEnter email for PBS job updates: "
+    echo -e "Enter email for PBS job updates: "
     read userEmail
     email="${userEmail}" inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" python3.6 - <<JOB_CREATED
 
 import os
 
 def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc):
-    job="#!/usr/bin/env bash\n#PBS -l mem=22gb,nodes=1:ppn=16,walltime=24:00:00\n#PBS -m abe\n#PBS -M " + email + "\n"
-    job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\n#PBS -q lab\nset -e\nset -o pipefail\n"
-    job+="module load snpContext/1.0.0\n"
+    job="#!/usr/bin/env bash\n\n#PBS -l mem=22gb,nodes=1:ppn=16,walltime=24:00:00\n#PBS -m abe\n#PBS -M " + email + "\n"
+    job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\n#PBS -q lab\nset -e\nset -o pipefail\n\n"
+    job+="module load snpContext/1.0.0\n\n"
     job+="source snpcontext "
     job+= "-i " + inputFile + " "
     job+= "-o " + outputLoc + " "
@@ -403,7 +403,7 @@ main()
 JOB_CREATED
 
 echo -e "\njob submited.\nEXITING...\n"
-source "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
+qsub "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
 exit 0
 
 }
