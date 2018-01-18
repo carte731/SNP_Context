@@ -403,9 +403,15 @@ exit 0
 }
 
 mainOne(){
+    vcfgate=1
     moduleLoader ##LOADS CORRECT MODULES
     starter "$@" ##ASSIGNS INPUTS TO HASHMAP
-    # if [[ "${projectDic["JOB"]}" 1= ]]
+    if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
+        inputSize=$( stat c%s "${projectDic["inputFile"]}")
+        if [ inputSize >= 110000000 ]; then
+            jobCreator
+        fi
+    fi
     fileConverter ##MAKES BED FILE
     pythonBEDScanner ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
     fileConverter ##CREATES FASTA FILE
