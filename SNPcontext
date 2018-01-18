@@ -371,8 +371,8 @@ import os
 def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc):
     job="#!/usr/bin/env bash\n#PBS -l mem=22gb,nodes=1:ppn=16,walltime=24:00:00\n#PBS -m abe\n#PBS -M " + email + "\n"
     job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\n#PBS -q lab\nset -e\nset -o pipefail\n"
-    job+="module load snpcontext/1.0.0\n"
-    job+="source snpconext "
+    job+="module load snpContext/1.0.0\n"
+    job+="source snpcontext "
     job+= "-i " + inputFile + " "
     job+= "-o " + outputLoc + " "
     job+= "-w " + windowLength + " "
