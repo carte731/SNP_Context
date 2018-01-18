@@ -16,7 +16,7 @@ declare -A projectDic=(
 declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
 
 starter(){ #grabs the arguments
-    DATE=`date +"%m%d%Y-%k%M"`
+    DATE=`date +"%m%d%Y-%H%M"`
     local args=("$@")
     if [[ "$#" > 1 ]] && [[ ${args[0],,} != "--help" ]] && [[ ${args[0],,} != "-h" ]]; then
         local frontgate=0
