@@ -412,13 +412,13 @@ mainOne(){
     vcfgate=1
     moduleLoader ##LOADS CORRECT MODULES
     starter "$@" ##ASSIGNS INPUTS TO HASHMAP
-    if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
-        inputSize=$( stat -c%s "${projectDic["inputFile"]}")
-        if (( "${inputSize}" >= 110000000 )); then
-            echo -e "\n(.VCF) over 100Mb, generating job script and submitting operations to MSI."
-            jobCreator
-        fi
-    fi
+    # if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
+    #     inputSize=$( stat -c%s "${projectDic["inputFile"]}")
+    #     if (( "${inputSize}" >= 110000000 )); then
+    #         echo -e "\n(.VCF) over 100Mb, generating job script and submitting operations to MSI."
+    #         jobCreator
+    #     fi
+    # fi
     fileConverter ##MAKES BED FILE
     pythonBEDScanner ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
     fileConverter ##CREATES FASTA FILE
