@@ -407,7 +407,7 @@ mainOne(){
     moduleLoader ##LOADS CORRECT MODULES
     starter "$@" ##ASSIGNS INPUTS TO HASHMAP
     if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
-        inputSize=$( stat c%s "${projectDic["inputFile"]}")
+        inputSize=$( stat -c%s "${projectDic["inputFile"]}")
         if [ inputSize >= 110000000 ]; then
             jobCreator
         fi
