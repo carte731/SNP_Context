@@ -362,8 +362,7 @@ END_OF_PYTHON
 }
 
 jobCreator(){
-    echo -e "File too large for vcf2bed, generating job script."
-    echo -e "Enter email for PBS job updates: "
+    echo -e "\nEnter email for PBS job updates: "
     read userEmail
     email="${userEmail}" inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" python3.6 - <<JOB_CREATED
 
@@ -388,9 +387,9 @@ def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, ema
 def bashImport():
     outputLoc=str(os.environ['outputLoc'])
     email=str(os.environ['email'])
-    flanks=int(os.environ['flanks'])
+    flanks=str(os.environ['flanks'])
     referenceGenome=str(os.environ['referenceGenome'])
-    windowLength=int(os.environ['windowLength'])
+    windowLength=str(os.environ['windowLength'])
     inputFile=str(os.environ['inputFile'])
     projectName=str(os.environ['projectName'])
     return(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc)
@@ -416,7 +415,7 @@ mainOne(){
     if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
         inputSize=$( stat -c%s "${projectDic["inputFile"]}")
         if (( "${inputSize}" >= 110000000 )); then
-            echo -e "(.VCF) over 100Mb, submitting operations as a job."
+            echo -e "\n(.VCF) over 100Mb, generating job script and submitting operations to MSI."
             jobCreator
         fi
     fi
