@@ -9,7 +9,7 @@ declare -A projectDic=(
     ["projectName"]='out' #-p
     ["flanks"]=0 #-f
     ["referenceGenome"]='' #-r
-    ["OperationalStage"]='vcfTObed'
+    ["OperationalStage"]='START...'
     ["JOB"]='NO_JOB_NOW'
 )
 
@@ -89,13 +89,16 @@ starter(){ #grabs the arguments
         if [[ ${projectDic["referenceGenome"]} == "" ]]; then
             referenceAssignment
         fi
-        mkdir "${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
-        projectDic["outputLoc"]="${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
         # mkdir "${projectDic["outputLoc"]}"FASTA_SPLIT
-        mkdir "${projectDic[outputLoc]}"COUNTS_TABLES
-        mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS
         # mkdir "${projectDic["outputLoc"]}"BED_SPLIT
         # echo -e "${projectDic["outputLoc"]}" ###
+        if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
+            mkdir "${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
+            projectDic["outputLoc"]="${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
+            mkdir "${projectDic[outputLoc]}"SPLITVCF
+            mkdir "${projectDic[outputLoc]}"FASTA_SPLIT
+            mkdir "${projectDic[outputLoc]}"BED_SPLIT
+        fi
     else
         local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
         helpPrintOut+=$'\n\t./SNPcontext -i <input> -o <output> -r <reference genome> -w <expansion size> -f <alignment window flank]> -p <project name>\n'
@@ -108,17 +111,17 @@ starter(){ #grabs the arguments
     fi
 }
 
-fastaSpliter(){
-    for y in ${dirL[@]}; do
-        cp "${projectDic[outputLoc]}""${projectDic["projectName"]}"_"${projectDic[filename]}".fasta "${projectDic["outputLoc"]}"FASTA_SPLIT/"${y}"_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta
-    done
+fileLayout(){
+
+        mkdir "${projectDic[outputLoc]}""${dir}"_COUNTS_TABLES
+        mkdir "${projectDic[outputLoc]}""${dir}"_COUNTS_TABLES/LOGS
 }
 
 referenceAssignment(){
     if [[ ${var,,} == "barley" ]] || [[ ${var,,} == "b" ]]; then ##forced lowercase with ,,
         projectDic["referenceGenome"]+='/home/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
     elif [[ ${var,,} == "soy bean" ]] || [[ ${var,,} == "s" ]] || [[ ${var,,} == "soy" ]]; then
-        projectDic["referenceGenome"]+="soy/temp/path/to/reference/"
+        projectDic["referenceGenome"]+="panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Soybean/PhytozomeV11/Gmax/assembly/Gmax_275_v2.0.fa"
     else
         echo -e "\nPlease enter a valid reference genome. Defaulting to Barley reference.\n"
         projectDic["referenceGenome"]+='/home/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
@@ -135,8 +138,8 @@ moduleLoader(){ #load modules need for operations
 }
 
 fileConverter(){
-    if [ "${projectDic[OperationalStage]}" == "vcfTObed" ]; then
-        vcf2bed < "${projectDic["inputFile"]}" > "${projectDic["outputLoc"]}"/"${projectDic["projectName"]}"_"${projectDic["filename"]}".bed ##sort later
+    if [ "${OperationalStage}" == "vcfTObed" ]; then ##Key and new input LOCATION
+        vcf2bed < "${dirInput}" > "${projectDic["outputLoc"]}"/BED_SPLIT/"${geneDir}"_split_"${projectDic["filename"]}".bed ##sort later
         projectDic["OperationalStage"]="bedTOfasta"
     # elif [ "${projectDic[OperationalStage]}" == "...." ]; then ##OLD CODE, MOST LIKELY WILL REMOVE
     #     local declare -A aln_out
@@ -183,25 +186,27 @@ fileConverter(){
     #     mv "${projectDic[outputLoc]}"COUNTS_TABLES/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS
     #     all_counts -c ${projectDic[outputLoc]}COUNTS_TABLES/"*.txt*" -o "${projectDic[outputLoc]}"
     #     projectDic["OperationalStage"]="DONE..." 
-    elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
-        bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic[outputLoc]}""${projectDic["projectName"]}"_"${projectDic["filename"]}"_new_interval.bed -fo "${projectDic[outputLoc]}""${projectDic["projectName"]}"_"${projectDic[filename]}".fasta    
-        projectDic["OperationalStage"]="alnToCounts"
-        if [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
-            fastaLoc="${projectDic[outputLoc]}""${projectDic["projectName"]}"_"${projectDic[filename]}".fasta
+    elif [ "${OperationalStage}" == "bedTOfasta" ]; then
+        bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic[outputLoc]}""${geneDir}"_"${projectDic["filename"]}"_new_interval.bed -fo "${projectDic[outputLoc]}"FASTA_SPLIT/"${geneDir}"_"${projectDic[filename]}".fasta
+        OperationalStage="alnToCounts"
+        if [ "${OperationalStage}" == "alnToCounts" ]; then
+            fastaLoc="${projectDic[outputLoc]}"FASTA_SPLIT/"${geneDir}"_"${projectDic[filename]}".fasta
             wcFile="${projectDic["projectName"]}"_"${projectDic[filename]}".txt
+            mkdir "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES
+            mkdir "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/LOGS
                 for gDir in ${dirL[@]}; do
-                    aln_to_counts --align_path "${fastaLoc}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES --flank_size "${projectDic[flanks]}" --direction "${gDir}" -F
-                    # mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${wcFile}" "${projectDic[outputLoc]}"COUNTS_TABLES/"${gDir}"_"${wcFile}"
+                    aln_to_counts --align_path "${fastaLoc}" --output_path "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES --flank_size "${projectDic[flanks]}" --direction "${gDir}" -F
+                    mv "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/"${wcFile}" "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/"${gDir}"_"${wcFile}"
                 done
-            mv "${projectDic[outputLoc]}"COUNTS_TABLES/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS
-            all_counts -c ${projectDic[outputLoc]}COUNTS_TABLES/"*.txt*" -o "${projectDic[outputLoc]}"
+            mv "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/*.log* "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/LOGS
+            all_counts -c "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/"*.txt*" -o "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/
             projectDic["OperationalStage"]="DONE..."
         fi
     fi
 }
 
 pythonBEDScanner(){
-    inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" python3.6 - <<END_OF_PYTHON
+    inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" geneDir="$geneDir" python3.6 - <<END_OF_PYTHON
     
 import os
 from itertools import chain
@@ -214,7 +219,7 @@ def bedMapper(interval, outputLoc, projectName, filename):
     sub=[] ##FOR BEDMAPPER
     temp=[] ##FOR MASTERLIST
     final=''
-    with open(outputLoc + "/" + projectName + "_" + filename + ".bed", "rb") as bed_test: ##Change to input variables
+    with open(outputLoc + "BED_SPLIT/" + geneDir + "_split_" + filename + ".bed", "rb") as bed_test: ##Change to input variables
         bedmap=bed_test.read()
         for asii in bedmap:
             element = chr(asii)
@@ -312,13 +317,13 @@ def binaryIntersect(expandedList, interval, outputLoc, projectName, filename):
         print("\nNO overlaps dectected. Results saved to 'WindowOverlap.txt' in your output directory.\n")
     else:
         print("\nTYPE ONE AND/OR TYPE TWO OVERLAPS DETECTED. Check 'WindowOverlap.txt' in your output directory for saved results.\n")
-    with open(outputLoc + "/" + projectName + "_" + "WindowOverlap.txt", 'a+') as window:
+    with open(outputLoc + projectName + "_" + "WindowOverlap.txt", 'a+') as window:
         window.write(results)
 
 # def fileSaverTwo(bedMapp, outputLoc, filename, projectName, dirC):
 #     if(dirC == None):
 #         output="".join(chain.from_iterable(bedMapp))
-#         with open(outputLoc + "/" + projectName + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
+#         with open(outputLoc + "/" + geneDir + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
 #             newBed.write(output)
 #     else:
 #         output="".join(chain.from_iterable(bedMapp)) ##
@@ -338,7 +343,7 @@ def binaryIntersect(expandedList, interval, outputLoc, projectName, filename):
 
 def fileSaver(bedMapp, outputLoc, filename, projectName):
         output="".join(chain.from_iterable(bedMapp))
-        with open(outputLoc + "/" + projectName + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
+        with open(outputLoc + "/" + geneDir + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
             newBed.write(output)
         # os.rename(outputLoc + "/" + projectName + "_" + filename + ".bed", outputLoc + "/" + projectName + "_" + filename + "_new_interval.bed")
         
@@ -348,6 +353,7 @@ def bashInputs():
     windowLength=int(os.environ['windowLength'])
     inputFile=str(os.environ['inputFile'])
     projectName=str(os.environ['projectName'])
+    geneDir=str(os.environ['geneDir'])
     return(outputLoc, filename, windowLength, inputFile, projectName)
 
 def main():
@@ -408,23 +414,109 @@ exit 0
 
 }
 
-mainOne(){
-    vcfgate=1
+vcfSplit(){
+
+inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" python3.6 - <<VCF_SPLIT_END
+
+from itertools import chain
+
+def vcfSegments(geneDir):
+    geneDir={
+
+        'AtoC':[],
+        'AtoG':[],
+        'AtoT':[],
+        'CtoA':[],
+        'CtoG':[],
+        'CtoT':[],
+        'GtoA':[],
+        'GtoC':[],
+        'GtoT':[],
+        'TtoA':[],
+        'TtoC':[],
+        'TtoG':[],
+
+    }
+    with open(inputFile, "rb") as raw:
+        commentGate=False
+        test=raw.read()
+        sub=[]
+        header=''
+        results=''
+        for ele in test:
+            element=chr(ele)
+            if(element == "#"):
+                commentGate=True
+            if((commentGate == False)):
+                if((element != '\t') and (element != '\n')):
+                    results = results + element
+                elif((element == '\t') and (element != '\n')):
+                    sub.append(results)
+                    results=''
+                    sub.append(element)
+                if(element == "\n"):
+                    results = results + element
+                    sub.append(results)
+                    gene= str(sub[6]) + "to" + str(sub[8])
+                    geneDir[gene]+=sub
+                    results=''
+                    sub=[]
+            else:
+                header+=element
+                if(element == "\n"):commentGate=False
+    return(header, geneDir)
+
+def vcfSpliter(header, geneDir):
+    for key in geneDir:
+        output=''
+        if(geneDir[key] != []):
+            with open(outputLoc + SPLITVCF + "/" + key + "_split_" + filename + ".vcf","w") as vcfOut:
+                output+=header
+                output+="".join(geneDir[key])
+                vcfOut.write(output)
+
+def bashImport():
+    outputLoc=str(os.environ['outputLoc'])
+    inputFile=str(os.environ['inputFile'])
+    filename=str(os.environ['filename'])
+    projectName=str(os.environ['projectName'])
+    return(projectName, inputFile, outputLoc, filename)
+
+def main():
+    projectName, inputFile, outputLoc, filename=bashImport()
+    header, geneDir=vcfSegments()
+    vcfSpliter(header, geneDir, )
+
+VCF_SPLIT_END
+
+}
+
+mainTop(){
     moduleLoader ##LOADS CORRECT MODULES
-    starter "$@" ##ASSIGNS INPUTS TO HASHMAP
-    # if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
-    #     inputSize=$( stat -c%s "${projectDic["inputFile"]}")
-    #     if (( "${inputSize}" >= 110000000 )); then
-    #         echo -e "\n(.VCF) over 100Mb, generating job script and submitting operations to MSI."
-    #         jobCreator
-    #     fi
-    # fi
-    fileConverter ##MAKES BED FILE
-    pythonBEDScanner ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
-    fileConverter ##CREATES FASTA FILE
+    fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##MAKES BED FILE 
+    pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
+    fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##CREATES FASTA FILE
     # fastaSpliter ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
     # fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
     ##DONE...
 }
 
-mainOne "$@"
+mainBottom(){
+    starter "$@" ##ASSIGNS INPUTS TO HASHMAP
+    if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
+        inputSize=$( stat -c%s "${projectDic["inputFile"]}")
+        if (( "${inputSize}" >= 110000000 )); then
+            echo -e "\n(.VCF) over 100Mb, generating job script and submitting operations to MSI."
+            jobCreator
+        fi
+    fi
+    fileLayout
+    vcfSplit
+    for geneDir in "${dirL}"; do
+        local OperationalStage="vcfTObed"
+        local dirInput="${projectDic[outputLoc]}"SPLITVCF/"${geneDir}"_split_"${projectDic[filename]}".vcf
+        local subFileName="${geneDir}"_split_"${projectDic[filename]}"
+        mainTop "$subFileName" "$geneDir" "$dirInput" "$OperationalStage"
+}
+
+mainBottom "$@"
