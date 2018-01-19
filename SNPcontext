@@ -357,7 +357,7 @@ def bashInputs():
     return(outputLoc, filename, windowLength, inputFile, projectName)
 
 def main():
-    outputLoc, filename, interval, inputFile, projectName=bashInputs()
+    outputLoc, filename, interval, inputFile, projectName, geneDir=bashInputs()
     bedmap, masterList=bedMapper(interval, outputLoc, projectName, filename)
     binaryIntersect(masterList, interval, outputLoc, projectName, filename)
     fileSaver(bedmap, outputLoc, filename, projectName)
