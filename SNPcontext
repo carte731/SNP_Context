@@ -510,13 +510,13 @@ mainBottom(){
             jobCreator
         fi
     fi
-    fileLayout
     vcfSplit
     for geneDir in "${dirL}"; do
         local OperationalStage="vcfTObed"
         local dirInput="${projectDic[outputLoc]}"SPLITVCF/"${geneDir}"_split_"${projectDic[filename]}".vcf
         local subFileName="${geneDir}"_split_"${projectDic[filename]}"
         mainTop "$subFileName" "$geneDir" "$dirInput" "$OperationalStage"
+
 }
 
 mainBottom "$@"
