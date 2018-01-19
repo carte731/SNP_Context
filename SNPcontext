@@ -516,7 +516,7 @@ mainBottom(){
         local dirInput="${projectDic[outputLoc]}"SPLITVCF/"${geneDir}"_split_"${projectDic[filename]}".vcf
         local subFileName="${geneDir}"_split_"${projectDic[filename]}"
         mainTop "$subFileName" "$geneDir" "$dirInput" "$OperationalStage"
-
+        done
 }
 
 mainBottom "$@"
