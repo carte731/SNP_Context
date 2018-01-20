@@ -417,7 +417,7 @@ exit 0
 vcfSplit(){
     inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" python3.6 - <<VCF_SPLIT_END
 
-from itertools import chain
+import os
 
 def vcfSegments():
     geneDir={
