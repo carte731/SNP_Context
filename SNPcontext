@@ -507,25 +507,25 @@ VCF_SPLIT_END
 main(){
     moduleLoader ##LOADS CORRECT MODULES    
     starter "$@" ##ASSIGNS INPUTS TO HASHMAP
-    if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
-        inputSize=$( stat -c%s "${projectDic["inputFile"]}")
-        if (( "${inputSize}" >= 110000000 )); then
-            echo -e "\n(.VCF) over 100Mb, generating job script and submitting operations to MSI."
-            jobCreator
-        fi
-    fi
+    # if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
+    #     inputSize=$( stat -c%s "${projectDic["inputFile"]}")
+    #     if (( "${inputSize}" >= 110000000 )); then
+    #         echo -e "\n(.VCF) over 100Mb, generating job script and submitting operations to MSI."
+    #         jobCreator
+    #     fi
+    # fi
     vcfSplit
-    # for geneDir in "${dirL}"; do
-    #     local OperationalStage="vcfTObed"
-    #     local dirInput="${projectDic[outputLoc]}"SPLITVCF/"${geneDir}"_split_"${projectDic[filename]}".vcf
-    #     local subFileName="${geneDir}"_split_"${projectDic[filename]}"
-    #     fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##MAKES BED FILE 
-    #     pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
-    #     fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##CREATES FASTA FILE
-    #     # fastaSpliter ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
-    #     # fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
-    #     ##DONE...
-    #     done
+    for geneDir in "${dirL}"; do
+        local OperationalStage="vcfTObed"
+        local dirInput="${projectDic[outputLoc]}"SPLITVCF/"${geneDir}"_split_"${projectDic[filename]}".vcf
+        local subFileName="${geneDir}"_split_"${projectDic[filename]}"
+        fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##MAKES BED FILE 
+        pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
+        fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##CREATES FASTA FILE
+        # fastaSpliter ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
+        # fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
+        ##DONE...
+        done
 }
 
 main "$@"
