@@ -483,13 +483,13 @@ def vcfSpliter(header, geneDir, outputLoc, filename):
     for key in geneDir:
         output=''
         if(geneDir[key] != []):
-            if(geneDir[key] != "rejected"):
+            if(key != "rejected"):
                 with open(outputLoc + "SPLITVCF/" + key + "_split_" + filename + ".vcf","w") as vcfOut:
                     output+=header
                     output+="".join(geneDir[key])
                     vcfOut.write(output)
             else:
-                with open(outputLoc + "SPLITVCF/REJECTED_" + filename + ".vcf","w") as vcfOut:
+                with open(outputLoc + "REJECTEDVCFs_" + filename + ".vcf","w") as vcfOut:
                     output+=header
                     output+="".join(geneDir[key])
                     vcfOut.write(output)
