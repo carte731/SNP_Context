@@ -477,7 +477,7 @@ def vcfSpliter(header, geneDir, outputLoc):
     for key in geneDir:
         output=''
         if(geneDir[key] != []):
-            with open(outputLoc + SPLITVCF + "/" + key + "_split_" + filename + ".vcf","w") as vcfOut:
+            with open(outputLoc + "SPLITVCF/" + key + "_split_" + filename + ".vcf","w") as vcfOut:
                 output+=header
                 output+="".join(geneDir[key])
                 vcfOut.write(output)
