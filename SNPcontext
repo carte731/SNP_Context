@@ -217,7 +217,7 @@ fileConverter(){
                 aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}" --flank_size "${projectDic[flanks]}" --direction "${loopGene}" -F
                 mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${Countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"_"${loopGene}""${Countfile}".txt
             done
-            mv "${projectDic[outputLoc]}""${geneDirection}"_COUNTS_TABLES/*.log* "${projectDic[outputLoc]}""${geneDirection}"_COUNTS_TABLES/LOGS            
+            mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS            
         done
         projectDic["OperationalStage"]="allCounts."
     elif [ "${projectDic[OperationalStage]}" == "allCounts" ]; then
