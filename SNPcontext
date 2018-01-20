@@ -415,8 +415,7 @@ exit 0
 }
 
 vcfSplit(){
-
-inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" python3.6 - <<VCF_SPLIT_END
+    inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" python3.6 - <<VCF_SPLIT_END
 
 from itertools import chain
 
@@ -491,17 +490,12 @@ VCF_SPLIT_END
 
 }
 
-mainTop(){
-    moduleLoader ##LOADS CORRECT MODULES
-    fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##MAKES BED FILE 
-    pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
-    fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##CREATES FASTA FILE
-    # fastaSpliter ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
-    # fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
-    ##DONE...
-}
+# mainTop(){
 
-mainBottom(){
+# }
+
+main(){
+    moduleLoader ##LOADS CORRECT MODULES    
     starter "$@" ##ASSIGNS INPUTS TO HASHMAP
     if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
         inputSize=$( stat -c%s "${projectDic["inputFile"]}")
@@ -515,8 +509,13 @@ mainBottom(){
         local OperationalStage="vcfTObed"
         local dirInput="${projectDic[outputLoc]}"SPLITVCF/"${geneDir}"_split_"${projectDic[filename]}".vcf
         local subFileName="${geneDir}"_split_"${projectDic[filename]}"
-        mainTop "$subFileName" "$geneDir" "$dirInput" "$OperationalStage"
+        fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##MAKES BED FILE 
+        pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
+        fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##CREATES FASTA FILE
+        # fastaSpliter ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
+        # fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
+        ##DONE...
         done
 }
 
-mainBottom "$@"
+main "$@"
