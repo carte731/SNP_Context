@@ -535,7 +535,7 @@ main(){
     local splitDir=("${temp}"*_split_"${projectDic[filename]}".bed*)
     for gene in "${splitDir[@]}"; do
         local geneDir="${gene%.*}"
-        geneDir="${targetVCF##*/}"
+        geneDir="${geneDir##*/}"
         geneDir=${geneDir:0:4} ##BASH IS BASE 1
         echo -e "${geneDir}"
         # pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
