@@ -195,7 +195,7 @@ fileConverter(){
     elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
         local temp="${projectDic[outputLoc]}"BED_SPLIT/
         local splitDir=("${temp}"*"${projectDic[filename]}"_new_interval.bed*)
-        echo -e $splitDir
+        echo -e ${splitDir[@]}
         for gene in "${splitDir[@]}"; do
             local targetBED="${gene%.*}"
             targetBED="${targetBED##*/}"
