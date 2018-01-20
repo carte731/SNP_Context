@@ -1,7 +1,7 @@
 #!/bin/bash
 
 declare -A projectDic=(
-    ["windowLength"]=4 #-w
+    ["windowLength"]=2 #-w
     ["inputFile"]='' #-i
     ["inputLoc"]=''
     ["outputLoc"]='' #-o
@@ -193,22 +193,29 @@ fileConverter(){
     #     all_counts -c ${projectDic[outputLoc]}COUNTS_TABLES/"*.txt*" -o "${projectDic[outputLoc]}"
     #     projectDic["OperationalStage"]="DONE..." 
     elif [ "${OperationalStage}" == "bedTOfasta" ]; then
-        bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic[outputLoc]}"BED_SPLIT/"${geneDir}"_"${projectDic["filename"]}"_new_interval.bed -fo "${projectDic[outputLoc]}"FASTA_SPLIT/"${geneDir}"_"${projectDic[filename]}".fasta
+        local temp="${projectDic[outputLoc]}"BED_SPLIT/
+        local splitDir=("${temp}"*"${projectDic[filename]}"_new_interval.bed*)
+        for gene in "${splitDir[@]}"; do
+            local targetBED="${gene%.*}"
+            targetBED="${targetBED##*/}"
+            targetBED=${targetBED:0:4}
+            bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic[outputLoc]}"BED_SPLIT/"${geneDir}"_"${projectDic["filename"]}"_new_interval.bed -fo "${projectDic[outputLoc]}"FASTA_SPLIT/"${geneDir}"_"${projectDic[filename]}".fasta
+        done
         OperationalStage="alnToCounts"
-        if [ "${OperationalStage}" == "alnToCounts" ]; then
-            fastaLoc="${projectDic[outputLoc]}"FASTA_SPLIT/"${geneDir}"_"${projectDic[filename]}".fasta
-            wcFile="${geneDir}"_"${projectDic[filename]}".txt
-            mkdir "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES
-            mkdir "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/LOGS
-                for gDir in ${dirL[@]}; do
-                    aln_to_counts --align_path "${fastaLoc}" --output_path "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES --flank_size "${projectDic[flanks]}" --direction "${gDir}" -F
-                    mv "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/"${wcFile}" "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/"${gDir}"_"${wcFile}"
-                done
-            mv "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/*.log* "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/LOGS
-            all_counts -c "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/"*.txt*" -o "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/
-            projectDic["OperationalStage"]="DONE..."
-        fi
+    elif [ "${OperationalStage}" == "alnToCounts" ]; then
+        fastaLoc="${projectDic[outputLoc]}"FASTA_SPLIT/"${geneDir}"_"${projectDic[filename]}".fasta
+        wcFile="${geneDir}"_"${projectDic[filename]}".txt
+        mkdir "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES
+        mkdir "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/LOGS
+            for gDir in ${dirL[@]}; do
+                aln_to_counts --align_path "${fastaLoc}" --output_path "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES --flank_size "${projectDic[flanks]}" --direction "${gDir}" -F
+                mv "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/"${wcFile}" "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/"${gDir}"_"${wcFile}"
+            done
+        mv "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/*.log* "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/LOGS
+        all_counts -c "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/"*.txt*" -o "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/
+        projectDic["OperationalStage"]="DONE..."
     fi
+
 }
 
 pythonBEDScanner(){
@@ -295,7 +302,7 @@ def binaryIntersect(expandedList, interval, outputLoc, projectName, filename):
                         resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subTA) + "-" + str(subTB) + ". on the right, between " + str(b) + " and " + str(subTA) + '.'
                     elif(binary == [0,1,1,1]):
                         resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subTA) + "-" + str(subTB) + ". on the left, between " + str(a) + " and " + str(subTB) + '.' 
-            if(interval > 4):
+            if(interval > 2):
                 if((binaryMB != [1,1,0,0]) and (binaryMB != [0,0,1,1])):
                     gateB=False
                     if(binaryMB == [0,1,1,0]):
@@ -326,32 +333,10 @@ def binaryIntersect(expandedList, interval, outputLoc, projectName, filename):
     with open(outputLoc + projectName + "_" + "WindowOverlap.txt", 'a+') as window:
         window.write(results)
 
-# def fileSaverTwo(bedMapp, outputLoc, filename, projectName, dirC):
-#     if(dirC == None):
-#         output="".join(chain.from_iterable(bedMapp))
-#         with open(outputLoc + "/" + geneDir + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
-#             newBed.write(output)
-#     else:
-#         output="".join(chain.from_iterable(bedMapp)) ##
-#         with open(outputLoc + "/BED_SPLIT/" + dirC + "_" + "split" + "_" + projectName + "_" + filename + ".bed", "w") as splitBed: ##Change to input variables
-#             splitBed.write(output)
-
-# def bedSpliter(bedMapp, outputLoc, filename, projectName):
-#     directions=["AtoC","AtoG","AtoT","CtoA","CtoG","CtoT","GtoA","GtoC","GtoT","TtoA","TtoC","TtoG"]
-#     for j in directions:
-#         masterList=[]
-#         for i in range(len(bedMapp)):
-#             dirC=bedMapp[i][10] + "to" + bedMapp[i][12]
-#             if(dirC == j):
-#                 masterList.append(bedMapp[i])
-#         if(len(masterList) > 0):
-#             fileSaver(masterList, outputLoc, filename, projectName, j)  
-
 def fileSaver(bedMapp, outputLoc, filename, projectName, geneDir):
         output="".join(chain.from_iterable(bedMapp))
         with open(outputLoc + "BED_SPLIT/" + geneDir + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
             newBed.write(output)
-        # os.rename(outputLoc + "/" + projectName + "_" + filename + ".bed", outputLoc + "/" + projectName + "_" + filename + "_new_interval.bed")
         
 def bashInputs():
     outputLoc=str(os.environ['outputLoc'])
@@ -512,9 +497,11 @@ VCF_SPLIT_END
 
 }
 
-# mainTop(){
+fastaScanner(){
+    
 
-# }
+
+}
 
 main(){
     moduleLoader ##LOADS CORRECT MODULES    
@@ -527,9 +514,6 @@ main(){
     #     fi
     # fi
     vcfSplit
-    # for geneDir in "${dirL}"; do
-    # local dirInput="${projectDic[outputLoc]}"SPLITVCF/"${geneDir}"_split_"${projectDic[filename]}".vcf
-    # local subFileName="${geneDir}"_split_"${projectDic[filename]}"
     fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##MAKES BED FILE
     local temp="${projectDic[outputLoc]}"BED_SPLIT/
     local splitDir=("${temp}"*_split_"${projectDic[filename]}".bed*)
@@ -537,10 +521,9 @@ main(){
         local geneDir="${gene%.*}"
         geneDir="${geneDir##*/}"
         geneDir=${geneDir:0:4} ##BASH IS BASE 1
-        echo -e "${geneDir}"
         pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
     done
-    # fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##CREATES FASTA FILE
+    fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##CREATES FASTA FILE
         # fastaSpliter ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
         # fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
         ##DONE...
