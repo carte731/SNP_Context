@@ -538,7 +538,7 @@ main(){
         geneDir="${geneDir##*/}"
         geneDir=${geneDir:0:4} ##BASH IS BASE 1
         echo -e "${geneDir}"
-        # pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
+        pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
     done
     # fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##CREATES FASTA FILE
         # fastaSpliter ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
