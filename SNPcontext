@@ -434,7 +434,7 @@ def vcfSegments(inputFile):
         'TtoA':[],
         'TtoC':[],
         'TtoG':[],
-        'rejected':[]
+        'rejected':[],
 
     }
     
