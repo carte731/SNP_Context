@@ -434,8 +434,10 @@ def vcfSegments(inputFile):
         'TtoA':[],
         'TtoC':[],
         'TtoG':[],
+        'rejected':[]
 
     }
+    
     with open(inputFile, "rb") as raw:
         commentGate=False
         test=raw.read()
@@ -457,15 +459,21 @@ def vcfSegments(inputFile):
                     results = results + element
                     sub.append(results)
                     gene= str(sub[6]) + "to" + str(sub[8])
-                    geneDir[gene]+=sub
-                    results=''
-                    sub=[]
+                    if gene in geneDir:
+                        geneDir[gene]+=sub
+                        results=''
+                        sub=[]
+                    else:
+                        geneDir[rejected]+=sub
+                        results=''
+                        sub=[]
             else:
                 header+=element
-                if(element == "\n"):commentGate=False
-    return(header, geneDir)
+                if(element == "\n"):
+                    commentGate=False
+    return(header, geneDir, rejected)
 
-def vcfSpliter(header, geneDir):
+def vcfSpliter(header, geneDir, rejected):
     for key in geneDir:
         output=''
         if(geneDir[key] != []):
@@ -483,8 +491,8 @@ def bashImport():
 
 def main():
     projectName, inputFile, outputLoc, filename=bashImport()
-    header, geneDir=vcfSegments(inputFile)
-    vcfSpliter(header, geneDir)
+    header, geneDir, rejected=vcfSegments(inputFile)
+    vcfSpliter(header, geneDir, rejected)
 
 main()
 
