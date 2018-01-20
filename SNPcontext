@@ -489,7 +489,7 @@ def vcfSpliter(header, geneDir, outputLoc, filename):
                     output+="".join(geneDir[key])
                     vcfOut.write(output)
             else:
-                    with open(outputLoc + "SPLITVCF/REJECTED_" + filename + ".vcf","w") as vcfOut:
+                with open(outputLoc + "SPLITVCF/REJECTED_" + filename + ".vcf","w") as vcfOut:
                     output+=header
                     output+="".join(geneDir[key])
                     vcfOut.write(output)
