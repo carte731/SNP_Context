@@ -536,6 +536,7 @@ main(){
     for gene in "${splitDir[@]}"; do
         local geneDir="${gene%.*}"
         geneDir="${targetVCF##*/}"
+        geneDir=${geneDir:0:4} ##BASH IS BASE 1
         pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
     done
     # fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##CREATES FASTA FILE
