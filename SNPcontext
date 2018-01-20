@@ -213,7 +213,7 @@ from itertools import chain
 # import itertools
 import datetime
 
-def bedMapper(interval, outputLoc, projectName, filename):
+def bedMapper(interval, outputLoc, projectName, filename, geneDir):
     bedMapper=[]
     masterList=[]
     sub=[] ##FOR BEDMAPPER
@@ -341,7 +341,7 @@ def binaryIntersect(expandedList, interval, outputLoc, projectName, filename):
 #         if(len(masterList) > 0):
 #             fileSaver(masterList, outputLoc, filename, projectName, j)  
 
-def fileSaver(bedMapp, outputLoc, filename, projectName):
+def fileSaver(bedMapp, outputLoc, filename, projectName, geneDir):
         output="".join(chain.from_iterable(bedMapp))
         with open(outputLoc + "/" + geneDir + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
             newBed.write(output)
@@ -354,13 +354,13 @@ def bashInputs():
     inputFile=str(os.environ['inputFile'])
     projectName=str(os.environ['projectName'])
     geneDir=str(os.environ['geneDir'])
-    return(outputLoc, filename, windowLength, inputFile, projectName)
+    return(outputLoc, filename, windowLength, inputFile, projectName, geneDir)
 
 def main():
     outputLoc, filename, interval, inputFile, projectName, geneDir=bashInputs()
-    bedmap, masterList=bedMapper(interval, outputLoc, projectName, filename)
+    bedmap, masterList=bedMapper(interval, outputLoc, projectName, filename, geneDir)
     binaryIntersect(masterList, interval, outputLoc, projectName, filename)
-    fileSaver(bedmap, outputLoc, filename, projectName)
+    fileSaver(bedmap, outputLoc, filename, projectName, geneDir)
 main()
 
 END_OF_PYTHON
@@ -419,7 +419,7 @@ vcfSplit(){
 
 from itertools import chain
 
-def vcfSegments(geneDir):
+def vcfSegments():
     geneDir={
 
         'AtoC':[],
@@ -484,7 +484,7 @@ def bashImport():
 def main():
     projectName, inputFile, outputLoc, filename=bashImport()
     header, geneDir=vcfSegments()
-    vcfSpliter(header, geneDir, )
+    vcfSpliter(header, geneDir)
 
 VCF_SPLIT_END
 
