@@ -486,6 +486,8 @@ def main():
     header, geneDir=vcfSegments()
     vcfSpliter(header, geneDir)
 
+main()
+
 VCF_SPLIT_END
 
 }
