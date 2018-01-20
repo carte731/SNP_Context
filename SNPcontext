@@ -538,6 +538,7 @@ main(){
     fileConverter ##CREATES FASTA FILE
         # fastaScanner ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
     fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
+    fileConverter ##ALL_COUNTS
     ##DONE...
         
 }
