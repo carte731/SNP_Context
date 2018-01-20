@@ -9,7 +9,7 @@ declare -A projectDic=(
     ["projectName"]='out' #-p
     ["flanks"]=0 #-f
     ["referenceGenome"]='' #-r
-    ["OperationalStage"]='START...'
+    ["OperationalStage"]='vcfTObed'
     ["JOB"]='NO_JOB_NOW'
 )
 
@@ -528,7 +528,6 @@ main(){
     # fi
     vcfSplit
     # for geneDir in "${dirL}"; do
-    "${projectDic[OperationalStage]}"="vcfTObed"
     # local dirInput="${projectDic[outputLoc]}"SPLITVCF/"${geneDir}"_split_"${projectDic[filename]}".vcf
     # local subFileName="${geneDir}"_split_"${projectDic[filename]}"
     fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##MAKES BED FILE 
