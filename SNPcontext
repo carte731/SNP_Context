@@ -98,6 +98,8 @@ starter(){ #grabs the arguments
             mkdir "${projectDic[outputLoc]}"SPLITVCF
             mkdir "${projectDic[outputLoc]}"FASTA_SPLIT
             mkdir "${projectDic[outputLoc]}"BED_SPLIT
+            mkdir "${projectDic[outputLoc]}"COUNTS_TABLES
+            
         fi
     else
         local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
@@ -203,15 +205,22 @@ fileConverter(){
         done
         projectDic[OperationalStage]="alnToCounts"
     elif [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
-        fastaLoc="${projectDic[outputLoc]}"FASTA_SPLIT/"${geneDir}"_"${projectDic[filename]}".fasta
-        wcFile="${geneDir}"_"${projectDic[filename]}".txt
-        mkdir "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES
-        mkdir "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/LOGS
-            for gDir in ${dirL[@]}; do
-                aln_to_counts --align_path "${fastaLoc}" --output_path "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES --flank_size "${projectDic[flanks]}" --direction "${gDir}" -F
-                mv "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/"${wcFile}" "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/"${gDir}"_"${wcFile}"
+        local temp="${projectDic[outputLoc]}"FASTA_SPLIT/
+        local splitDir=("${temp}"*"${targetBED}"_"${projectDic[filename]}".fasta*)
+        for gene in "${splitDir[@]}"; do
+            local Countfile="${gene%.*}"
+            Countfile="${Countfile##*/}"
+            geneDirection=${Countfile:0:4}
+            mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"
+            mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS
+            for loopGene in "${dirL}", do
+                aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}" --flank_size "${projectDic[flanks]}" --direction "${loopGene}" -F
+                mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${Countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"_"${loopGene}""${Countfile}".txt
             done
-        mv "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/*.log* "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/LOGS
+            mv "${projectDic[outputLoc]}""${geneDirection}"_COUNTS_TABLES/*.log* "${projectDic[outputLoc]}""${geneDirection}"_COUNTS_TABLES/LOGS            
+        done
+        projectDic["OperationalStage"]="allCounts."
+    elif [ "${projectDic[OperationalStage]}" == "allCounts" ]; then
         all_counts -c "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/"*.txt*" -o "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/
         projectDic["OperationalStage"]="DONE..."
     fi
@@ -524,9 +533,9 @@ main(){
         pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
     done
     fileConverter ##CREATES FASTA FILE
-        # fastaSpliter ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
-        # fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
-        ##DONE...
+        # fastaScanner ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
+    fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
+    ##DONE...
         
 }
 
