@@ -464,7 +464,7 @@ def vcfSegments(inputFile):
                         results=''
                         sub=[]
                     else:
-                        geneDir[rejected]+=sub
+                        geneDir['rejected']+=sub
                         results=''
                         sub=[]
             else:
