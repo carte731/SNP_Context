@@ -35,8 +35,8 @@ starter(){ #grabs the arguments
                 if [[ "${var##*.}" == "vcf" ]] && [ -f "$var" ]; then ##Checks if it's VCF and if file exist
                     projectDic["inputFile"]+="$var"
                     projectDic["inputLoc"]+="${var%/*}"
-                    local filename=${var%.*}
-                    filename=${filename##*/}
+                    local filename=${var%.*} ##removes files extension
+                    filename=${filename##*/} ##removes file path
                     projectDic["filename"]+="$filename"
                     frontgate=1
                 else
@@ -138,9 +138,15 @@ moduleLoader(){ #load modules need for operations
 }
 
 fileConverter(){
-    if [ "${OperationalStage}" == "vcfTObed" ]; then ##Key and new input LOCATION
-        vcf2bed < "${dirInput}" > "${projectDic["outputLoc"]}"BED_SPLIT/"${geneDir}"_split_"${projectDic["filename"]}".bed ##sort later
-        OperationalStage="bedTOfasta"
+    if [ "${projectDic[OperationalStage]}" == "vcfTObed" ]; then ##Key and new input LOCATION
+        local temp="${projectDic[outputLoc]}"SPLITVCF/
+        local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
+        for gene in "${splitDir}"; do
+            local targetVCF="${gene%.*}"
+            targetVCF="${targetVCF##*/}"
+            vcf2bed < "${gene}" > "${projectDic["outputLoc"]}"BED_SPLIT/"${targetVCF}".bed ##sort later
+        done
+        projectDic[OperationalStage]="bedTOfasta"
     # elif [ "${projectDic[OperationalStage]}" == "...." ]; then ##OLD CODE, MOST LIKELY WILL REMOVE
     #     local declare -A aln_out
     #     local declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
@@ -477,10 +483,16 @@ def vcfSpliter(header, geneDir, outputLoc, filename):
     for key in geneDir:
         output=''
         if(geneDir[key] != []):
-            with open(outputLoc + "SPLITVCF/" + key + "_split_" + filename + ".vcf","w") as vcfOut:
-                output+=header
-                output+="".join(geneDir[key])
-                vcfOut.write(output)
+            if(geneDir[key] != "rejected"):
+                with open(outputLoc + "SPLITVCF/" + key + "_split_" + filename + ".vcf","w") as vcfOut:
+                    output+=header
+                    output+="".join(geneDir[key])
+                    vcfOut.write(output)
+            else:
+                    with open(outputLoc + "SPLITVCF/REJECTED_" + filename + ".vcf","w") as vcfOut:
+                    output+=header
+                    output+="".join(geneDir[key])
+                    vcfOut.write(output)
 
 def bashImport():
     outputLoc=str(os.environ['outputLoc'])
@@ -515,17 +527,17 @@ main(){
     #     fi
     # fi
     vcfSplit
-    for geneDir in "${dirL}"; do
-        local OperationalStage="vcfTObed"
-        local dirInput="${projectDic[outputLoc]}"SPLITVCF/"${geneDir}"_split_"${projectDic[filename]}".vcf
-        local subFileName="${geneDir}"_split_"${projectDic[filename]}"
-        fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##MAKES BED FILE 
-        pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
-        fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##CREATES FASTA FILE
+    # for geneDir in "${dirL}"; do
+    "${projectDic[OperationalStage]}"="vcfTObed"
+    # local dirInput="${projectDic[outputLoc]}"SPLITVCF/"${geneDir}"_split_"${projectDic[filename]}".vcf
+    # local subFileName="${geneDir}"_split_"${projectDic[filename]}"
+    fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##MAKES BED FILE 
+    # pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
+    # fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##CREATES FASTA FILE
         # fastaSpliter ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
         # fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
         ##DONE...
-        done
+        
 }
 
 main "$@"
