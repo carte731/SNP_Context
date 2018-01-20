@@ -419,7 +419,7 @@ vcfSplit(){
 
 import os
 
-def vcfSegments():
+def vcfSegments(inputFile):
     geneDir={
 
         'AtoC':[],
@@ -483,7 +483,7 @@ def bashImport():
 
 def main():
     projectName, inputFile, outputLoc, filename=bashImport()
-    header, geneDir=vcfSegments()
+    header, geneDir=vcfSegments(inputFile)
     vcfSpliter(header, geneDir)
 
 main()
