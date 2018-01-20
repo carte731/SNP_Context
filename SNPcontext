@@ -1,7 +1,7 @@
 #!/bin/bash
 
 declare -A projectDic=(
-    ["windowLength"]=0 #-w
+    ["windowLength"]=4 #-w
     ["inputFile"]='' #-i
     ["inputLoc"]=''
     ["outputLoc"]='' #-o
@@ -295,7 +295,7 @@ def binaryIntersect(expandedList, interval, outputLoc, projectName, filename):
                         resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subTA) + "-" + str(subTB) + ". on the right, between " + str(b) + " and " + str(subTA) + '.'
                     elif(binary == [0,1,1,1]):
                         resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subTA) + "-" + str(subTB) + ". on the left, between " + str(a) + " and " + str(subTB) + '.' 
-            if(interval > 0):
+            if(interval > 4):
                 if((binaryMB != [1,1,0,0]) and (binaryMB != [0,0,1,1])):
                     gateB=False
                     if(binaryMB == [0,1,1,0]):
@@ -530,8 +530,13 @@ main(){
     # for geneDir in "${dirL}"; do
     # local dirInput="${projectDic[outputLoc]}"SPLITVCF/"${geneDir}"_split_"${projectDic[filename]}".vcf
     # local subFileName="${geneDir}"_split_"${projectDic[filename]}"
-    fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##MAKES BED FILE 
-    # pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
+    fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##MAKES BED FILE
+    local temp="${projectDic[outputLoc]}"SPLITVCF/
+    local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
+    for gene in "${splitDir[@]}"; do
+        local geneDir="${gene%.*}"
+        geneDir="${targetVCF##*/}"
+        pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
     # fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##CREATES FASTA FILE
         # fastaSpliter ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
         # fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
