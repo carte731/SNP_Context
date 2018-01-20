@@ -505,17 +505,17 @@ main(){
         fi
     fi
     vcfSplit
-    for geneDir in "${dirL}"; do
-        local OperationalStage="vcfTObed"
-        local dirInput="${projectDic[outputLoc]}"SPLITVCF/"${geneDir}"_split_"${projectDic[filename]}".vcf
-        local subFileName="${geneDir}"_split_"${projectDic[filename]}"
-        fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##MAKES BED FILE 
-        pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
-        fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##CREATES FASTA FILE
-        # fastaSpliter ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
-        # fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
-        ##DONE...
-        done
+    # for geneDir in "${dirL}"; do
+    #     local OperationalStage="vcfTObed"
+    #     local dirInput="${projectDic[outputLoc]}"SPLITVCF/"${geneDir}"_split_"${projectDic[filename]}".vcf
+    #     local subFileName="${geneDir}"_split_"${projectDic[filename]}"
+    #     fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##MAKES BED FILE 
+    #     pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
+    #     fileConverter "$subFileName" "$geneDir" "$dirInput" "$OperationalStage" ##CREATES FASTA FILE
+    #     # fastaSpliter ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
+    #     # fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
+    #     ##DONE...
+    #     done
 }
 
 main "$@"
