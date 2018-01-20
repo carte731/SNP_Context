@@ -141,7 +141,7 @@ fileConverter(){
     if [ "${projectDic[OperationalStage]}" == "vcfTObed" ]; then ##Key and new input LOCATION
         local temp="${projectDic[outputLoc]}"SPLITVCF/
         local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
-        for gene in "${splitDir}"; do
+        for gene in "${splitDir[@]}"; do
             local targetVCF="${gene%.*}"
             targetVCF="${targetVCF##*/}"
             vcf2bed < "${gene}" > "${projectDic["outputLoc"]}"BED_SPLIT/"${targetVCF}".bed ##sort later
