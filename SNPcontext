@@ -196,11 +196,10 @@ fileConverter(){
         local temp="${projectDic[outputLoc]}"BED_SPLIT/
         local splitDir=("${temp}"*"${projectDic[filename]}"_new_interval.bed*)
         for gene in "${splitDir[@]}"; do
-            echo -e $gene
             local targetBED="${gene%.*}"
             targetBED="${targetBED##*/}"
             targetBED=${targetBED:0:4}
-            # bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${gene}" -fo "${projectDic[outputLoc]}"FASTA_SPLIT/"${geneDir}"_"${projectDic[filename]}".fasta
+            bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${gene}" -fo "${projectDic[outputLoc]}"FASTA_SPLIT/"${targetBED}"_"${projectDic[filename]}".fasta
         done
         projectDic[OperationalStage]="alnToCounts"
     elif [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
