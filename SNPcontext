@@ -473,7 +473,7 @@ def vcfSegments(inputFile):
                     commentGate=False
     return(header, geneDir)
 
-def vcfSpliter(header, geneDir):
+def vcfSpliter(header, geneDir, outputLoc):
     for key in geneDir:
         output=''
         if(geneDir[key] != []):
@@ -492,7 +492,7 @@ def bashImport():
 def main():
     projectName, inputFile, outputLoc, filename=bashImport()
     header, geneDir=vcfSegments(inputFile)
-    vcfSpliter(header, geneDir)
+    vcfSpliter(header, geneDir, outputLoc)
 
 main()
 
