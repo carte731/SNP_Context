@@ -139,8 +139,8 @@ moduleLoader(){ #load modules need for operations
 
 fileConverter(){
     if [ "${OperationalStage}" == "vcfTObed" ]; then ##Key and new input LOCATION
-        vcf2bed < "${dirInput}" > "${projectDic["outputLoc"]}"/BED_SPLIT/"${geneDir}"_split_"${projectDic["filename"]}".bed ##sort later
-        projectDic["OperationalStage"]="bedTOfasta"
+        vcf2bed < "${dirInput}" > "${projectDic["outputLoc"]}"BED_SPLIT/"${geneDir}"_split_"${projectDic["filename"]}".bed ##sort later
+        OperationalStage="bedTOfasta"
     # elif [ "${projectDic[OperationalStage]}" == "...." ]; then ##OLD CODE, MOST LIKELY WILL REMOVE
     #     local declare -A aln_out
     #     local declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
@@ -187,11 +187,11 @@ fileConverter(){
     #     all_counts -c ${projectDic[outputLoc]}COUNTS_TABLES/"*.txt*" -o "${projectDic[outputLoc]}"
     #     projectDic["OperationalStage"]="DONE..." 
     elif [ "${OperationalStage}" == "bedTOfasta" ]; then
-        bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic[outputLoc]}""${geneDir}"_"${projectDic["filename"]}"_new_interval.bed -fo "${projectDic[outputLoc]}"FASTA_SPLIT/"${geneDir}"_"${projectDic[filename]}".fasta
+        bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic[outputLoc]}"BED_SPLIT/"${geneDir}"_"${projectDic["filename"]}"_new_interval.bed -fo "${projectDic[outputLoc]}"FASTA_SPLIT/"${geneDir}"_"${projectDic[filename]}".fasta
         OperationalStage="alnToCounts"
         if [ "${OperationalStage}" == "alnToCounts" ]; then
             fastaLoc="${projectDic[outputLoc]}"FASTA_SPLIT/"${geneDir}"_"${projectDic[filename]}".fasta
-            wcFile="${projectDic["projectName"]}"_"${projectDic[filename]}".txt
+            wcFile="${geneDir}"_"${projectDic[filename]}".txt
             mkdir "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES
             mkdir "${projectDic[outputLoc]}""${gDir}"_COUNTS_TABLES/LOGS
                 for gDir in ${dirL[@]}; do
@@ -343,7 +343,7 @@ def binaryIntersect(expandedList, interval, outputLoc, projectName, filename):
 
 def fileSaver(bedMapp, outputLoc, filename, projectName, geneDir):
         output="".join(chain.from_iterable(bedMapp))
-        with open(outputLoc + "/" + geneDir + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
+        with open(outputLoc + "BED_SPLIT/" + geneDir + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
             newBed.write(output)
         # os.rename(outputLoc + "/" + projectName + "_" + filename + ".bed", outputLoc + "/" + projectName + "_" + filename + "_new_interval.bed")
         
