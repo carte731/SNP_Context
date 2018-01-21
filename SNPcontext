@@ -216,28 +216,19 @@ fileConverter(){
             countfile="${countfile##*/}"
             # echo -e ${countfile}
             local geneDirection=${countfile:0:4}
-            # echo -e ${geneDirection}
             mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"
             mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS
             for loopGene in "${dirL[@]}"; do
-                echo -e "TEST_START..."
-                echo -e ${loopGene}
-                echo -e ${gene}
-                echo -e "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"
-                echo -e "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${countfile}".txt
-                echo -e "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${loopGene}"_"${geneDirection^^}""${projectDic[filename]}".txt
-                echo -e "${projectDic[flanks]}"
-                echo -e "${loopGene}"
-                echo -e "<<<<TEST_END>>>>"
-            #     aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}" --flank_size "${projectDic[flanks]}" --direction "${loopGene}" -F
-            #     mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${Countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${loopGene}"_"${geneDirection^^}""${projectDic[filename]}".txt
-            #     mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".log   ##FIX Unique Log ID'S            
+                aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/ --flank_size "${projectDic[flanks]}" --direction "${loopGene}" -F
+                mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${Countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${loopGene}"_"${geneDirection^^}""${projectDic[filename]}".txt
+                mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".log   ##FIX Unique Log ID'S            
             done
         done
         projectDic["OperationalStage"]="allCounts"
     elif [ "${projectDic[OperationalStage]}" == "allCounts..." ]; then
         for loopGene in "${dirL[@]}"; do
-            all_counts -c "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/"*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/
+            cd "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/
+            all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/
             mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"_combined_counts.txt
         done
         projectDic["OperationalStage"]="DONE..."
