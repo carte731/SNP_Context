@@ -211,20 +211,26 @@ fileConverter(){
         # echo -e "${targetBED}"
         # echo -e "TEST"
         for gene in "${splitDir[@]}"; do
-            echo -e ${gene}
+            # echo -e ${gene}
             local countfile="${gene%.*}"
             countfile="${countfile##*/}"
             # echo -e ${countfile}
             local geneDirection=${countfile:0:4}
             # echo -e ${geneDirection}
-            # mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"
-            # mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS
-            # for loopGene in "${dirL[@]}"; do
-                # echo -e ${loopGene}
+            mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"
+            mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS
+            for loopGene in "${dirL[@]}"; do
+                echo -e "TEST_START..."
+                echo -e ${loopGene}
+                echo -e ${gene}
+                echo -e "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"
+                echo -e "${projectDic[flanks]}"
+                echo -e "${loopGene}"
+                echo -e "<<<<TEST_END>>>>"
             #     aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}" --flank_size "${projectDic[flanks]}" --direction "${loopGene}" -F
             #     mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${Countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${loopGene}"_"${geneDirection^^}""${projectDic[filename]}".txt
             #     mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".log   ##FIX Unique Log ID'S            
-            # done
+            done
         done
         projectDic["OperationalStage"]="allCounts"
     elif [ "${projectDic[OperationalStage]}" == "allCounts..." ]; then
@@ -288,8 +294,12 @@ def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, ge
     for i in range(len(expandedList)-1): #Checks for Type One SNP overlaps (ORIGINAL INTERVAL CHECK)
             a=expandedList[i][0] ##A= left side
             b=expandedList[i][1] ##B= right side
-            subTA=expandedList[i+1][0]+interval ##TYPE ONE
-            subTB=expandedList[i+1][1]-interval ##TYPE ONE
+            if(interval > 2):
+                subTA=expandedList[i+1][0]+(interval - 2) ##TYPE ONE
+                subTB=expandedList[i+1][1]-(interval - 2) ##TYPE ONE
+            else:
+                subTA=expandedList[i+1][0] ##TYPE ONE
+                subTB=expandedList[i+1][1] ##TYPE ONE
             subMA=expandedList[i+1][0] ##TYPE TWO
             subMB=expandedList[i+1][1] ##TYPE TWO
             binary=[0,0,0,0]
