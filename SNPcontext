@@ -224,7 +224,7 @@ fileConverter(){
                 echo -e ${loopGene}
                 echo -e ${gene}
                 echo -e "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"
-                echo -e "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${Countfile}".txt
+                echo -e "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${countfile}".txt
                 echo -e "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${loopGene}"_"${geneDirection^^}""${projectDic[filename]}".txt
                 echo -e "${projectDic[flanks]}"
                 echo -e "${loopGene}"
