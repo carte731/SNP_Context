@@ -207,8 +207,9 @@ fileConverter(){
     elif [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
         local temp="${projectDic[outputLoc]}"FASTA_SPLIT/
         local splitDir=("${temp}"*"${targetBED}"_"${projectDic[filename]}".fasta*)
-        echo -e "${splitDir[@]}"
+        echo -e "TEST"
         echo -e "${targetBED}"
+        echo -e "TEST"
         for gene in "${splitDir[@]}"; do
             # echo -e ${gene}
             local Countfile="${gene%.*}"
