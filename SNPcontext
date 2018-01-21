@@ -149,51 +149,6 @@ fileConverter(){
             vcf2bed < "${gene}" > "${projectDic["outputLoc"]}"BED_SPLIT/"${targetVCF}".bed ##sort later
         done
         projectDic[OperationalStage]="bedTOfasta"
-    # elif [ "${projectDic[OperationalStage]}" == "...." ]; then ##OLD CODE, MOST LIKELY WILL REMOVE
-    #     local declare -A aln_out
-    #     local declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
-    #     temp="${projectDic[outputLoc]}"BED_SPLIT/
-    #     splitDir=("${temp}"*_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".bed*)
-    #     for gDir in ${dirL[@]}; do
-    #         comSDir="${gDir}"_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".bed
-    #         counter=0
-    #         for sp in ${splitDir[@]}; do
-    #             if [[ "${splitDir[$counter]##*/}" == "${comSDir}" ]]; then
-    #                 bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic["outputLoc"]}"BED_SPLIT/"${comSDir}" -fo "${projectDic[outputLoc]}"FASTA_SPLIT/"${gDir}"_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta
-    #                 aln_out+=( ["${gDir}"]="${projectDic[outputLoc]}"FASTA_SPLIT/"${gDir}"_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta )
-    #             fi
-    #             ((counter+=1))
-    #         done
-    #     done
-    #     projectDic["OperationalStage"]="alnToCounts"
-    #     if [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
-    #         mkdir "${projectDic[outputLoc]}"COUNTS_TABLES
-    #         for d in "${!aln_out[@]}"; do
-    #             aln_to_counts --align_path "${aln_out[$d]}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES --flank_size "${projectDic[flanks]}" --direction "${d}" -F
-    #         done
-    #         mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS
-    #         mv "${projectDic[outputLoc]}"COUNTS_TABLES/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS
-    #         projectDic["OperationalStage"]="DONE..."
-    #     fi
-    # elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
-    #         bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${projectDic[outputLoc]}""${projectDic["projectName"]}"_"${projectDic["filename"]}"_new_interval.bed -fo "${projectDic[outputLoc]}""${projectDic["projectName"]}"_"${projectDic[filename]}".fasta    
-    #         projectDic["OperationalStage"]="alnToCounts"
-    # elif [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
-    #     local temp="${projectDic[outputLoc]}"FASTA_SPLIT/
-    #     local splitDir=("${temp}"*_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta*)
-    #     for gDir in ${dirL[@]}; do
-    #         local comSDir="${gDir}"_split_"${projectDic["projectName"]}"_"${projectDic[filename]}".fasta
-    #         local counter=0
-    #         for sp in ${splitDir[@]}; do
-    #             if [[ "${splitDir[$counter]##*/}" == "${comSDir}" ]]; then
-    #                 aln_to_counts --align_path "${splitDir[$counter]}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES --flank_size "${projectDic[flanks]}" --direction "${gDir}" -F
-    #             fi
-    #             ((counter+=1))
-    #         done
-    #     done
-    #     mv "${projectDic[outputLoc]}"COUNTS_TABLES/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS
-    #     all_counts -c ${projectDic[outputLoc]}COUNTS_TABLES/"*.txt*" -o "${projectDic[outputLoc]}"
-    #     projectDic["OperationalStage"]="DONE..." 
     elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
         local temp="${projectDic[outputLoc]}"BED_SPLIT/
         local splitDir=("${temp}"*"${projectDic[filename]}"_new_interval.bed*)
@@ -207,19 +162,15 @@ fileConverter(){
     elif [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
         local temp="${projectDic[outputLoc]}"FASTA_SPLIT/
         local splitDir=("${temp}"*_"${projectDic[filename]}".fasta*)
-        # echo -e "TEST"
-        # echo -e "${targetBED}"
-        # echo -e "TEST"
         for gene in "${splitDir[@]}"; do
-            # echo -e ${gene}
             local countfile="${gene%.*}"
             countfile="${countfile##*/}"
-            # echo -e ${countfile}
             local geneDirection=${countfile:0:4}
             mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"
             mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS
+            echo -e "TEST"
             for loopGene in "${dirL[@]}"; do
-                aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/ --flank_size "${projectDic[flanks]}" --direction "${loopGene}" -F
+                aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/ --flank_size "${projectDic[flanks]}" --direction "${loopGene}" -F > /dev/null
                 mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${loopGene}"_"${geneDirection^^}""${projectDic[filename]}".txt
                 mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".log   ##FIX Unique Log ID'S            
             done
@@ -338,21 +289,11 @@ def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, ge
                         elif(binaryMB == [0,1,1,1]):
                             resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subMA) + "-" + str(subMB) + ". on the left, between " + str(a) + " and " + str(subMB) + '.' 
     if(gateA):
-        print("\nNo Type ONE window overlaps detected.\n")
         resultsA+="\nNo Type ONE window overlaps detected.\n"
-    else:
-        print("\nTYPE ONE OVERLAPS DETECTED.")
     if(gateB):
-        print("\nNo Type TWO window overlaps detected.\n")
         resultsB+="\nNo Type TWO window overlaps detected.\n"
-    else:
-        print("\nTYPE TWO OVERLAPS DETECTED.")
     results += resultsA + "\n" + resultsB + "\n"
     results += "\nEND OF INTERVAL CHECKS.\nXXXXXXXXXXXXXXXXXXXXXX\n"
-    if((gateA == True) and (gateB == True)):
-        print("\nNO overlaps dectected. Results saved to 'WindowOverlap.txt' in your output directory.\n")
-    else:
-        print("\nTYPE ONE AND/OR TYPE TWO OVERLAPS DETECTED. Check 'WindowOverlap.txt' in your output directory for saved results.\n")
     with open(outputLoc + projectName + "_" + "WindowOverlap.txt", 'a+') as window:
         window.write(results)
 
@@ -546,6 +487,8 @@ main(){
         geneDir=${geneDir:0:4} ##BASH IS BASE 1
         pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
     done
+    echo -e "Overlap checks completed..."
+    echo -e "See Overlap results located in 'WindowOverlap.txt' in your main output directory.\n"
     fileConverter ##CREATES FASTA FILE
         # fastaScanner ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
     fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
