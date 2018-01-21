@@ -211,12 +211,12 @@ fileConverter(){
         # echo -e "${targetBED}"
         # echo -e "TEST"
         for gene in "${splitDir[@]}"; do
-            # echo -e ${gene}
+            echo -e ${gene}
             local countfile="${gene%.*}"
             countfile="${countfile##*/}"
             # echo -e ${countfile}
             local geneDirection=${countfile:0:4}
-            echo -e ${geneDirection}
+            # echo -e ${geneDirection}
             # mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"
             # mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS
             # for loopGene in "${dirL[@]}"; do
