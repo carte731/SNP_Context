@@ -225,7 +225,7 @@ fileConverter(){
             done
         done
         projectDic["OperationalStage"]="allCounts"
-    elif [ "${projectDic[OperationalStage]}" == "allCounts..." ]; then
+    elif [ "${projectDic[OperationalStage]}" == "allCounts" ]; then
         for loopGene in "${dirL[@]}"; do
             cd "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/
             all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/
