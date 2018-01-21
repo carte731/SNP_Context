@@ -214,8 +214,9 @@ fileConverter(){
             # echo -e ${gene}
             local countfile="${gene%.*}"
             countfile="${countfile##*/}"
-            echo -e ${countfile}
+            # echo -e ${countfile}
             local geneDirection=${Countfile:0:4}
+            echo -e ${geneDirection}
             mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"
             mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS
             # for loopGene in "${dirL[@]}"; do
