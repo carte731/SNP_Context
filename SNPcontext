@@ -462,11 +462,11 @@ VCF_SPLIT_END
 
 }
 
-fastaScanner(){
+# fastaScanner(){
     
 
 
-}
+# }
 
 main(){
     moduleLoader ##LOADS CORRECT MODULES    
