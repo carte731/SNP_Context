@@ -220,7 +220,7 @@ fileConverter(){
             # mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"
             # mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS
             for loopGene in "${dirL[@]}"; do
-                echo -e ${loopGene}
+                # echo -e ${loopGene}
             #     aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}" --flank_size "${projectDic[flanks]}" --direction "${loopGene}" -F
             #     mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${Countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${loopGene}"_"${geneDirection^^}""${projectDic[filename]}".txt
             #     mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".log   ##FIX Unique Log ID'S            
