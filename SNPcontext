@@ -1,7 +1,7 @@
 #!/bin/bash
 
 declare -A projectDic=(
-    ["windowLength"]=2 #-w
+    ["windowLength"]=3 #-w
     ["inputFile"]='' #-i
     ["inputLoc"]=''
     ["outputLoc"]='' #-o
@@ -111,12 +111,6 @@ starter(){ #grabs the arguments
         echo "$helpPrintOut"
         exit -0
     fi
-}
-
-fileLayout(){
-
-        mkdir "${projectDic[outputLoc]}""${dir}"_COUNTS_TABLES
-        mkdir "${projectDic[outputLoc]}""${dir}"_COUNTS_TABLES/LOGS
 }
 
 referenceAssignment(){
