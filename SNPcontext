@@ -230,7 +230,7 @@ fileConverter(){
             all_counts -c "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/"*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/
             mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"_combined_counts.txt
         done
-        projectDic["OperationalStage"]="DONE..."        
+        projectDic["OperationalStage"]="DONE..."
     fi
 
 }
