@@ -208,6 +208,7 @@ fileConverter(){
         local temp="${projectDic[outputLoc]}"FASTA_SPLIT/
         local splitDir=("${temp}"*"${targetBED}"_"${projectDic[filename]}".fasta*)
         for gene in "${splitDir[@]}"; do
+            echo -e ${gene}
             local Countfile="${gene%.*}"
             Countfile="${Countfile##*/}"
             local geneDirection=${Countfile:0:4}
