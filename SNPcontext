@@ -161,7 +161,7 @@ fileConverter(){
         done
         wait
         projectDic[OperationalStage]="alnToCounts"
-    elif [ "${projectDic[OperationalStage]}" == "...alnToCounts..." ]; then
+    elif [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
         local temp="${projectDic[outputLoc]}"FASTA_SPLIT/
         local splitDir=("${temp}"*_"${projectDic[filename]}".fasta*)
         echo -e "creating counts tables..."
