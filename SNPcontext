@@ -10,8 +10,12 @@ declare -A projectDic=(
     ["flanks"]=0 #-f
     ["referenceGenome"]='' #-r
     ["OperationalStage"]='vcfTObed'
-    ["nMax"]=0
+    ["nMax"]=0 ##-n
     ["JOB"]='NO_JOB_NOW'
+    ["TempLoc"]=''
+    ["tempOut"]=''
+    ["allData"]='false' #-ad
+    
 )
 
 declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
@@ -86,7 +90,12 @@ starter(){ #grabs the arguments
                         echo -e "\nMaximum N threshold is 100. Defaulting to 100% threshold."
                         ((projectDic["nMax"]+=100))
                     fi
+                    frontgate=1                    
                 fi
+            elif [[ "${i,,}" == "-ab"  ]]; then
+                local var=${args[${indexPos}+1]}
+                projectDic["allData"]+="${var,,}"
+                frontgate=1
             fi
             ((indexPos+=1))
         done
@@ -141,28 +150,28 @@ moduleLoader(){ #load modules need for operations
 
 fileConverter(){
     if [ "${projectDic[OperationalStage]}" == "vcfTObed" ]; then ##Key and new input LOCATION
-        local temp="${projectDic[outputLoc]}"SPLITVCF/
+        local temp="${projectDic["tempOut"]}"SPLITVCF/
         local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
         for gene in "${splitDir[@]}"; do
             local targetVCF="${gene%.*}"
             targetVCF="${targetVCF##*/}"
-            vcf2bed < "${gene}" > "${projectDic["outputLoc"]}"BED_SPLIT/"${targetVCF}".bed & ##sort later
+            vcf2bed < "${gene}" > "${projectDic["tempOut"]}"BED_SPLIT/"${targetVCF}".bed & ##sort later
         done
         wait
         projectDic[OperationalStage]="bedTOfasta"
     elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
-        local temp="${projectDic[outputLoc]}"BED_SPLIT/
+        local temp="${projectDic["tempOut"]}"BED_SPLIT/
         local splitDir=("${temp}"*"${projectDic[filename]}"_new_interval.bed*)
         for gene in "${splitDir[@]}"; do
             local targetBED="${gene%.*}"
             targetBED="${targetBED##*/}"
             targetBED=${targetBED:0:4}
-            bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${gene}" -fo "${projectDic[outputLoc]}"FASTA_SPLIT/"${targetBED}"_"${projectDic[filename]}".fasta &
+            bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${gene}" -fo "${projectDic["tempOut"]}"FASTA_SPLIT/"${targetBED}"_"${projectDic[filename]}".fasta &
         done
         wait
         projectDic[OperationalStage]="alnToCounts"
     elif [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
-        local temp="${projectDic[outputLoc]}"FASTA_SPLIT/
+        local temp="${projectDic["tempOut"]}"FASTA_SPLIT/
         local splitDir=("${temp}"*_"${projectDic[filename]}".fasta*)
         echo -e "creating counts tables..."
         for gene in "${splitDir[@]}"; do
@@ -195,14 +204,23 @@ dirStructure(){
     DATE=`date +"%m%d%Y-%H%M"`
     mkdir "${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
     projectDic["outputLoc"]="${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
-    mkdir "${projectDic[outputLoc]}"SPLITVCF
-    mkdir "${projectDic[outputLoc]}"FASTA_SPLIT
-    mkdir "${projectDic[outputLoc]}"BED_SPLIT
     mkdir "${projectDic[outputLoc]}"COUNTS_TABLES
+    if [[ ${projectDic["allData"]} == "true" ]]; then
+        mkdir "${projectDic[outputLoc]}"SPLITVCF
+        mkdir "${projectDic[outputLoc]}"FASTA_SPLIT
+        mkdir "${projectDic[outputLoc]}"BED_SPLIT
+        projectDic["tempOut"]="${projectDic[outputLoc]}"
+    elif [[ ${projectDic["allData"]} == "true" ]];then
+        projectDic["TempLoc"]+=$(mktemp -d)
+        mkdir "${projectDic[TempLoc]}"/SPLITVCF
+        mkdir "${projectDic[TempLoc]}"/FASTA_SPLIT
+        mkdir "${projectDic[TempLoc]}"/BED_SPLIT
+        projectDic["tempOut"]="${projectDic["TempLoc"]}"
+    fi
 }
 
 pythonBEDScanner(){
-    inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" geneDir="$geneDir" python3.6 - <<END_OF_PYTHON
+    inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" geneDir="$geneDir" python3.6 - <<END_OF_PYTHON
     
 import os
 from itertools import chain
@@ -351,7 +369,7 @@ END_OF_PYTHON
 jobCreator(){
     echo -e "Enter email for PBS job updates: "
     read userEmail
-    email="${userEmail}" inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" python3.6 - <<JOB_CREATED
+    email="${userEmail}" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" python3.6 - <<JOB_CREATED
 
 import os
 
@@ -366,6 +384,8 @@ def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, ema
     job+= "-f " + flanks + " "
     job+= "-p " + projectName + " "
     job+= "-r " + referenceGenome + " "
+    job+= "-ab " + allData + " "
+    job+= "-j " + nMax + " "
     job+= "-JOB THIS_IS_A_JOB"
 
     with open(outputLoc + projectName + ".job", "w") as jobScript:
@@ -379,11 +399,13 @@ def bashImport():
     windowLength=str(os.environ['windowLength'])
     inputFile=str(os.environ['inputFile'])
     projectName=str(os.environ['projectName'])
-    return(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc)
+    allData=str(os.environ['allData'])
+    nMax=str(os.environ['nMax'])
+    return(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax)
 
 def main():
-    projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc = bashImport()
-    jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc)
+    projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax = bashImport()
+    jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax)
 
 main()
     
@@ -396,7 +418,7 @@ exit 0
 }
 
 vcfSplit(){
-    inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" python3.6 - <<VCF_SPLIT_END
+    inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" python3.6 - <<VCF_SPLIT_END
 
 import os
 
@@ -489,7 +511,7 @@ VCF_SPLIT_END
 
 fastaScanner(){
 
-    inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" filename="${projectDic["filename"]}" geneTwo=${geneTwo} geneDirTwo="${geneDirTwo}" nMax="${projectDic["nMax"]}" windowLength="${projectDic["windowLength"]}" python3.6 - <<FASTA_SWEEP
+    inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" geneTwo=${geneTwo} geneDirTwo="${geneDirTwo}" nMax="${projectDic["nMax"]}" windowLength="${projectDic["windowLength"]}" python3.6 - <<FASTA_SWEEP
     
 from itertools import chain
 import os
@@ -610,7 +632,7 @@ main(){
     dirStructure
     vcfSplit
     fileConverter ##MAKES BED FILE
-    local temp="${projectDic[outputLoc]}"BED_SPLIT/
+    local temp="${projectDic["tempOut"]}"BED_SPLIT/
     local splitDir=("${temp}"*_split_"${projectDic[filename]}".bed*)
     for gene in "${splitDir[@]}"; do
         local geneDir="${gene%.*}"
@@ -622,7 +644,7 @@ main(){
     echo -e "\nOverlap checks completed..."
     echo -e "See Overlap results located in 'WindowOverlap.txt' in your main output directory.\n"
     fileConverter ##CREATES FASTA FILE
-    local tempTwo="${projectDic[outputLoc]}"FASTA_SPLIT/
+    local tempTwo="${projectDic["tempOut"]}"FASTA_SPLIT/
     local fastalisting=("${tempTwo}"*_"${projectDic[filename]}".fasta*)
     for geneTwo in "${fastalisting[@]}"; do
         local geneDirTwo="${geneTwo%.*}"
