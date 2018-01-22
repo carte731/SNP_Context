@@ -186,7 +186,6 @@ fileConverter(){
         local iterator=$((${#splitDir[@]} * 11))
         local subCount=0
         for (( i=0; $i <= $iterator; i++ )); do
-            echo -e $i
             if (( "${subCount}" == 0 )); then
                 local gene="${splitDir[fastaindex]}"
                 local countfile="${gene%.*}"
