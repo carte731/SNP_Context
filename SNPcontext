@@ -578,10 +578,6 @@ main()
 
 FASTA_SWEEP
 
-main()
-
-}
-
 main(){
     moduleLoader ##LOADS CORRECT MODULES    
     starter "$@" ##ASSIGNS INPUTS TO HASHMAP
