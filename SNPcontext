@@ -1,7 +1,7 @@
 #!/bin/bash
 
 declare -A projectDic=(
-    ["windowLength"]=4 #-w
+    ["windowLength"]=0 #-w
     ["inputFile"]='' #-i
     ["inputLoc"]=''
     ["outputLoc"]='' #-o
@@ -26,8 +26,12 @@ starter(){ #grabs the arguments
             if [[ "${i,,}" == "-w" ]]; then ##Window expansion size
                 local var=${args[${indexPos}+1]}
                 if [[ "$var" =~ ^[0-9]+$ ]]; then ##Checks if it's a number, max expansion of 1000.
-                    ((projectDic["windowLength"]+="$var"))
-                    frontgate=1
+                    if (( "$var" >= 4)); then
+                        ((projectDic["windowLength"]+="$var"))
+                        frontgate=1
+                    elif (( "$var" < 4 )); then
+                        ((projectDic["windowLength"]+=4))
+                        frontgate=1
                 else
                     echo -e "\nPlease enter a valid integer for window expansion size, defaulting to ZERO.\n"
                 fi
@@ -475,7 +479,7 @@ VCF_SPLIT_END
 
 fastaScanner(){
 
-    inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" geneTwo=${geneTwo} geneDirTwo="${geneDirTwo}" nMax="${projectDic["nMax"]}" python3.6 - <<FASTA_SWEEP
+    inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" filename="${projectDic["filename"]}" geneTwo=${geneTwo} geneDirTwo="${geneDirTwo}" nMax="${projectDic["nMax"]}" windowLength="${projectDic["windowLength"]}" python3.6 - <<FASTA_SWEEP
     
 from itertools import chain
 import os
@@ -528,9 +532,10 @@ def fastaBasePop(master, interval):
     allRejected=False
     subMaster=[]
     nList=[]
-    newI=interval- 2 ##change to 4
+    Linterval=interval - 3 ##change to 4
+    Rinterval=interval - 2 ##change to 4
     for element in master:
-        baseIn = element[1][interval:-(interval+1)]
+        baseIn = element[1][Linterval:-Rinterval] ##MAYBE add +1 on Rinterval.
         if("N" not in baseIn):
             subMaster.append(element)
         else:
@@ -566,10 +571,11 @@ def bashImport():
     gene=str(os.environ['geneTwo'])
     nMax=str(os.environ['nMax'])
     geneDirTwo=str(os.environ['geneDirTwo']) ##GENE Direction
-    return(projectName, inputFile, outputLoc, filename, gene, geneDirTwo)
+    interval=int(os.environ['windowLength'])
+    return(projectName, inputFile, outputLoc, filename, gene, geneDirTwo, interval)
 
 def main():
-    projectName, inputFile, outputLoc, filename, gene, geneDirTwo = bashImport()
+    projectName, inputFile, outputLoc, filename, gene, geneDirTwo, interval = bashImport()
     master=fastaMapper(gene)
     subMaster, allRejected, nList = fastaBasePop(master, interval)
     subMaster, nMaxList = fastaNpop(subMaster, allRejected, nMax)
