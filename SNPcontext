@@ -29,9 +29,6 @@ starter(){ #grabs the arguments
                     if (( "$var" >= 4)); then
                         ((projectDic["windowLength"]+="$var"))
                         frontgate=1
-                    elif (( "$var" < 4 )); then
-                        ((projectDic["windowLength"]+=4))
-                        frontgate=1
                     fi
                 else
                     echo -e "\nPlease enter a valid integer for window expansion size, defaulting to ZERO.\n"
@@ -84,10 +81,10 @@ starter(){ #grabs the arguments
                     if (( "${var}" >= 25  && "$var" <= 100 )); then
                         ((projectDic["nMax"]+="$var"))
                     elif (( "${var}" < 25 )); then
-                        echo -e "Minimum N threshold is 25. Defaulting to 25% threshold."
+                        echo -e "\nMinimum N threshold is 25. Defaulting to 25% threshold."
                         ((projectDic["nMax"]+=25))
                     elif (( "${var}" > 100 )); then
-                        echo -e "Maximum N threshold is 100. Defaulting to 100% threshold."
+                        echo -e "\nMaximum N threshold is 100. Defaulting to 100% threshold."
                         ((projectDic["nMax"]+=100))
                     fi
                 fi
@@ -114,7 +111,7 @@ starter(){ #grabs the arguments
         # mkdir "${projectDic["outputLoc"]}"FASTA_SPLIT
         # mkdir "${projectDic["outputLoc"]}"BED_SPLIT
         # echo -e "${projectDic["outputLoc"]}" ###
-        if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
+        if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then ##TURN INTO FUNCTION
             mkdir "${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
             projectDic["outputLoc"]="${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
             mkdir "${projectDic[outputLoc]}"SPLITVCF
@@ -232,8 +229,13 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
             if(element == "\n"):
                 sub.append(final)
                 sub.append(element)
-                sub[2] = str(int(sub[2]) - interval)
-                sub[4] = str(int(sub[4]) + interval)
+                intSize = int(sub[4]) - int(sub[2])
+                if((intSize >= 3) or (interval >= 1)): ##ADDED
+                    sub[2] = str(int(sub[2]) - interval)
+                    sub[4] = str(int(sub[4]) + interval)
+                else:
+                    sub[2] = str(int(sub[2]) - 2)
+                    sub[4] = str(int(sub[4]) + 2)
                 a = sub[2]
                 b = sub[4]
                 temp.append(int(a))
