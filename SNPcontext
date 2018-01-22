@@ -614,8 +614,9 @@ main(){
         local geneDir="${gene%.*}"
         geneDir="${geneDir##*/}"
         geneDir=${geneDir:0:4} ##BASH IS BASE 1
-        pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
+        pythonBEDScanner "$geneDir" & ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
     done
+    wait
     echo -e "\nOverlap checks completed..."
     echo -e "See Overlap results located in 'WindowOverlap.txt' in your main output directory.\n"
     fileConverter ##CREATES FASTA FILE
@@ -625,8 +626,9 @@ main(){
         local geneDirTwo="${geneTwo%.*}"
         geneDirTwo="${geneDirTwo##*/}"
         geneDirTwo=${geneDirTwo:0:4}
-        fastaScanner "${geneDirTwo}" "${geneTwo}" ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
+        fastaScanner "${geneDirTwo}" "${geneTwo}" & ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
     done
+    wait
     fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
     fileConverter ##ALL_COUNTS
     echo -e "operations completed...\n"
