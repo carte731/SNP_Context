@@ -573,10 +573,10 @@ def bashImport():
     nMax=str(os.environ['nMax'])
     geneDirTwo=str(os.environ['geneDirTwo']) ##GENE Direction
     interval=int(os.environ['windowLength'])
-    return(inputFile, outputLoc, filename, gene, geneDirTwo, interval)
+    return(inputFile, outputLoc, filename, gene, geneDirTwo, interval, nMax)
 
 def main():
-    inputFile, outputLoc, filename, gene, geneDirTwo, interval = bashImport()
+    inputFile, outputLoc, filename, gene, geneDirTwo, interval, nMax = bashImport()
     master=fastaMapper(gene)
     subMaster, allRejected, nList = fastaBasePop(master, interval)
     subMaster, nMaxList = fastaNpop(subMaster, allRejected, nMax)
