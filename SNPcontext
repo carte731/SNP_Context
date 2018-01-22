@@ -603,6 +603,7 @@ main(){
     fileConverter ##CREATES FASTA FILE
     for geneTwo in "${splitDir[@]}"; do
         fastaScanner "${geneTwo}" ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
+    done
     fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
     fileConverter ##ALL_COUNTS
     echo -e "operations completed...\n"
