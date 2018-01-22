@@ -82,13 +82,13 @@ starter(){ #grabs the arguments
                 local var=${args[${indexPos}+1]}
                 if [[ "$var" =~ ^[0-9]+$ ]]; then
                     if (( "${var}" >= 25  && "$var" <= 100 )); then
-                        ((projectDic["nMax"]+="$var"/100))
+                        ((projectDic["nMax"]+="$var"))
                     elif (( "${var}" < 25 )); then
                         echo -e "Minimum N threshold is 25. Defaulting to 25% threshold."
-                        ((projectDic["nMax"]+=.25))
+                        ((projectDic["nMax"]+=25))
                     elif (( "${var}" > 100 )); then
                         echo -e "Maximum N threshold is 100. Defaulting to 100% threshold."
-                        ((projectDic["nMax"]+=1))
+                        ((projectDic["nMax"]+=100))
                     fi
                 fi
             fi
@@ -109,7 +109,7 @@ starter(){ #grabs the arguments
             referenceAssignment ##Function call
         fi
         if (( ${projectDic["nMax"]} == 0 )); then
-            ((projectDic["nMax"]+=.25))
+            ((projectDic["nMax"]+=25))
         fi
         # mkdir "${projectDic["outputLoc"]}"FASTA_SPLIT
         # mkdir "${projectDic["outputLoc"]}"BED_SPLIT
@@ -517,12 +517,13 @@ def fastaMapper(gene):
     return(master)
 
 def fastaNpop(subMaster, allRejected, nMax):
+    maxP=nMax/100
     newsubMaster=[]
     nMaxList=[]
     for subListing in subMaster:
         totalN = len([x for x in subListing[1] if x == "N"])
         nPercent=totalN/len(subListing[1])
-        if(nPercent >= nMax):
+        if(nPercent >= maxP):
             nMaxList.append(subListing)
         else:
             newsubMaster.append(subListing)
