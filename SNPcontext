@@ -108,18 +108,6 @@ starter(){ #grabs the arguments
         if (( ${projectDic["nMax"]} == 0 )); then
             ((projectDic["nMax"]+=25))
         fi
-        # mkdir "${projectDic["outputLoc"]}"FASTA_SPLIT
-        # mkdir "${projectDic["outputLoc"]}"BED_SPLIT
-        # echo -e "${projectDic["outputLoc"]}" ###
-        if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then ##TURN INTO FUNCTION
-            mkdir "${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
-            projectDic["outputLoc"]="${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
-            mkdir "${projectDic[outputLoc]}"SPLITVCF
-            mkdir "${projectDic[outputLoc]}"FASTA_SPLIT
-            mkdir "${projectDic[outputLoc]}"BED_SPLIT
-            mkdir "${projectDic[outputLoc]}"COUNTS_TABLES
-            
-        fi
     else
         local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
         helpPrintOut+=$'\n\t./SNPcontext -i <input> -o <output> -r <reference genome> -w <expansion size> -f <alignment window flank]> -p <project name>\n'
@@ -202,6 +190,17 @@ fileConverter(){
 
 }
 
+dirStructure(){
+    if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then ##TURN INTO FUNCTION
+        mkdir "${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
+        projectDic["outputLoc"]="${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
+        mkdir "${projectDic[outputLoc]}"SPLITVCF
+        mkdir "${projectDic[outputLoc]}"FASTA_SPLIT
+        mkdir "${projectDic[outputLoc]}"BED_SPLIT
+        mkdir "${projectDic[outputLoc]}"COUNTS_TABLES  
+    fi
+}
+
 pythonBEDScanner(){
     inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" geneDir="$geneDir" python3.6 - <<END_OF_PYTHON
     
@@ -234,8 +233,8 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
                     sub[2] = str(int(sub[2]) - interval)
                     sub[4] = str(int(sub[4]) + interval)
                 else:
-                    sub[2] = str(int(sub[2]) - 2)
-                    sub[4] = str(int(sub[4]) + 2)
+                    sub[2] = str(int(sub[2]) - 3)
+                    sub[4] = str(int(sub[4]) + 3)
                 a = sub[2]
                 b = sub[4]
                 temp.append(int(a))
