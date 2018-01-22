@@ -575,7 +575,7 @@ def bashImport():
     return(projectName, inputFile, outputLoc, filename, gene, geneDirTwo, interval)
 
 def main():
-    projectName, inputFile, outputLoc, filename, gene, geneDirTwo, interval = bashImport()
+    inputFile, outputLoc, filename, gene, geneDirTwo, interval = bashImport()
     master=fastaMapper(gene)
     subMaster, allRejected, nList = fastaBasePop(master, interval)
     subMaster, nMaxList = fastaNpop(subMaster, allRejected, nMax)
