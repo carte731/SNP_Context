@@ -203,6 +203,7 @@ fileConverter(){
                 mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".txt
                 ((subCount=0))
             fi
+        done
     elif [ "${projectDic[OperationalStage]}" == "allCounts" ]; then
         echo -e "creating combined tables..."
         mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS
