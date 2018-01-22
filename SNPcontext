@@ -10,6 +10,7 @@ declare -A projectDic=(
     ["flanks"]=0 #-f
     ["referenceGenome"]='' #-r
     ["OperationalStage"]='vcfTObed'
+    ["nMax"]=0
     ["JOB"]='NO_JOB_NOW'
 )
 
@@ -72,6 +73,18 @@ starter(){ #grabs the arguments
             elif [[ "${i}" == "-JOB" ]]; then
                 local var=${args[${indexPos}+1]}
                 projectDic["JOB"]="${var}"
+            elif [[ "${i,,}" == "-n"  ]], then
+                local var=${args[${indexPos}+1]}
+                if [[ "$var" =~ ^[0-9]+$ ]]; then
+                    if (( "$var" > 25  && "$var" <= 100 )); then
+                        ((projectDic["nMax"]+="$var"/100))
+                    elif [ "$var" < 25 ]; then
+                        echo -e "Minimum N threshold is 25. Defaulting to 25% threshold."
+                        ((projectDic["nMax"]+=.25))
+                    elif [ "$var" > 100 ]; then
+                        echo -e "Maximum N threshold is 100. Defaulting to 100% threshold."
+                        ((projectDic["nMax"]+=1))
+                    fi
             fi
             ((indexPos+=1))
         done
@@ -87,7 +100,10 @@ starter(){ #grabs the arguments
             projectDic["outputLoc"]+=${projectDic["inputLoc"]}
         fi
         if [[ ${projectDic["referenceGenome"]} == "" ]]; then
-            referenceAssignment
+            referenceAssignment ##Function call
+        fi
+        if (( ${projectDic["nMax"]} == 0 )); then
+            ((projectDic["nMax"]+=.25))
         fi
         # mkdir "${projectDic["outputLoc"]}"FASTA_SPLIT
         # mkdir "${projectDic["outputLoc"]}"BED_SPLIT
@@ -547,6 +563,7 @@ def bashImport():
     filename=str(os.environ['filename'])
     projectName=str(os.environ['projectName'])
     gene=str(os.environ['geneTwo'])
+    nMax=str(os.environ['nMax'])
     return(projectName, inputFile, outputLoc, filename, gene)
 
 def main():
