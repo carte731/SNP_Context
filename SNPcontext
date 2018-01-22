@@ -228,14 +228,14 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
                 sub.append(element)
                 intSize = int(sub[4]) - int(sub[2])
                 if(intSize >= 3): ##ADDED 
-                    if(interval >= 1):
+                    if(interval >= 3):
                         sub[2] = str(int(sub[2]) - interval)
                         sub[4] = str(int(sub[4]) + interval)
                     else:
                         sub[2] = str(int(sub[2]) - 3)
                         sub[4] = str(int(sub[4]) + 3)                    
                 else:
-                    if(interval >= 2):
+                    if(interval >= 4):
                         sub[2] = str(int(sub[2]) - interval)
                         sub[4] = str(int(sub[4]) + interval)
                     else:
