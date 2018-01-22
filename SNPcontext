@@ -182,7 +182,7 @@ fileConverter(){
         local temp="${projectDic[outputLoc]}"FASTA_SPLIT/
         local splitDir=("${temp}"*_"${projectDic[filename]}".fasta*)
         local fastaindex=0
-        local iterator=$(((${#splitDir[@]} * 11))
+        local iterator=$((${#splitDir[@]} * 11))
         local subCount=0
         for (( i=0; i <= iterator; i++ )); do
             if (( subCount == 0 )); then
@@ -202,6 +202,7 @@ fileConverter(){
                 aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/ --flank_size "${projectDic[flanks]}" --direction "${dirL[subCount]}" -F > /dev/null
                 mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".txt
                 ((subCount=0))
+            fi
     elif [ "${projectDic[OperationalStage]}" == "allCounts" ]; then
         echo -e "creating combined tables..."
         mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS
