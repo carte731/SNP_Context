@@ -30,7 +30,7 @@ starter(){ #grabs the arguments
                         frontgate=1
                     fi
                 else
-                    echo -e "\nPlease enter a valid integer for window expansion size, defaulting to THREE.\n"
+                    echo -e "\nPlease enter a valid integer for window expansion size, defaulting to FIVE bases.\n"
                 fi
             elif [[ "${i,,}" == "-i" ]]; then ##Input file which grabs the input file name, location and complete file path 
                 local var=${args[${indexPos}+1]}
@@ -232,15 +232,15 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
                         sub[2] = str(int(sub[2]) - interval)
                         sub[4] = str(int(sub[4]) + interval)
                     else:
-                        sub[2] = str(int(sub[2]) - 1)
-                        sub[4] = str(int(sub[4]) + 1)                    
+                        sub[2] = str(int(sub[2]) - 2)
+                        sub[4] = str(int(sub[4]) + 2)                    
                 else:
                     if(interval >= 2):
                         sub[2] = str(int(sub[2]) - interval)
                         sub[4] = str(int(sub[4]) + interval)
                     else:
-                        sub[2] = str(int(sub[2]) - 2)
-                        sub[4] = str(int(sub[4]) + 2)
+                        sub[2] = str(int(sub[2]) - 3)
+                        sub[4] = str(int(sub[4]) + 3)
                 a = sub[2]
                 b = sub[4]
                 temp.append(int(a))
