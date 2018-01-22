@@ -85,6 +85,7 @@ starter(){ #grabs the arguments
                         echo -e "Maximum N threshold is 100. Defaulting to 100% threshold."
                         ((projectDic["nMax"]+=1))
                     fi
+                fi
             fi
             ((indexPos+=1))
         done
