@@ -177,7 +177,7 @@ fileConverter(){
         done
         projectDic["OperationalStage"]="allCounts"
     elif [ "${projectDic[OperationalStage]}" == "allCounts" ]; then
-        echo -e "creating combined tables"
+        echo -e "creating combined tables..."
         mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS
         for loopGene in "${dirL[@]}"; do
             cd "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/
