@@ -172,11 +172,10 @@ fileConverter(){
             mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"
             mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS
             for loopGene in "${dirL[@]}"; do
-                aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/ --flank_size "${projectDic[flanks]}" --direction "${loopGene}" -F > /dev/null &
-                mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".txt &
-                mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".log &  ##FIX Unique Log ID'S            
+                aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/ --flank_size "${projectDic[flanks]}" --direction "${loopGene}" -F > /dev/null
+                mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".txt
+                mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".log ##FIX Unique Log ID'S            
             done
-            wait
         done
         projectDic["OperationalStage"]="allCounts"
     elif [ "${projectDic[OperationalStage]}" == "allCounts" ]; then
@@ -184,10 +183,9 @@ fileConverter(){
         mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS
         for loopGene in "${dirL[@]}"; do
             cd "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/
-            all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/ > /dev/null &
-            mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${loopGene}"_combined_counts.txt &
+            all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/ > /dev/null 
+            mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${loopGene}"_combined_counts.txt
         done
-        wait
         projectDic["OperationalStage"]="DONE..."
     fi
 
@@ -547,7 +545,7 @@ def fastaBasePop(master, interval):
     nList=[]
     Linterval=interval - 3 ##change to 4
     Rinterval=interval - 2 ##change to 4
-    for element in master:
+    for element in master: ##CHANGE TO SUBTRACT CORRECT DISTANCES
         baseIn = element[1][Linterval:-Rinterval] ##MAYBE add +1 on Rinterval.
         if("N" not in baseIn):
             subMaster.append(element)
