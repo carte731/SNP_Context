@@ -456,11 +456,113 @@ VCF_SPLIT_END
 
 }
 
-# fastaScanner(){
+fastaScanner(){
+
+    inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" geneTwo=${geneTwo} python3.6 - <<FASTA_SWEEP
     
+from itertools import chain
+import os
 
+def fastaMapper(gene):
+    with open("/home/corey/Documents/GHOSTRECON_01212018-0259/FASTA_SPLIT/" + gene + "_CBF3_unfiltered.fasta","rb") as fasta:
+        fastafile=fasta.read()
+        totalN=0
+        master=[]
+        sub=[]
+        final=''
+        for counter, i in enumerate(fastafile):
+            element=chr(i)
+            if(element == 'N'):
+                totalN+=1
+            if((element != "\n") and (element != ">")):
+                final = final + str(element)
+            if((element == "\n") and (element != ">")):
+                final = final + str(element)
+                sub.append(final)
+                final=''
+            if((element == ">") and (element != "\n")):
+                if(sub != []):
+                    master.append(sub)
+                    sub=[]
+                    final=''
+                    final = final + str(element)
+                else:
+                    final = final + str(element)
+            if(counter == (len(fastafile)-1)):
+                final = final + str(element)
+                sub.append(final)
+                master.append(sub)
+    return(master)
 
-# }
+def fastaNpop(subMaster, allRejected, nMax):
+    newsubMaster=[]
+    nMaxList=[]
+    for subListing in subMaster:
+        totalN = len([x for x in subListing[1] if x == "N"])
+        nPercent=totalN/len(subListing[1])
+        if(nPercent >= nMax):
+            nMaxList.append(subListing)
+        else:
+            newsubMaster.append(subListing)
+    return(newsubMaster, nMaxList)
+        
+
+def fastaBasePop(master, interval):
+    allRejected=False
+    subMaster=[]
+    nList=[]
+    newI=interval- 2 ##change to 4
+    for element in master:
+        baseIn = element[1][interval:-(interval+1)]
+        if("N" not in baseIn):
+            subMaster.append(element)
+        else:
+            nList.append(element)
+    if(len(subMaster) == 0):
+        allRejected=True
+    return(subMaster, allRejected, nList)
+
+def fileSaver(subMaster, master, nList, nMaxList, gene, allRejected):
+    if(allRejected != True):
+        with open("/home/corey/Documents/GHOSTRECON_01212018-0259/FASTA_SPLIT/" + h + "_CBF3_unfiltered.fasta","w") as newFasta:
+            output="".join(chain.from_iterable(subMaster))
+            newFasta.write(output)
+    else:
+        with open("/home/corey/Documents/GHOSTRECON_01212018-0259/FASTA_SPLIT/" + h + "_CBF3_unfiltered.fasta","w") as newFasta:
+            output="".join(chain.from_iterable(master))
+            newFasta.write(output)
+        os.rename("/home/corey/Documents/GHOSTRECON_01212018-0259/FASTA_SPLIT/" + h + "_CBF3_unfiltered.fasta", "/home/corey/Documents/GHOSTRECON_01212018-0259/ALLREJECTED_" + h + "_CBF3_unfiltered.fasta")
+    if(len(nList) != 0):
+        with open("/home/corey/Documents/GHOSTRECON_01212018-0259/NBASE_FAILED_FASTAS.fasta","a") as newFasta:
+            output="".join(chain.from_iterable(nList))
+            newFasta.write(output)
+    if(len(nMaxList) != 0):
+        with open("/home/corey/Documents/GHOSTRECON_01212018-0259/N-THRESHOLD_FAILED_FASTAS.fasta","a") as newFasta:
+            output="".join(chain.from_iterable(nMaxList))
+            newFasta.write(output)
+
+def bashImport():
+    outputLoc=str(os.environ['outputLoc'])
+    inputFile=str(os.environ['inputFile'])
+    filename=str(os.environ['filename'])
+    projectName=str(os.environ['projectName'])
+    gene=str(os.environ['geneTwo'])
+    return(projectName, inputFile, outputLoc, filename, gene)
+
+def main():
+    projectName, inputFile, outputLoc, filename, gene = bashImport()
+    master=fastaMapper(gene)
+    subMaster, allRejected, nList = fastaBasePop(master, interval)
+    subMaster, nMaxList = fastaNpop(subMaster, allRejected, nMax)
+    fileSaver(subMaster, master, nList, nMaxList, gene, allRejected)
+
+main()
+
+FASTA_SWEEP
+
+main()
+
+}
 
 main(){
     moduleLoader ##LOADS CORRECT MODULES    
@@ -485,7 +587,8 @@ main(){
     echo -e "\nOverlap checks completed..."
     echo -e "See Overlap results located in 'WindowOverlap.txt' in your main output directory.\n"
     fileConverter ##CREATES FASTA FILE
-        # fastaScanner ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
+    for geneTwo in "${splitDir[@]}"; do
+        fastaScanner "${geneTwo}" ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
     fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
     fileConverter ##ALL_COUNTS
     echo -e "operations completed...\n"
