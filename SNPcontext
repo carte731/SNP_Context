@@ -73,7 +73,7 @@ starter(){ #grabs the arguments
             elif [[ "${i}" == "-JOB" ]]; then
                 local var=${args[${indexPos}+1]}
                 projectDic["JOB"]="${var}"
-            elif [[ "${i,,}" == "-n"  ]], then
+            elif [[ "${i,,}" == "-n"  ]]; then
                 local var=${args[${indexPos}+1]}
                 if [[ "$var" =~ ^[0-9]+$ ]]; then
                     if (( "$var" > 25  && "$var" <= 100 )); then
