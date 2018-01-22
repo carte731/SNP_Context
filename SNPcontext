@@ -568,7 +568,6 @@ def bashImport():
     outputLoc=str(os.environ['outputLoc'])
     inputFile=str(os.environ['inputFile'])
     filename=str(os.environ['filename'])
-    projectName=str(os.environ['projectName'])
     gene=str(os.environ['geneTwo'])
     nMax=str(os.environ['nMax'])
     geneDirTwo=str(os.environ['geneDirTwo']) ##GENE Direction
