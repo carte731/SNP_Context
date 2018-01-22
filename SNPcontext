@@ -32,6 +32,7 @@ starter(){ #grabs the arguments
                     elif (( "$var" < 4 )); then
                         ((projectDic["windowLength"]+=4))
                         frontgate=1
+                    fi
                 else
                     echo -e "\nPlease enter a valid integer for window expansion size, defaulting to ZERO.\n"
                 fi
