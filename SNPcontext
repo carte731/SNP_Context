@@ -230,7 +230,6 @@ dirStructure(){
         projectDic["tempOut"]="${projectDic[outputLoc]}"
     elif [[ ${projectDic["allData"]} == "false" ]];then
         projectDic["TempLoc"]+=$(mktemp -d)
-        echo -e "${projectDic["TempLoc"]}"
         mkdir "${projectDic[TempLoc]}"/SPLITVCF
         mkdir "${projectDic[TempLoc]}"/FASTA_SPLIT
         mkdir "${projectDic[TempLoc]}"/BED_SPLIT
