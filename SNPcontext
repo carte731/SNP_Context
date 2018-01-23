@@ -122,7 +122,8 @@ starter(){ #grabs the arguments
         helpPrintOut+=$'\n\t------------------------\n'
         helpPrintOut+=$'\n\t-i [File input, VCF only]\n\t-o [output location (defaults to input location if not stated)]'
         helpPrintOut+=$'\n\t-r [Reference genome]\n\t-w [window expansion size]\n\t-f [mutation motif window flank]'
-        helpPrintOut+=$'\n\t-p [project name]\n'
+        helpPrintOut+=$'\n\t-p [project name]\n\t-n [max percentage of indels allowed in fasta files]'
+        helpPrintOut+=$'\n\t-a [(true/false) Do you want all temp file(vcf,bed and fasta files) to be saved in output directory]'
         echo "$helpPrintOut"
         exit -0
     fi
@@ -659,6 +660,9 @@ main(){
     wait
     fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
     fileConverter ##ALL_COUNTS
+    if [[ "${projectDic["allData"]}" == "false"  ]]; then
+        local templocation = "${projectDic["TempLoc"]}"
+        rm "${templocation}"
     echo -e "operations completed...\n"
         
 }
