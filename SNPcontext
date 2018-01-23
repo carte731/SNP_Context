@@ -607,7 +607,7 @@ def bashImport():
     nMax=int(os.environ['nMax'])
     geneDirTwo=str(os.environ['geneDirTwo']) ##GENE Direction
     interval=int(os.environ['windowLength'])
-    baseOut=int(os.environ['baseOut'])
+    baseOut=str(os.environ['baseOut'])
     return(inputFile, outputLoc, filename, gene, geneDirTwo, interval, nMax, baseOut)
 
 def main():
