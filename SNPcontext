@@ -1,5 +1,13 @@
 #!/bin/bash
 
+#    Corey Carter, St. Paul, MN - 09 January 2018
+#    This bash script is designed to pull contextual sequence flanking a SNP (variants) from a reference genome.
+#    The window size for contextual sequence can be user specificed.
+#    The program checks for the presence of more than one variant within user specified windows. 
+
+#     A bash dictionary for input parameters
+
+#     A bash dictionary for input parameters
 declare -A projectDic=(
     ["windowLength"]=0 #-w
     ["inputFile"]='' #-i
@@ -18,8 +26,10 @@ declare -A projectDic=(
     
 )
 
+#     A bash list of all possible nucleotide state transitions
 declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
 
+#     Takes user arguments from command line and assigns values to dictionary keys in 'projectDic'
 starter(){ #grabs the arguments
     local args=("$@")
     if [[ "$#" > 1 ]] && [[ ${args[0],,} != "--help" ]] && [[ ${args[0],,} != "-h" ]]; then
@@ -129,6 +139,8 @@ starter(){ #grabs the arguments
     fi
 }
 
+#     Current reference genomes for barley and soybean are hard coded here. For other species or reference updates,
+#     this will need to be changed.
 referenceAssignment(){
     if [[ ${var,,} == "barley" ]] || [[ ${var,,} == "b" ]]; then ##forced lowercase with ,,
         projectDic["referenceGenome"]+='/home/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
@@ -140,6 +152,8 @@ referenceAssignment(){
     fi
 }
 
+#    Loading modules on UMN MSI system. Three of the four are maintained by Morrell Lab (Corey Carter).
+#    Will need to be changed for use outside UMN/MSI
 moduleLoader(){ #load modules need for operations
 
     module load R
@@ -149,6 +163,7 @@ moduleLoader(){ #load modules need for operations
 
 }
 
+#    Performing vcf to bed conversion using bedops 'vcf2bed' function
 fileConverter(){
     if [ "${projectDic[OperationalStage]}" == "vcfTObed" ]; then ##Key and new input LOCATION
         local temp="${projectDic["tempOut"]}"SPLITVCF/
@@ -160,6 +175,7 @@ fileConverter(){
         done
         wait
         projectDic[OperationalStage]="bedTOfasta"
+    #    Takes a reference genome and bed file and generates small fasta files from reference genome intervals
     elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
         local temp="${projectDic["tempOut"]}"BED_SPLIT/
         local splitDir=("${temp}"*"${projectDic[filename]}"_new_interval.bed*)
@@ -201,6 +217,7 @@ fileConverter(){
 
 }
 
+#    Creates output directories
 dirStructure(){
     DATE=`date +"%m%d%Y-%H%M"`
     mkdir "${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
@@ -221,6 +238,11 @@ dirStructure(){
     fi
 }
 
+#    This is Python 3 code embedded in the bash script
+#    Expands coverage windows based on user-specified intervals
+#    Also checks for "Type One" and "Type Two" overlaps
+#    A "Type One overlap" is another SNP within immediate contextual sequence
+#    A "Type Two overlap" is another SNP within the expanded flanking contextual sequencing
 pythonBEDScanner(){
     inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" interval="${projectDic["windowLength"]}" geneDir="$geneDir" python3.6 - <<END_OF_PYTHON
     
@@ -661,8 +683,8 @@ main(){
     fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
     fileConverter ##ALL_COUNTS
     if [[ "${projectDic["allData"]}" == "false"  ]]; then
-        local templocation = "${projectDic["TempLoc"]}"
-        rm "${templocation}"
+        local templocation="${projectDic["TempLoc"]}"
+        rm -rf "${templocation}"
     fi
     echo -e "operations completed...\n"
         
