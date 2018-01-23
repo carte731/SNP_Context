@@ -221,7 +221,7 @@ dirStructure(){
 }
 
 pythonBEDScanner(){
-    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" geneDir="$geneDir" python3.6 - <<END_OF_PYTHON
+    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" interval="${projectDic["windowLength"]}" geneDir="$geneDir" python3.6 - <<END_OF_PYTHON
     
 import os
 from itertools import chain
@@ -350,7 +350,7 @@ def fileSaver(bedMapp, outputLoc, filename, projectName, geneDir):
 def bashInputs():
     outputLoc=str(os.environ['outputLoc'])
     filename=str(os.environ['filename'])
-    windowLength=int(os.environ['windowLength'])
+    interval=int(os.environ['interval'])
     inputFile=str(os.environ['inputFile'])
     projectName=str(os.environ['projectName'])
     geneDir=str(os.environ['geneDir'])
@@ -358,7 +358,7 @@ def bashInputs():
     return(outputLoc, filename, windowLength, inputFile, projectName, geneDir, baseOut)
 
 def main():
-    outputLoc, filename, windowLength, inputFile, projectName, geneDir, baseOut=bashInputs()
+    outputLoc, filename, interval, inputFile, projectName, geneDir, baseOut=bashInputs()
     bedmap, masterList=bedMapper(interval, outputLoc, projectName, filename, geneDir)
     binaryIntersect(masterList, interval, outputLoc, projectName, filename, geneDir, baseOut)
     fileSaver(bedmap, outputLoc, filename, projectName, geneDir)
