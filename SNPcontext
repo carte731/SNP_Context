@@ -29,6 +29,8 @@ declare -A projectDic=(
 #     A bash list of all possible nucleotide state transitions
 declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
 
+declare -a active=()
+
 #     Takes user arguments from command line and assigns values to dictionary keys in 'projectDic'
 starter(){ #grabs the arguments
     local args=("$@")
@@ -202,18 +204,16 @@ fileConverter(){
                 mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".txt
                 mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".log ##FIX Unique Log ID'S            
             done
+            active+="${geneDirection}"
         done
         projectDic["OperationalStage"]="allCounts"
     elif [ "${projectDic[OperationalStage]}" == "allCounts" ]; then
-        cd "${projectDic["tempOut"]}"COUNTS_TABLES/
         echo -e "creating combined tables..."
-        local geneDir=($(ls -d */))
         mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS
-        for loopGene in "${geneDir[@]}"; do
-            local subgene=${loopGene:0:4}
-            cd "${projectDic[outputLoc]}"COUNTS_TABLES/"${subgene}"/
-            all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/"${subgene}"/ > /dev/null 
-            mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${subgene}"/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${subgene}"_combined_counts.txt
+        for loopGene in "${active[@]}"; do
+            cd "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/
+            all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/ > /dev/null 
+            mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${loopGene}"_combined_counts.txt
         done
         projectDic["OperationalStage"]="DONE..."
     fi
