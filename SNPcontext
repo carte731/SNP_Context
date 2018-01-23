@@ -205,12 +205,15 @@ fileConverter(){
         done
         projectDic["OperationalStage"]="allCounts"
     elif [ "${projectDic[OperationalStage]}" == "allCounts" ]; then
+        cd "${projectDic["tempOut"]}"COUNTS_TABLES/
         echo -e "creating combined tables..."
+        local geneDir=($(ls -d */))
         mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS
-        for loopGene in "${dirL[@]}"; do
-            cd "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/
-            all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/ > /dev/null 
-            mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${loopGene}"_combined_counts.txt
+        for loopGene in "${geneDir[@]}"; do
+            local subgene=${loopGene:0:4}
+            cd "${projectDic[outputLoc]}"COUNTS_TABLES/"${subgene}"/
+            all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/"${subgene}"/ > /dev/null 
+            mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${subgene}"/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${subgene}"_combined_counts.txt
         done
         projectDic["OperationalStage"]="DONE..."
     fi
@@ -228,9 +231,6 @@ dirStructure(){
         mkdir "${projectDic[outputLoc]}"FASTA_SPLIT
         mkdir "${projectDic[outputLoc]}"BED_SPLIT
         projectDic["tempOut"]="${projectDic[outputLoc]}"
-        echo -e "<<<TEST>>>"
-        echo -e "${projectDic["tempOut"]}"
-        echo -e "<<<TEST>>>"
     elif [[ ${projectDic["allData"]} == "false" ]];then
         projectDic["TempLoc"]+=$(mktemp -d)
         mkdir "${projectDic[TempLoc]}"/SPLITVCF
