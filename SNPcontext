@@ -648,13 +648,13 @@ FASTA_SWEEP
 main(){
     moduleLoader ##LOADS CORRECT MODULES    
     starter "$@" ##ASSIGNS INPUTS TO HASHMAP
-    # if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
-    #     inputSize=$( stat -c%s "${projectDic["inputFile"]}")
-    #     if (( "${inputSize}" >= 110000000 )); then
-    #         echo -e "\n(.VCF) over 100Mb, generating job script and submitting operations to MSI."
-    #         jobCreator
-    #     fi
-    # fi
+    if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
+        inputSize=$( stat -c%s "${projectDic["inputFile"]}")
+        if (( "${inputSize}" >= 110000000 )); then
+            echo -e "\n(.VCF) over 100Mb, generating job script and submitting operations to MSI."
+            jobCreator
+        fi
+    fi
     dirStructure
     vcfSplit
     fileConverter ##MAKES BED FILE
