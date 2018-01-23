@@ -663,6 +663,7 @@ main(){
     if [[ "${projectDic["allData"]}" == "false"  ]]; then
         local templocation = "${projectDic["TempLoc"]}"
         rm "${templocation}"
+    fi
     echo -e "operations completed...\n"
         
 }
