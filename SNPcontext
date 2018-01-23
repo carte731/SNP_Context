@@ -221,7 +221,7 @@ dirStructure(){
 }
 
 pythonBEDScanner(){
-    inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" geneDir="$geneDir" python3.6 - <<END_OF_PYTHON
+    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" geneDir="$geneDir" python3.6 - <<END_OF_PYTHON
     
 import os
 from itertools import chain
@@ -274,7 +274,7 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
                 temp=[]
         return(bedMapper, masterList)
 
-def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, geneDir):
+def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, geneDir, baseOut):
     gateA=True
     gateB=True
     now = datetime.datetime.now()
@@ -339,7 +339,7 @@ def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, ge
         resultsB+="\nNo Type TWO window overlaps detected.\n"
     results += resultsA + "\n" + resultsB + "\n"
     results += "\nEND OF INTERVAL CHECKS.\nXXXXXXXXXXXXXXXXXXXXXX\n"
-    with open(outputLoc + projectName + "_" + "WindowOverlap.txt", 'a+') as window:
+    with open(baseOut + projectName + "_" + "WindowOverlap.txt", 'a+') as window:
         window.write(results)
 
 def fileSaver(bedMapp, outputLoc, filename, projectName, geneDir):
@@ -354,12 +354,13 @@ def bashInputs():
     inputFile=str(os.environ['inputFile'])
     projectName=str(os.environ['projectName'])
     geneDir=str(os.environ['geneDir'])
-    return(outputLoc, filename, windowLength, inputFile, projectName, geneDir)
+    baseOut=str(os.environ['baseOut'])
+    return(outputLoc, filename, windowLength, inputFile, projectName, geneDir, baseOut)
 
 def main():
-    outputLoc, filename, interval, inputFile, projectName, geneDir=bashInputs()
+    outputLoc, filename, windowLength, inputFile, projectName, geneDir, baseOut=bashInputs()
     bedmap, masterList=bedMapper(interval, outputLoc, projectName, filename, geneDir)
-    binaryIntersect(masterList, interval, outputLoc, projectName, filename, geneDir)
+    binaryIntersect(masterList, interval, outputLoc, projectName, filename, geneDir, baseOut)
     fileSaver(bedmap, outputLoc, filename, projectName, geneDir)
 main()
 
@@ -419,7 +420,7 @@ exit 0
 }
 
 vcfSplit(){
-    inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" python3.6 - <<VCF_SPLIT_END
+    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" python3.6 - <<VCF_SPLIT_END
 
 import os
 
@@ -477,7 +478,7 @@ def vcfSegments(inputFile):
                     commentGate=False
     return(header, geneDir)
 
-def vcfSpliter(header, geneDir, outputLoc, filename):
+def vcfSpliter(header, geneDir, outputLoc, filename, baseOut):
     for key in geneDir:
         output=''
         if(geneDir[key] != []):
@@ -487,7 +488,7 @@ def vcfSpliter(header, geneDir, outputLoc, filename):
                     output+="".join(geneDir[key])
                     vcfOut.write(output)
             else:
-                with open(outputLoc + "REJECTEDVCFs_" + filename + ".vcf","w") as vcfOut:
+                with open(baseOut + "REJECTEDVCFs_" + filename + ".vcf","w") as vcfOut:
                     output+=header
                     output+="".join(geneDir[key])
                     vcfOut.write(output)
@@ -497,12 +498,13 @@ def bashImport():
     inputFile=str(os.environ['inputFile'])
     filename=str(os.environ['filename'])
     projectName=str(os.environ['projectName'])
-    return(projectName, inputFile, outputLoc, filename)
+    baseOut=str(os.environ['baseOut'])
+    return(projectName, inputFile, outputLoc, filename, baseOut)
 
 def main():
-    projectName, inputFile, outputLoc, filename=bashImport()
+    projectName, inputFile, outputLoc, filename, baseOut=bashImport()
     header, geneDir=vcfSegments(inputFile)
-    vcfSpliter(header, geneDir, outputLoc, filename)
+    vcfSpliter(header, geneDir, outputLoc, filename, baseOut)
 
 main()
 
@@ -512,7 +514,7 @@ VCF_SPLIT_END
 
 fastaScanner(){
 
-    inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" geneTwo=${geneTwo} geneDirTwo="${geneDirTwo}" nMax="${projectDic["nMax"]}" windowLength="${projectDic["windowLength"]}" python3.6 - <<FASTA_SWEEP
+    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" geneTwo=${geneTwo} geneDirTwo="${geneDirTwo}" nMax="${projectDic["nMax"]}" windowLength="${projectDic["windowLength"]}" python3.6 - <<FASTA_SWEEP
     
 from itertools import chain
 import os
@@ -578,22 +580,22 @@ def fastaBasePop(master, interval):
         allRejected=True
     return(subMaster, allRejected, nList)
 
-def fileSaver(subMaster, master, nList, nMaxList, gene, allRejected):
+def fileSaver(subMaster, master, nList, nMaxList, gene, allRejected, baseOut):
     if(allRejected != True):
         with open(gene,"w") as newFasta:
             output="".join(chain.from_iterable(subMaster))
             newFasta.write(output)
     else:
-        with open(outputLoc + "FASTA_SPLIT/" + geneDirTwo + filename + ".fasta","w") as newFasta:
+        with open(baseOut + "FASTA_SPLIT/" + geneDirTwo + filename + ".fasta","w") as newFasta:
             output="".join(chain.from_iterable(master))
             newFasta.write(output)
         os.rename(outputLoc + "FASTA_SPLIT/" + geneDirTwo + filename + ".fasta", outputLoc + "ALLREJECTED_" + geneDirTwo + "_" + filename + ".fasta")
     if(len(nList) != 0):
-        with open(outputLoc + "N-BASE_FAILED_FASTAS.fasta","a") as newFasta:
+        with open(baseOut + "N-BASE_FAILED_FASTAS.fasta","a") as newFasta:
             output="".join(chain.from_iterable(nList))
             newFasta.write(output)
     if(len(nMaxList) != 0):
-        with open(outputLoc + "N-THRESHOLD_FAILED_FASTAS.fasta","a") as newFasta:
+        with open(baseOut + "N-THRESHOLD_FAILED_FASTAS.fasta","a") as newFasta:
             output="".join(chain.from_iterable(nMaxList))
             newFasta.write(output)
 
@@ -605,14 +607,15 @@ def bashImport():
     nMax=int(os.environ['nMax'])
     geneDirTwo=str(os.environ['geneDirTwo']) ##GENE Direction
     interval=int(os.environ['windowLength'])
-    return(inputFile, outputLoc, filename, gene, geneDirTwo, interval, nMax)
+    baseOut=int(os.environ['baseOut'])
+    return(inputFile, outputLoc, filename, gene, geneDirTwo, interval, nMax, baseOut)
 
 def main():
-    inputFile, outputLoc, filename, gene, geneDirTwo, interval, nMax = bashImport()
+    inputFile, outputLoc, filename, gene, geneDirTwo, interval, nMax, baseOut = bashImport()
     master=fastaMapper(gene)
     subMaster, allRejected, nList = fastaBasePop(master, interval)
     subMaster, nMaxList = fastaNpop(subMaster, allRejected, nMax)
-    fileSaver(subMaster, master, nList, nMaxList, gene, allRejected)
+    fileSaver(subMaster, master, nList, nMaxList, gene, allRejected, baseOut)
 
 main()
 
