@@ -104,7 +104,7 @@ starter(){ #grabs the arguments
                 fi
             elif [[ "${i,,}" == "-ad"  ]]; then
                 local var=${args[${indexPos}+1]}
-                projectDic["allData"]+="${var,,}"
+                projectDic["allData"]="${var,,}"
                 frontgate=1
             fi
             ((indexPos+=1))
