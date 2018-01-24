@@ -273,23 +273,22 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
                 sub.append(final)
                 sub.append(element)
                 intSize = int(sub[4]) - int(sub[2])
-                if(intSize >= 3): ##ADDED 
-                    if(interval >= 3):
-                        print("TEST_1")
-                        sub[2] = str(int(sub[2]) - interval)
-                        sub[4] = str(int(sub[4]) + interval)
-                    else:
-                        print("TEST_2")
-                        sub[2] = str(int(sub[2]) - 3)
-                        sub[4] = str(int(sub[4]) + 3)                    
+                if(interval >= 8):
+                    print("TEST_1")
+                    sub[2] = str(int(sub[2]) - interval)
+                    sub[4] = str(int(sub[4]) + interval)
                 else:
-                    if(interval >= 4):
-                        print("TEST_3")
-                        sub[2] = str(int(sub[2]) - interval)
-                        sub[4] = str(int(sub[4]) + interval)
+                    print("\nMinimum distance is 17 total bases, user entered amount of " + interval + " is below that. Defaulting to 9...\n")
+                    diffInt = abs(18 - intSize)
+                    if(diffInt > 0):
+                        if(diffInt % 2 != 0):
+                            diffInt+=1
+                        print("TEST_2")
+                        sub[2] = str(int(sub[2]) - (diffInt//2))
+                        sub[4] = str(int(sub[4]) + (diffInt//2))
                     else:
-                        print("TEST_4")
-                        sub[2] = str(int(sub[2]) - 7)
+                        print("TEST_3")
+                        sub[2] = str(int(sub[2]) - 8)
                         sub[4] = str(int(sub[4]) + 8)
                 a = sub[2]
                 b = sub[4]
