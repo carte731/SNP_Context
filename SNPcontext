@@ -41,7 +41,7 @@ starter(){ #grabs the arguments
             if [[ "${i,,}" == "-w" ]]; then ##Window expansion size
                 local var=${args[${indexPos}+1]}
                 if [[ "$var" =~ ^[0-9]+$ ]]; then ##Checks if it's a number, max expansion of 1000.
-                    if (( "$var" >= 4)); then
+                    if (( "$var" >= 2)); then
                         ((projectDic["windowLength"]+="$var"))
                         frontgate=1
                     fi
@@ -289,8 +289,8 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
                         sub[4] = str(int(sub[4]) + interval)
                     else:
                         print("TEST_4")
-                        sub[2] = str(int(sub[2]) - 8)
-                        sub[4] = str(int(sub[4]) + 8)
+                        sub[2] = str(int(sub[2]) - 2)
+                        sub[4] = str(int(sub[4]) + 2)
                 a = sub[2]
                 b = sub[4]
                 temp.append(int(a))
