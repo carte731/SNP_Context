@@ -401,10 +401,12 @@ jobCreator(){
 import os
 
 def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax):
-    job="#!/usr/bin/env bash\n\n#PBS -l mem=22gb,nodes=1:ppn=16,walltime=24:00:00\n#PBS -m abe\n#PBS -M " + email + "\n"
+    job="#!/bin/bash -l\n\n#PBS -l mem=22gb,nodes=1:ppn=16,walltime=24:00:00\n#PBS -m abe\n#PBS -M " + email + "\n"
     job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\n#PBS -q lab\nset -e\nset -o pipefail\n\n"
     job+="\nmodule load snpContext/1.0.0\n\n"
-    job+="snpcontext "
+    # job+="snpcontext "
+    job+="cd /panfs/roc/groups/9/morrellp/carte731/pipelineProject/Pipeline\n "
+    job+= "./SNPcontext"
     job+= "-i " + inputFile + " "
     job+= "-o " + outputLoc + " "
     job+= "-w " + windowLength + " "
