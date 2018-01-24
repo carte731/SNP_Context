@@ -3,9 +3,7 @@
 #    Corey Carter, St. Paul, MN - 09 January 2018
 #    This bash script is designed to pull contextual sequence flanking a SNP (variants) from a reference genome.
 #    The window size for contextual sequence can be user specificed.
-#    The program checks for the presence of more than one variant within user specified windows. 
-
-#     A bash dictionary for input parameters
+#    The program checks for the presence of more than one variant within user specified windows.
 
 #     A bash dictionary for input parameters
 declare -A projectDic=(
@@ -662,13 +660,13 @@ FASTA_SWEEP
 main(){
     moduleLoader ##LOADS CORRECT MODULES    
     starter "$@" ##ASSIGNS INPUTS TO HASHMAP
-    # if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
-    #     inputSize=$( stat -c%s "${projectDic["inputFile"]}")
-    #     if (( "${inputSize}" >= 110000000 )); then
-    #         echo -e "\n(.VCF) over 100Mb, generating job script and submitting operations to MSI."
-    #         jobCreator
-    #     fi
-    # fi
+    if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
+        inputSize=$( stat -c%s "${projectDic["inputFile"]}")
+        if (( "${inputSize}" >= 479000000 )); then ##479MB (in decimal) and 456MB (in binary)
+            echo -e "\n(.VCF) over 456Mb, generating job script and submitting operations to MSI."
+            jobCreator
+        fi
+    fi
     dirStructure
     vcfSplit
     fileConverter ##MAKES BED FILE
