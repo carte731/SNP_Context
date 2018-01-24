@@ -287,11 +287,11 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
                         print(diffInt)
                         sub[2] = str(int(sub[2]) - (diffInt//2))
                         sub[4] = str(int(sub[4]) + (diffInt//2))
-                        print(int(sub[4]) - int(sub[2]))
                     else:
                         print("TEST_3")
                         sub[2] = str(int(sub[2]) - 8)
                         sub[4] = str(int(sub[4]) + 8)
+                        print(int(sub[4]) - int(sub[2]))                        
                 a = sub[2]
                 b = sub[4]
                 temp.append(int(a))
