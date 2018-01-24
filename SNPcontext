@@ -563,6 +563,8 @@ def fastaMapper(gene):
                 final=''
             if((element == ">") and (element != "\n")):
                 if(sub != []):
+                    if(sub[0] != ">"):
+                        sub = [u.upper() for u in sub]
                     master.append(sub)
                     sub=[]
                     final=''
@@ -574,10 +576,6 @@ def fastaMapper(gene):
                 sub.append(final)
                 master.append(sub)
     return(master)
-
-def uppercase(master):
-    upperMaster = [[u.upper() for u in sub[1]] for sub in master]
-    return(upperMaster)
 
 def fastaNpop(subMaster, allRejected, nMax):
     maxP=nMax/100
@@ -642,7 +640,6 @@ def bashImport():
 def main():
     inputFile, outputLoc, filename, gene, geneDirTwo, interval, nMax, baseOut = bashImport()
     master=fastaMapper(gene)
-    master=uppercase(master)
     subMaster, allRejected, nList = fastaBasePop(master, interval)
     subMaster, nMaxList = fastaNpop(subMaster, allRejected, nMax)
     fileSaver(subMaster, master, nList, nMaxList, gene, allRejected, baseOut)
