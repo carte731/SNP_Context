@@ -596,9 +596,9 @@ def fastaBasePop(master, interval):
     allRejected=False
     subMaster=[]
     nList=[]
-    if(interval >= 8)
-        Linterval=interval - 3 ##change to 4
-        Rinterval=interval - 2 ##change to 4
+    # if(interval >= 8)
+    Linterval=interval - 3 ##change to 4
+    Rinterval=interval - 2 ##change to 4
     for element in master: ##CHANGE TO SUBTRACT CORRECT DISTANCES
         baseIn = element[1][Linterval:-Rinterval] ##MAYBE add +1 on Rinterval.
         if("N" not in baseIn):
