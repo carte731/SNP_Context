@@ -600,7 +600,7 @@ def fastaBasePop(master, interval):
     if(interval >= 8):
         Linterval=interval ##change to 4
         Rinterval=(-interval) ##change to 4
-        Linterval-=2
+        Linterval-=1
         Rinterval+=2
     else:
         Linterval=6 ##change to 4
