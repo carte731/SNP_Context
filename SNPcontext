@@ -310,11 +310,11 @@ def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, ge
             b=expandedList[i][1] ##B= right side
             if(interval >= 8): ####
                 subTA=expandedList[i+1][0]+(interval - 5) ##TYPE ONE
-                subTB=expandedList[i+1][1]-(interval + 6) ##TYPE ONE
+                subTB=expandedList[i+1][1]-(interval + 5) ##TYPE ONE
                 print(subTB - subTA)
             else:
                 subTA=expandedList[i+1][0]+5 ##TYPE ONE
-                subTB=expandedList[i+1][1]-6 ##TYPE ONE
+                subTB=expandedList[i+1][1]-5 ##TYPE ONE
                 print(subTB - subTA)
             subMA=expandedList[i+1][0] ##TYPE TWO
             subMB=expandedList[i+1][1] ##TYPE TWO
