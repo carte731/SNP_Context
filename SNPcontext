@@ -278,7 +278,7 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
                     sub[2] = str(int(sub[2]) - interval)
                     sub[4] = str(int(sub[4]) + interval)
                 else:
-                    print("\nMinimum distance is 17 total bases, user entered amount of " + interval + " is below that. Defaulting to 9...\n")
+                    print("\nMinimum distance is 17 total bases, user entered amount of " + str(interval) + " is below that. Defaulting to 9...\n")
                     diffInt = abs(18 - intSize)
                     if(diffInt > 0):
                         if(diffInt % 2 != 0):
