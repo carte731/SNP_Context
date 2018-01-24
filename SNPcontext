@@ -403,7 +403,7 @@ import os
 def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax):
     job="#!/usr/bin/env bash\n\n#PBS -l mem=22gb,nodes=1:ppn=16,walltime=24:00:00\n#PBS -m abe\n#PBS -M " + email + "\n"
     job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\n#PBS -q lab\nset -e\nset -o pipefail\n\n"
-    job+="module load snpContext/1.0.0\n\n"
+    job+="\nmodule load snpContext/1.0.0\n\n"
     job+="snpcontext "
     job+= "-i " + inputFile + " "
     job+= "-o " + outputLoc + " "
@@ -662,7 +662,8 @@ main(){
     starter "$@" ##ASSIGNS INPUTS TO HASHMAP
     if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
         inputSize=$( stat -c%s "${projectDic["inputFile"]}")
-        if (( "${inputSize}" >= 479000000 )); then ##479MB (in decimal) and 456MB (in binary)
+        # if (( "${inputSize}" >= 479000000 )); then ##479MB (in decimal) and 456MB (in binary)
+        if (( "${inputSize}" >= 100000000 )); then ##479MB (in decimal) and 456MB (in binary)
             echo -e "\n(.VCF) over 456Mb, generating job script and submitting operations to MSI."
             jobCreator
         fi
