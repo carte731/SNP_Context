@@ -599,14 +599,14 @@ def fastaBasePop(master, interval):
     nList=[]
     if(interval >= 8):
         Linterval=interval ##change to 4
-        Rinterval=(-interval) ##change to 4
-        Linterval-=1
-        Rinterval+=2
+        Rinterval=interval ##change to 4
+        Linterval-=2
+        Rinterval+=1
     else:
         Linterval=6 ##change to 4
         Rinterval=7 ##change to 4
     for element in master: ##CHANGE TO SUBTRACT CORRECT DISTANCES
-        baseIn = element[1][Linterval:Rinterval] ##MAYBE add +1 on Rinterval.
+        baseIn = element[1][Linterval:-Rinterval] ##MAYBE add +1 on Rinterval.
         print(baseIn)
         if("N" not in baseIn):
             subMaster.append(element)
