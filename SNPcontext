@@ -279,7 +279,7 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
                     sub[2] = str(int(sub[2]) - interval)
                     sub[4] = str(int(sub[4]) + interval)
                 else:
-                    diffInt = abs(17 - intSize)
+                    diffInt = abs(18 - intSize)
                     if(diffInt < 17):
                         if(diffInt % 2 != 0):
                             diffInt+=1
