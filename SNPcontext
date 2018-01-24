@@ -663,7 +663,7 @@ main(){
     if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
         inputSize=$( stat -c%s "${projectDic["inputFile"]}")
         # if (( "${inputSize}" >= 479000000 )); then ##479MB (in decimal) and 456MB (in binary)
-        if (( "${inputSize}" >= 100000000 )); then ##479MB (in decimal) and 456MB (in binary)
+        if (( "${inputSize}" > 0 )); then ##479MB (in decimal) and 456MB (in binary)
             echo -e "\n(.VCF) over 456Mb, generating job script and submitting operations to MSI."
             jobCreator
         fi
