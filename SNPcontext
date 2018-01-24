@@ -575,12 +575,16 @@ def fastaMapper(gene):
                 master.append(sub)
     return(master)
 
+def uppercase(master):
+    upperMaster = [[u.upper() for u in sub[1]] for sub in master]
+    return(upperMaster)
+
 def fastaNpop(subMaster, allRejected, nMax):
     maxP=nMax/100
     newsubMaster=[]
     nMaxList=[]
     for subListing in subMaster:
-        totalN = len([x.upper() for x in subListing[1] if x == "N"])
+        totalN = len([x for x in subListing[1] if x == "N"])
         nPercent=totalN/len(subListing[1])
         if(nPercent >= maxP):
             nMaxList.append(subListing)
@@ -638,6 +642,7 @@ def bashImport():
 def main():
     inputFile, outputLoc, filename, gene, geneDirTwo, interval, nMax, baseOut = bashImport()
     master=fastaMapper(gene)
+    master=uppercase(master)
     subMaster, allRejected, nList = fastaBasePop(master, interval)
     subMaster, nMaxList = fastaNpop(subMaster, allRejected, nMax)
     fileSaver(subMaster, master, nList, nMaxList, gene, allRejected, baseOut)
