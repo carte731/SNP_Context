@@ -273,7 +273,7 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
                 sub.append(final)
                 sub.append(element)
                 intSize = int(sub[4]) - int(sub[2])
-                print(len(intSize))
+                print(intSize)
                 if(intSize >= 3): ##ADDED 
                     if(interval >= 3):
                         sub[2] = str(int(sub[2]) - interval)
