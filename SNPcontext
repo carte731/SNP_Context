@@ -396,6 +396,7 @@ END_OF_PYTHON
 jobCreator(){
     echo -e "Enter email for PBS job updates: "
     read userEmail
+    logout
     echo -e "Enter Mesabi password: "
     ssh Mesabi
     email="${userEmail}" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" python3.6 - <<JOB_CREATED
