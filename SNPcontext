@@ -396,13 +396,15 @@ END_OF_PYTHON
 jobCreator(){
     echo -e "Enter email for PBS job updates: "
     read userEmail
+    echo -e "Enter Mesabi password: "
+    ssh mesabi
     email="${userEmail}" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" python3.6 - <<JOB_CREATED
 
 import os
 
 def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax):
     job="#!/bin/bash -l\n\n#PBS -l mem=20gb,nodes=1:ppn=4,walltime=24:00:00\n#PBS -m abe\n#PBS -M " + email + "\n"
-    job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\n#PBS -q Mesabi/small\nset -e\nset -o pipefail\n\n"
+    job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\n#PBS -q small\nset -e\nset -o pipefail\n\n"
     job+="#PBS -o " + outputLoc + "_" + projectName + "\n#PBS -e " + outputLoc + "_" + projectName + "\n"
     job+="\nmodule load snpContext/1.0.0\n\n"
     # job+="snpcontext "
