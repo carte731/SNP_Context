@@ -396,7 +396,7 @@ END_OF_PYTHON
 jobCreator(){
     echo -e "Enter email for PBS job updates: "
     read userEmail
-    ssh mesabi
+    # ssh mesabi
     email="${userEmail}" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" python3.6 - <<JOB_CREATED
 
 import os
@@ -441,8 +441,9 @@ main()
     
 JOB_CREATED
 
-# echo -e "Enter Mesabi password: "
 qsub "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
+# echo -e "Enter Mesabi password: "
+# ssh carte731@login03 '~/pipelineProject/Pipeline/SNPcontext'
 echo -e "\njob submited.\nEXITING...\n"
 exit 0
 
