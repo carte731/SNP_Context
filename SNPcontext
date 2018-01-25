@@ -441,9 +441,9 @@ main()
 JOB_CREATED
 
 echo -e "Enter Mesabi password: "
-ssh -l ${USER} mesabi
+ssh -l ${USER} mesabi "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
 echo -e "\njob submited.\nEXITING...\n"
-qsub "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
+# qsub "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
 exit 0
 
 }
