@@ -440,13 +440,14 @@ main()
     
 JOB_CREATED
 
-echo -e "\njob submited.\nEXITING...\n"
 echo -e "Enter Mesabi password: "
-<<  EOF 
+bash -c <<  EOF 
 ssh Mesabi
 qsub "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
-exit 0
 EOF
+echo -e "\njob submited.\nEXITING...\n"
+exit 0
+
 }
 
 vcfSplit(){
