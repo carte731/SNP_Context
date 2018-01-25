@@ -406,7 +406,7 @@ def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, ema
     job+="#PBS -o " + outputLoc + "_" + projectName + "\n#PBS -e " + outputLoc + "_" + projectName + "\n"
     job+="\nmodule load snpContext/1.0.0\n\n"
     # job+="snpcontext "
-    job+="/panfs/roc/groups/9/morrellp/public/Software/SNP_Context "
+    job+="/panfs/roc/groups/9/morrellp/public/Software/SNP_Context/SNPcontext "
     job+= "-i " + inputFile + " "
     job+= "-o " + outputLoc + " "
     job+= "-w " + windowLength + " "
