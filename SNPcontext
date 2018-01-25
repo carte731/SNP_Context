@@ -605,7 +605,10 @@ def fastaBasePop(master, interval):
         Rinterval=7 ##change to 4
     for element in master: ##CHANGE TO SUBTRACT CORRECT DISTANCES
         baseIn = element[1][(Linterval):-(Rinterval)] ##MAYBE add +1 on Rinterval.
+        print("TEST")
         print(baseIn)
+        print(element[1])
+        print("<<<TEST_END>>>")
         if("N" not in baseIn):
             subMaster.append(element)
         else:
