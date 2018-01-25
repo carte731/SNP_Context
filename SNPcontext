@@ -443,7 +443,7 @@ JOB_CREATED
 
 qsub "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
 # echo -e "Enter Mesabi password: "
-# ssh carte731@login03 '~/pipelineProject/Pipeline/SNPcontext'
+# ssh carte731@login03 '/usr/local/bin/qsub ~/pipelineProject/Pipeline/SNPcontext'
 echo -e "\njob submited.\nEXITING...\n"
 exit 0
 
