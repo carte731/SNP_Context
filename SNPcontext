@@ -405,7 +405,7 @@ def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, ema
     job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\n#PBS -q lab\nset -e\nset -o pipefail\n\n"
     job+="\nmodule load snpContext/1.0.0\n\n"
     # job+="snpcontext "
-    job+="source /panfs/roc/groups/9/morrellp/carte731/pipelineProject/Pipeline/SNPcontext\n "
+    job+="/panfs/roc/groups/9/morrellp/carte731/pipelineProject/Pipeline/SNPcontext "
     job+= "-i " + inputFile + " "
     job+= "-o " + outputLoc + " "
     job+= "-w " + windowLength + " "
