@@ -403,9 +403,10 @@ import os
 def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax):
     job="#!/bin/bash -l\n\n#PBS -l mem=22gb,nodes=1:ppn=16,walltime=24:00:00\n#PBS -m abe\n#PBS -M " + email + "\n"
     job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\n#PBS -q lab\nset -e\nset -o pipefail\n\n"
+    job+="#PBS -o " + outputLoc + "_" + projectName + "\n#PBS -e " + outputLoc + "_" + projectName + "\n"
     job+="\nmodule load snpContext/1.0.0\n\n"
     # job+="snpcontext "
-    job+="/panfs/roc/groups/9/morrellp/carte731/pipelineProject/Pipeline/SNPcontext "
+    job+="/panfs/roc/groups/9/morrellp/public/Software/SNP_Context "
     job+= "-i " + inputFile + " "
     job+= "-o " + outputLoc + " "
     job+= "-w " + windowLength + " "
@@ -663,8 +664,8 @@ main(){
     starter "$@" ##ASSIGNS INPUTS TO HASHMAP
     if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
         inputSize=$( stat -c%s "${projectDic["inputFile"]}")
-        # if (( "${inputSize}" >= 479000000 )); then ##479MB (in decimal) and 456MB (in binary)
-        if (( "${inputSize}" > 0 )); then ##479MB (in decimal) and 456MB (in binary)
+        if (( "${inputSize}" >= 479000000 )); then ##479MB (in decimal) and 456MB (in binary)
+        # if (( "${inputSize}" > 0 )); then ##479MB (in decimal) and 456MB (in binary)
             echo -e "\n(.VCF) over 456Mb, generating job script and submitting operations to MSI."
             jobCreator
         fi
