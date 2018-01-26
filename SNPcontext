@@ -441,24 +441,14 @@ main()
     
 JOB_CREATED
 
-
-
-# # qsub "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
-# echo -e "Enter Mesabi password: "
-# var="${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
-# # ssh carte731@mesabi bash -c '/usr/local/bin/qsub ${var}'
+# qsub "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
+echo -e "Enter Mesabi password: "
+var="${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
+# ssh carte731@mesabi bash -c '/usr/local/bin/qsub ${var}'
+ssh carte731@login 'echo "testing."'
 # ssh carte731@mesabi 'host'
-# echo -e "\njob submited.\nEXITING...\n"
-# exit 0
-
-}
-
-testing(){
-
-bash - <<ROF
-echo "testing"
-exit
-ROF
+echo -e "\njob submited.\nEXITING...\n"
+exit 0
 
 }
 
@@ -681,7 +671,6 @@ main(){
         # if (( "${inputSize}" > 0 )); then ##479MB (in decimal) and 456MB (in binary)
             echo -e "\n(.VCF) over 456Mb, generating job script and submitting operations to MSI."
             jobCreator
-            testing
         fi
     fi
     dirStructure
