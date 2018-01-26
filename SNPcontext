@@ -445,7 +445,8 @@ JOB_CREATED
 echo -e "Enter Mesabi password: "
 var="${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
 # ssh carte731@mesabi bash -c '/usr/local/bin/qsub ${var}'
-ssh carte731@login ' ssh carte731@masabi "echo hello" '
+ssh carte731@login /bin/bash << EOF ' ssh carte731@masabi "echo hello" ' 
+EOF
 # ssh carte731@mesabi 'stuff'
 echo -e "\njob submited.\nEXITING...\n"
 exit 0
