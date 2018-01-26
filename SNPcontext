@@ -441,7 +441,7 @@ main()
     
 JOB_CREATED
 
-test
+
 
 # # qsub "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
 # echo -e "Enter Mesabi password: "
@@ -453,7 +453,7 @@ test
 
 }
 
-test(){
+testing(){
 
 bash - <<ROF
 echo "testing"
@@ -681,6 +681,7 @@ main(){
         # if (( "${inputSize}" > 0 )); then ##479MB (in decimal) and 456MB (in binary)
             echo -e "\n(.VCF) over 456Mb, generating job script and submitting operations to MSI."
             jobCreator
+            testing
         fi
     fi
     dirStructure
