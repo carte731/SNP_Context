@@ -441,6 +441,11 @@ main()
     
 JOB_CREATED
 
+bash - <<ROF
+echo "testing"
+
+ROF
+
 # qsub "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
 echo -e "Enter Mesabi password: "
 var="${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
