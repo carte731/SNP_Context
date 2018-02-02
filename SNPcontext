@@ -396,7 +396,6 @@ END_OF_PYTHON
 jobCreator(){
     echo -e "Enter email for PBS job updates: "
     read userEmail
-    # ssh mesabi
     email="${userEmail}" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" python3.6 - <<JOB_CREATED
 
 import os
@@ -441,13 +440,7 @@ main()
     
 JOB_CREATED
 
-# qsub "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
-echo -e "Enter Mesabi password: "
-var="${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
-# ssh carte731@mesabi bash -c '/usr/local/bin/qsub ${var}'
-ssh carte731@login
-ssh carte731@mesabi "echo hello"
-# ssh carte731@mesabi 'stuff'
+qsub "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
 echo -e "\njob submited.\nEXITING...\n"
 exit 0
 
@@ -669,7 +662,6 @@ main(){
     if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
         inputSize=$( stat -c%s "${projectDic["inputFile"]}")
         if (( "${inputSize}" >= 479000000 )); then ##479MB (in decimal) and 456MB (in binary)
-        # if (( "${inputSize}" > 0 )); then ##479MB (in decimal) and 456MB (in binary)
             echo -e "\n(.VCF) over 456Mb, generating job script and submitting operations to MSI."
             jobCreator
         fi
