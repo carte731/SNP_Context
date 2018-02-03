@@ -14,6 +14,7 @@ declare -A projectDic=(
     ["filename"]=''
     ["projectName"]='out' #-p
     ["flanks"]=0 #-f
+    ["referenceGenomeChar"]=''
     ["referenceGenome"]='' #-r
     ["OperationalStage"]='vcfTObed'
     ["nMax"]=0 ##-n
@@ -147,11 +148,14 @@ starter(){ #grabs the arguments
 #     this will need to be changed.
 referenceAssignment(){
     if [[ ${var,,} == "barley" ]] || [[ ${var,,} == "b" ]]; then ##forced lowercase with ,,
+        projectDic["referenceGenomeChar"]+='b'
         projectDic["referenceGenome"]+='/home/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
     elif [[ ${var,,} == "soy bean" ]] || [[ ${var,,} == "s" ]] || [[ ${var,,} == "soy" ]]; then
+        projectDic["referenceGenomeChar"]+='s'
         projectDic["referenceGenome"]+="panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Soybean/PhytozomeV11/Gmax/assembly/Gmax_275_v2.0.fa"
     else
         echo -e "\nPlease enter a valid reference genome. Defaulting to Barley reference.\n"
+        projectDic["referenceGenomeChar"]+='b'
         projectDic["referenceGenome"]+='/home/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
     fi
 }
@@ -418,7 +422,7 @@ def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, ema
     job+= "-p " + projectName + " "
     job+= "-r " + referenceGenome + " "
     job+= "-ad " + allData + " "
-    job+= "-j " + nMax + " "
+    job+= "-n " + nMax + " "
     job+= "-JOB THIS_IS_A_JOB"
 
     with open(outputLoc + projectName + ".job", "w") as jobScript:
