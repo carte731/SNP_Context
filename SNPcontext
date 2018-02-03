@@ -136,7 +136,7 @@ starter(){ #grabs the arguments
         helpPrintOut+=$'\n\t-a [(true/false) Do you want all temp files (vcf,bed and fasta) to be saved in your output directory]'
         helpPrintOut+=$'\n\t-f [(number between 0 and 2) (flank size for aln_to_counts)]'
         helpPrintOut+=$'\n\t-n [(number)(The percentage of accepted indels in the FASTA file)]'
-        helpPrintOut+=$'\n\t-ad [(true or false) (Which stands for “all data”, this allows you to keep all intermediate files (split VCFs, BED, new interval BEDs, FASTA files) that are normally deleted after processing. Defaults to false, which deletes intermedidate files.)]\n'
+        helpPrintOut+=$'\n\t-ad [(true or false) (Which stands for “all data”, this allows you to keep all intermediate files (split VCFs, BED, new interval BEDs, FASTA files)\n\t that are normally deleted after processing. Defaults to false, which deletes intermedidate files.)]\n'
         echo "$helpPrintOut"
         exit -0
     fi
