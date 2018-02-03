@@ -130,6 +130,7 @@ starter(){ #grabs the arguments
         local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
         helpPrintOut+=$'\nSNPcontext -i <input VCF> -o <output> -r <reference genome> -w <expansion size> -f <flank size> -p <project name> -n <acceptable Indel %> -ad <saved all data>\n'
         helpPrintOut+=$'\n\t------------------------\n'
+        helpPrintOut+=$'\n\t**Input arguments can be in ANY order.**\n'
         helpPrintOut+=$'\n\t-i [(complete path to VCF file) (the VCF input file)]\n\t-o [(complete path to location) (The output location, if not entered it will default to the same location as your input file.)]'
         helpPrintOut+=$'\n\t-r [(barley or b, soy bean or s )(Selects the reference genome, defaults to Barley if not specified.)]\n\t-w [(Expansion window size)(The expandable window size around the SNP location, 8 on both ends is the deafult.)]'
         helpPrintOut+=$'\n\t-p [project name]\n\t-n [max percentage of indels allowed in fasta files]'
