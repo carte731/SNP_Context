@@ -6,6 +6,7 @@
 #    The program checks for the presence of more than one variant within user specified windows.
 
 #     A bash dictionary for input parameters
+
 declare -A projectDic=(
     ["windowLength"]=0 #-w
     ["inputFile"]='' #-i
@@ -475,58 +476,31 @@ def vcfSegments(inputFile):
         'TtoC':[],
         'TtoG':[],
         'rejected':[],
+        'header':[],
 
     }
     
     with open(inputFile, "rb") as raw:
-        commentGate=False
-        test=raw.read()
-        sub=[]
-        header=''
-        results=''
-        for ele in test:
-            element=chr(ele)
-            if(element == "#"):
-                commentGate=True
-            if((commentGate == False)):
-                if((element != '\t') and (element != '\n')):
-                    results = results + element
-                elif((element == '\t') and (element != '\n')):
-                    sub.append(results)
-                    results=''
-                    sub.append(element)
-                if(element == "\n"):
-                    results = results + element
-                    sub.append(results)
-                    gene= str(sub[6]) + "to" + str(sub[8])
+        for inx, ele in enumerate(raw):
+            if(chr(ele[0]) != "#"):
+                    gene = chr(ele[26]) + "to" + chr(ele[28])
                     if gene in geneDir:
-                        geneDir[gene]+=sub
-                        results=''
-                        sub=[]
+                        geneDir[gene]+=ele
                     else:
-                        geneDir['rejected']+=sub
-                        results=''
-                        sub=[]
+                        geneDir['rejected']+=ele
             else:
-                header+=element
-                if(element == "\n"):
-                    commentGate=False
-    return(header, geneDir)
+                geneDir['header']+=ele
+    return(geneDir)
 
-def vcfSpliter(header, geneDir, outputLoc, filename, baseOut):
+def vcfSpliter(geneDir, outputLoc, filename, baseOut):
+    output=bytearray()
     for key in geneDir:
-        output=''
-        if(geneDir[key] != []):
-            if(key != "rejected"):
-                with open(outputLoc + "SPLITVCF/" + key + "_split_" + filename + ".vcf","w") as vcfOut:
-                    output+=header
-                    output+="".join(geneDir[key])
-                    vcfOut.write(output)
-            else:
-                with open(baseOut + "REJECTEDVCFs_" + filename + ".vcf","w") as vcfOut:
-                    output+=header
-                    output+="".join(geneDir[key])
-                    vcfOut.write(output)
+        if((geneDir[key] != []) and (key != "header")):
+            with open(outputLoc + "SPLITVCF/" + key + "_split_" + filename + ".vcf","wb") as vcfOut:
+                output.extend(geneDir['header'])
+                output.extend(geneDir[key])
+                vcfOut.write(output)
+                output.clear()
 
 def bashImport():
     outputLoc=str(os.environ['outputLoc'])
@@ -538,8 +512,8 @@ def bashImport():
 
 def main():
     projectName, inputFile, outputLoc, filename, baseOut=bashImport()
-    header, geneDir=vcfSegments(inputFile)
-    vcfSpliter(header, geneDir, outputLoc, filename, baseOut)
+    geneDir=vcfSegments(inputFile)
+    vcfSpliter(geneDir, outputLoc, filename, baseOut)
 
 main()
 
