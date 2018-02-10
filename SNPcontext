@@ -483,7 +483,7 @@ def vcfSegments(inputFile):
     with open(inputFile, "rb") as raw:
         print("\nOPEN\n")
         for inx, ele in enumerate(raw):
-            print("\nLOOP " + inx)
+            print("\nLOOP " + str(inx))
             if(chr(ele[0]) != "#"):
                     gene = chr(ele[26]) + "to" + chr(ele[28])
                     if gene in geneDir:
