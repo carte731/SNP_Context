@@ -495,12 +495,20 @@ def vcfSegments(inputFile):
 def vcfSpliter(geneDir, outputLoc, filename, baseOut):
     output=bytearray()
     for key in geneDir:
-        if((geneDir[key] != []) and (key != "header")):
-            with open(outputLoc + "SPLITVCF/" + key + "_split_" + filename + ".vcf","wb") as vcfOut:
-                output.extend(geneDir['header'])
-                output.extend(geneDir[key])
-                vcfOut.write(output)
-                output.clear()
+        if(geneDir[key] != []):
+            if((key != "rejected") and (key != "header")):
+                with open(outputLoc + "SPLITVCF/" + key + "_split_" + filename + ".vcf","wb") as vcfOut:
+                    output.extend(geneDir['header'])
+                    output.extend(geneDir[key])
+                    vcfOut.write(output)
+                    output.clear()
+            else:
+                if(key != "header"):
+                    with open(baseOut + "REJECTEDVCFs_" + filename + ".vcf","wb") as vcfOut:
+                        output.extend(geneDir['header'])
+                        output.extend(geneDir[key])
+                        vcfOut.write(output)
+                        output.clear()
 
 def bashImport():
     outputLoc=str(os.environ['outputLoc'])
