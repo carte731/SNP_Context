@@ -481,7 +481,9 @@ def vcfSegments(inputFile):
     }
     
     with open(inputFile, "rb") as raw:
+        print("OPEN")
         for inx, ele in enumerate(raw):
+            print("LOOP " + inx)
             if(chr(ele[0]) != "#"):
                     gene = chr(ele[26]) + "to" + chr(ele[28])
                     if gene in geneDir:
@@ -489,7 +491,9 @@ def vcfSegments(inputFile):
                     else:
                         geneDir['rejected']+=ele
             else:
+                print("HEAD")
                 geneDir['header']+=ele
+    print("RETURNING")
     return(geneDir)
 
 def vcfSpliter(geneDir, outputLoc, filename, baseOut):
