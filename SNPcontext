@@ -542,7 +542,7 @@ def bashImport():
 def main():
     projectName, inputFile, outputLoc, filename, baseOut=bashImport()
     geneDir=geneDirCreate()
-    geneDir=vcfSegments(inputFile)
+    geneDir=vcfSegments(inputFile, geneDir)
     vcfSpliter(geneDir, outputLoc, filename, baseOut)
 
 main()
