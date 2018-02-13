@@ -460,75 +460,76 @@ vcfSplit(){
 
 import os
 
-def vcfSegments(inputFile):
+def geneDirCreate():
     geneDir={
 
-        'AtoC':[],
-        'AtoG':[],
-        'AtoT':[],
-        'CtoA':[],
-        'CtoG':[],
-        'CtoT':[],
-        'GtoA':[],
-        'GtoC':[],
-        'GtoT':[],
-        'TtoA':[],
-        'TtoC':[],
-        'TtoG':[],
-        'rejected':[],
-        'header':[],
-
+        'AtoC':bytearray(),
+        'AtoG':bytearray(),
+        'AtoT':bytearray(),
+        'CtoA':bytearray(),
+        'CtoG':bytearray(),
+        'CtoT':bytearray(),
+        'GtoA':bytearray(),
+        'GtoC':bytearray(),
+        'GtoT':bytearray(),
+        'TtoA':bytearray(),
+        'TtoC':bytearray(),
+        'TtoG':bytearray(),
+        'rejected':bytearray(),
+        'header':bytearray(),
+        
     }
+    return(geneDir)
 
+def vcfSegments(inputFile, geneDir):
     with open(inputFile, "rb") as raw:
         sub=[]
-        header=''
+        counter=0
+        gene=''
         results=''
-        for inx, ele in enumerate(raw):
-            if(chr(ele[0]) != "#"):
-                for subE in ele:
-                    element=chr(subE)
+        for readLine in raw:
+            sub.clear()
+            gene=''
+            results=''
+            gate=True
+            counter=0
+            while((gate == True) and (counter <= len(readLine))):
+                element = chr(readLine[counter])
+                if((element != '#') or (chr(readLine[0]) != "#")):                                
                     if((element != '\t') and (element != '\n')):
                         results = results + element
                     elif((element == '\t') and (element != '\n')):
                         sub.append(results)
-                        results=''
                         sub.append(element)
-                    if(element == "\n"):
-                        results = results + element
-                        sub.append(results)
+                        results=''
+                    if((element == "\n") or (len(sub) == 9)):
                         gene= str(sub[6]) + "to" + str(sub[8])
                         if gene in geneDir:
-                            geneDir[gene]+=sub
-                            results=''
-                            # sub=[]
+                            geneDir[gene].extend(readLine)
                             sub.clear()
+                            gate=False
                         else:
-                            geneDir['rejected']+=sub
-                            results=''
-                            # sub=[]
+                            geneDir['rejected'].extend(readLine)
                             sub.clear()
-            else:
-                geneDir['header']+=ele
+                            gate=False
+                else:
+                    geneDir['header'].extend(readLine)
+                    gate=False
+                counter+=1
     return(geneDir)
 
 def vcfSpliter(geneDir, outputLoc, filename, baseOut):
-    output=bytearray()
     for key in geneDir:
-        if(geneDir[key] != []):
+        if(geneDir[key]):
             if((key != "rejected") and (key != "header")):
-                with open(outputLoc + "SPLITVCF/" + key + "_split_" + filename + ".vcf","wb") as vcfOut:
-                    output.extend(geneDir['header'])
-                    output.extend(geneDir[key])
-                    vcfOut.write(output)
-                    output.clear()
+                with open(outputLoc + "SPLITVCF/" + key + "_split_" + filename + ".vcf","ab") as vcfOut:
+                    vcfOut.write(geneDir['header'])
+                    vcfOut.write(geneDir[key])
             else:
                 if(key != "header"):
-                    with open(baseOut + "REJECTEDVCFs_" + filename + ".vcf","wb") as vcfOut:
-                        output.extend(geneDir['header'])
-                        output.extend(geneDir[key])
-                        vcfOut.write(output)
-                        output.clear()
+                    with open(baseOut + "REJECTEDVCFs_" + filename + ".vcf","ab") as vcfOut:
+                        vcfOut.write(geneDir['header'])
+                        vcfOut.write(geneDir[key])
 
 def bashImport():
     outputLoc=str(os.environ['outputLoc'])
@@ -540,6 +541,7 @@ def bashImport():
 
 def main():
     projectName, inputFile, outputLoc, filename, baseOut=bashImport()
+    geneDir=geneDirCreate()
     geneDir=vcfSegments(inputFile)
     vcfSpliter(geneDir, outputLoc, filename, baseOut)
 
