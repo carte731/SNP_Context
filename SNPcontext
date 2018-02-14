@@ -267,9 +267,13 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
     temp=[] ##FOR MASTERLIST
     final=''
     with open(outputLoc + "BED_SPLIT/" + geneDir + "_split_" + filename + ".bed", "rb") as bed_test: ##Change to input variables
-        bedmap=bed_test.read()
-        for asii in bedmap:
-            element = chr(asii)
+        # bedmap=bed_test.read()
+        counter=0
+        length = os.fstat(bed_test.fileno()).st_size
+        while(counter <= length)
+        # for bedmap in bed_test:
+            # for asii in bedmap:
+            element = bed_test.read(1).decode("ascii")
             if((element != '\t') and (element != '\n')):
                 final = final + element
             elif((element == '\t') and (element != '\n')):
@@ -301,8 +305,9 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
                 bedMapper.append(sub)
                 masterList.append(temp)
                 final=''
-                sub=[]
-                temp=[]
+                sub.clear() ## was sub=[]
+                temp.clear() ## was sub=[]
+            counter+=1
         return(bedMapper, masterList)
 
 def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, geneDir, baseOut):
