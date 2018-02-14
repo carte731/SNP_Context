@@ -257,6 +257,7 @@ pythonBEDScanner(){
     
 import os
 import re
+import subprocess
 from itertools import chain
 # import itertools
 import datetime
