@@ -256,11 +256,15 @@ pythonBEDScanner(){
     inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" interval="${projectDic["windowLength"]}" geneDir="$geneDir" python3.6 - <<END_OF_PYTHON
     
 import os
+import re
 from itertools import chain
 # import itertools
 import datetime
 
 def bedMapper(interval, outputLoc, projectName, filename, geneDir):
+    output = str(subprocess.check_output(['wc', '-m', outputLoc + "BED_SPLIT/" + geneDir + "_split_" + filename + ".bed"]))
+    length = re.findall(r'\d+', output)
+    length = int(length[0])
     bedMapper=[]
     masterList=[]
     sub=[] ##FOR BEDMAPPER
@@ -268,9 +272,9 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
     final=''
     with open(outputLoc + "BED_SPLIT/" + geneDir + "_split_" + filename + ".bed", "rb") as bed_test: ##Change to input variables
         # bedmap=bed_test.read()
-        counter=0
-        length = os.fstat(bed_test.fileno()).st_size
-        while(counter <= length):
+        # counter=0
+        # length = os.fstat(bed_test.fileno()).st_size
+        for i in range(length)
         # for bedmap in bed_test:
             # for asii in bedmap:
             element = bed_test.read(1).decode("ascii")
@@ -305,8 +309,10 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
                 bedMapper.append(sub)
                 masterList.append(temp)
                 final=''
-                sub.clear() ## was sub=[]
-                temp.clear() ## was sub=[]
+                sub=[] ## was sub=[]
+                # sub.clear() ## was sub=[]
+                temp=[] ## was sub=[]
+                # temp.clear() ## was sub=[]
             counter+=1
         return(bedMapper, masterList)
 
