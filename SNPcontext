@@ -274,7 +274,7 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
         # bedmap=bed_test.read()
         # counter=0
         # length = os.fstat(bed_test.fileno()).st_size
-        for i in range(length)
+        for i in range(length):
         # for bedmap in bed_test:
             # for asii in bedmap:
             element = bed_test.read(1).decode("ascii")
