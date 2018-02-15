@@ -316,7 +316,7 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
                 # sub.clear() ## was sub=[]
                 temp=[] ## was sub=[]
                 # temp.clear() ## was sub=[]
-            counter+=1
+            # counter+=1
         fileSaver(bedMapper, outputLoc, filename, projectName, geneDir)
         return(masterList)
             # counter+=1
