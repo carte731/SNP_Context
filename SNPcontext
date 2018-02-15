@@ -395,7 +395,7 @@ def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, ge
 
 def fileSaver(bedMapp, outputLoc, filename, projectName, geneDir):
         # output="".join(chain.from_iterable(bedMapp))
-        with open(outputLoc + "BED_SPLIT/" + geneDir + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
+        with open(outputLoc + "BED_SPLIT/" + geneDir + "_" + filename + "_new_interval.bed", "wb") as newBed: ##Change to input variables
             newBed.write(bedMapp)
         
 def bashInputs():
