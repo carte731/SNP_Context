@@ -265,7 +265,8 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
     output = str(subprocess.check_output(['wc', '-m', outputLoc + "BED_SPLIT/" + geneDir + "_split_" + filename + ".bed"]))
     length = re.findall(r'\d+', output)
     length = int(length[0])
-    bedMapper=[]
+    # bedMapper=[]
+    bedMapper=bytearray()
     masterList=[]
     sub=[] ##FOR BEDMAPPER
     temp=[] ##FOR MASTERLIST
@@ -306,7 +307,8 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
                 temp.append(int(a))
                 temp.append(int(b))
                 temp.sort()
-                bedMapper.append(sub)
+                # bedMapper.append(sub)
+                bedMapper.extend(''.join(sub).encode("utf-8"))
                 masterList.append(temp)
                 final=''
                 sub=[] ## was sub=[]
@@ -314,7 +316,8 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
                 temp=[] ## was sub=[]
                 # temp.clear() ## was sub=[]
             counter+=1
-        return(bedMapper, masterList)
+        fileSaver(bedMapper, outputLoc, filename, projectName, geneDir)
+        return(masterList)
 
 def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, geneDir, baseOut):
     gateA=True
@@ -388,9 +391,9 @@ def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, ge
         window.write(results)
 
 def fileSaver(bedMapp, outputLoc, filename, projectName, geneDir):
-        output="".join(chain.from_iterable(bedMapp))
+        # output="".join(chain.from_iterable(bedMapp))
         with open(outputLoc + "BED_SPLIT/" + geneDir + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
-            newBed.write(output)
+            newBed.write(bedMapp)
         
 def bashInputs():
     outputLoc=str(os.environ['outputLoc'])
@@ -404,9 +407,9 @@ def bashInputs():
 
 def main():
     outputLoc, filename, interval, inputFile, projectName, geneDir, baseOut=bashInputs()
-    bedmap, masterList=bedMapper(interval, outputLoc, projectName, filename, geneDir)
+    masterList=bedMapper(interval, outputLoc, projectName, filename, geneDir)
     binaryIntersect(masterList, interval, outputLoc, projectName, filename, geneDir, baseOut)
-    fileSaver(bedmap, outputLoc, filename, projectName, geneDir)
+    # fileSaver(bedmap, outputLoc, filename, projectName, geneDir)
 main()
 
 END_OF_PYTHON
