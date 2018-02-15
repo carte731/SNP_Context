@@ -316,14 +316,11 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
                 # sub.clear() ## was sub=[]
                 temp=[] ## was sub=[]
                 # temp.clear() ## was sub=[]
-<<<<<<< HEAD
             counter+=1
         fileSaver(bedMapper, outputLoc, filename, projectName, geneDir)
         return(masterList)
-=======
             # counter+=1
-        return(bedMapper, masterList)
->>>>>>> 734499862c511e7615d90590f51b5418af7c0ee2
+        # return(bedMapper, masterList)
 
 def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, geneDir, baseOut):
     gateA=True
