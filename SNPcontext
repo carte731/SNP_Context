@@ -257,6 +257,7 @@ pythonBEDScanner(){
     
 import os
 import re
+import subprocess
 from itertools import chain
 # import itertools
 import datetime
@@ -275,7 +276,7 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
         # bedmap=bed_test.read()
         # counter=0
         # length = os.fstat(bed_test.fileno()).st_size
-        for i in range(length)
+        for i in range(length):
         # for bedmap in bed_test:
             # for asii in bedmap:
             element = bed_test.read(1).decode("ascii")
@@ -315,9 +316,14 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
                 # sub.clear() ## was sub=[]
                 temp=[] ## was sub=[]
                 # temp.clear() ## was sub=[]
+<<<<<<< HEAD
             counter+=1
         fileSaver(bedMapper, outputLoc, filename, projectName, geneDir)
         return(masterList)
+=======
+            # counter+=1
+        return(bedMapper, masterList)
+>>>>>>> 734499862c511e7615d90590f51b5418af7c0ee2
 
 def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, geneDir, baseOut):
     gateA=True
@@ -424,7 +430,7 @@ jobCreator(){
 import os
 
 def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax):
-    job="#!/bin/bash -l\n\n#PBS -l walltime=24:00:00,nodes=1:ppn=15,mem=30gb\n#PBS -m abe\n#PBS -M " + email + "\n"
+    job="#!/bin/bash -l\n\n#PBS -l walltime=24:00:00,nodes=1:ppn=10,mem=30gb\n#PBS -m abe\n#PBS -M " + email + "\n"
     job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\n#PBS -q small\nset -e\nset -o pipefail\n\n"
     job+="#PBS -o " + outputLoc + "_" + projectName + "\n#PBS -e " + outputLoc + "_" + projectName + "\n"
     job+="\nmodule load snpContext/1.0.0\n\n"
