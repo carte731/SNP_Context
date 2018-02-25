@@ -218,7 +218,7 @@ fileConverter(){
         mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS
         for loopGene in "${active[@]}"; do
             cd "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/
-            all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/ > /dev/null 
+            all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/ --strand_symmetry > /dev/null 
             mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${loopGene}"_combined_counts.txt
         done
         projectDic["OperationalStage"]="DONE..."
