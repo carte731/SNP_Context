@@ -8,7 +8,7 @@
 #     A bash dictionary for input parameters
 
 declare -A projectDic=(
-    ["windowLength"]=0 #-w
+    ["windowLength"]=1 #-w
     ["inputFile"]='' #-i
     ["inputLoc"]=''
     ["outputLoc"]='' #-o
@@ -18,7 +18,7 @@ declare -A projectDic=(
     ["referenceGenomeChar"]=''
     ["referenceGenome"]='' #-r
     ["OperationalStage"]='vcfTObed'
-    ["nMax"]=0 ##-n
+    ["nMax"]=25 ##-n
     ["JOB"]='NO_JOB_NOW'
     ["TempLoc"]=''
     ["tempOut"]=''
@@ -41,12 +41,12 @@ starter(){ #grabs the arguments
             if [[ "${i,,}" == "-w" ]]; then ##Window expansion size
                 local var=${args[${indexPos}+1]}
                 if [[ "$var" =~ ^[0-9]+$ ]]; then ##Checks if it's a number, max expansion of 1000.
-                    if (( "$var" >= 2)); then
+                    if (( "$var" >= 1)); then ##Changed from 2 to 1
                         ((projectDic["windowLength"]+="$var"))
-                        frontgate=1
+                        frontgate=1 
                     fi
                 else
-                    echo -e "\nPlease enter a valid integer for window expansion size, defaulting to FIVE bases.\n"
+                    echo -e "\nPlease enter a valid integer for window expansion size, defaulting to 1 bases or flank size.\n"
                 fi
             elif [[ "${i,,}" == "-i" ]]; then ##Input file which grabs the input file name, location and complete file path 
                 local var=${args[${indexPos}+1]}
@@ -92,14 +92,26 @@ starter(){ #grabs the arguments
                 projectDic["JOB"]="${var}"
             elif [[ "${i,,}" == "-n"  ]]; then
                 local var=${args[${indexPos}+1]}
+                # if [[ "$var" =~ ^[0-9]+$ ]]; then ##CHECK WITH PETER!!!
+                #     if (( "${var}" >= 25  && "$var" <= 100 )); then
+                #         ((projectDic["nMax"]+="$var"))
+                #     elif (( "${var}" < 25 )); then
+                #         echo -e "\nMinimum N threshold is 25. Defaulting to 25% threshold."
+                #         ((projectDic["nMax"]+=25))
+                #     elif (( "${var}" > 100 )); then
+                #         echo -e "\nMaximum N threshold is 100. Defaulting to 100% threshold."
+                #         ((projectDic["nMax"]+=100))
+                #     fi
+                #     frontgate=1                    
+                # fi
                 if [[ "$var" =~ ^[0-9]+$ ]]; then
-                    if (( "${var}" >= 25  && "$var" <= 100 )); then
+                    if (( "${var}" >= 0  && "$var" <= 100 )); then
                         ((projectDic["nMax"]+="$var"))
-                    elif (( "${var}" < 25 )); then
-                        echo -e "\nMinimum N threshold is 25. Defaulting to 25% threshold."
-                        ((projectDic["nMax"]+=25))
+                    elif (( "${var}" < 0 )); then
+                        echo -e "\nMinimum N threshold is 1. Defaulting to 1% threshold."
+                        ((projectDic["nMax"]+=1))
                     elif (( "${var}" > 100 )); then
-                        echo -e "\nMaximum N threshold is 100. Defaulting to 100% threshold."
+                        echo -e "\nMaximum N threshold is 75. Defaulting to 100% threshold."
                         ((projectDic["nMax"]+=100))
                     fi
                     frontgate=1                    
@@ -112,7 +124,7 @@ starter(){ #grabs the arguments
             ((indexPos+=1))
         done
         if ((${frontgate} <= 0)); then
-            echo -e "\nPlease enter valid arguments. None where valid.\n"
+            echo -e "\nPlease enter valid arguments. None were valid.\n"
         fi
         if [[ ${projectDic["inputFile"]} == '' ]]; then
             echo -e "\nNo input file or working directory specified.\nEXITING...\n"
@@ -125,8 +137,9 @@ starter(){ #grabs the arguments
         if [[ ${projectDic["referenceGenome"]} == "" ]]; then
             referenceAssignment ##Function call
         fi
-        if (( ${projectDic["nMax"]} == 0 )); then
-            ((projectDic["nMax"]+=25))
+        if (( ${projectDic["flanks"]} > ${projectDic["windowLength"]} )); then
+            # ((projectDic["nMax"]+=25))
+            ${projectDic["windowLength"]}=${projectDic["flanks"]}
         fi
     else
         local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
@@ -258,26 +271,19 @@ import os
 import re
 import subprocess
 from itertools import chain
-# import itertools
 import datetime
 
 def bedMapper(interval, outputLoc, projectName, filename, geneDir):
     output = str(subprocess.check_output(['wc', '-m', outputLoc + "BED_SPLIT/" + geneDir + "_split_" + filename + ".bed"]))
     length = re.findall(r'\d+', output)
     length = int(length[0])
-    # bedMapper=[]
     bedMapper=bytearray()
     masterList=[]
     sub=[] ##FOR BEDMAPPER
     temp=[] ##FOR MASTERLIST
     final=''
     with open(outputLoc + "BED_SPLIT/" + geneDir + "_split_" + filename + ".bed", "rb") as bed_test: ##Change to input variables
-        # bedmap=bed_test.read()
-        # counter=0
-        # length = os.fstat(bed_test.fileno()).st_size
         for i in range(length):
-        # for bedmap in bed_test:
-            # for asii in bedmap:
             element = bed_test.read(1).decode("ascii")
             if((element != '\t') and (element != '\n')):
                 final = final + element
@@ -288,38 +294,21 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
             if(element == "\n"):
                 sub.append(final)
                 sub.append(element)
-                intSize = int(sub[4]) - int(sub[2])
-                if(interval >= 8):
-                    sub[2] = str(int(sub[2]) - interval)
-                    sub[4] = str(int(sub[4]) + interval)
-                else:
-                    diffInt = abs(18 - intSize)
-                    if(diffInt < 17):
-                        if(diffInt % 2 != 0):
-                            diffInt+=1
-                        sub[2] = str(int(sub[2]) - (diffInt//2))
-                        sub[4] = str(int(sub[4]) + (diffInt//2))
-                    else:
-                        sub[2] = str(int(sub[2]) - 8)
-                        sub[4] = str(int(sub[4]) + 8)                  
+                sub[2] = str(int(sub[2]) - interval)
+                sub[4] = str(int(sub[4]) + interval)         
                 a = sub[2]
                 b = sub[4]
                 temp.append(int(a))
                 temp.append(int(b))
                 temp.sort()
-                # bedMapper.append(sub)
                 bedMapper.extend(''.join(sub).encode("utf-8"))
                 masterList.append(temp)
                 final=''
                 sub=[] ## was sub=[]
-                # sub.clear() ## was sub=[]
                 temp=[] ## was sub=[]
-                # temp.clear() ## was sub=[]
-            # counter+=1
-        fileSaver(bedMapper, outputLoc, filename, projectName, geneDir)
+        with open("/home/corey/SNP_test/testing_one_new_interval.bed", "wb") as newBed: ##Change to input variables
+            newBed.write(bedMapper)
         return(masterList)
-            # counter+=1
-        # return(bedMapper, masterList)
 
 def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, geneDir, baseOut):
     gateA=True
@@ -331,15 +320,8 @@ def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, ge
     for i in range(len(expandedList)-1): #Checks for Type One SNP overlaps (ORIGINAL INTERVAL CHECK)
             a=expandedList[i][0] ##A= left side
             b=expandedList[i][1] ##B= right side
-            if(interval >= 8): ####
-                intervalDiff = interval - (interval - 3)
-                subTA=expandedList[i+1][0]+(interval) ##TYPE ONE
-                subTB=expandedList[i+1][1]-(interval) ##TYPE ONE
-                subTA-=2
-                subTB+=2
-            else:
-                subTA=expandedList[i+1][0]+6 ##TYPE ONE
-                subTB=expandedList[i+1][1]-6 ##TYPE ONE
+            subTA=expandedList[i+1][0]-(interval) ##TYPE ONE SWITCHED FROM - TO +
+            subTB=expandedList[i+1][1]+(interval) ##TYPE ONE SWITCHED FROM - TO +
             subMA=expandedList[i+1][0] ##TYPE TWO
             subMB=expandedList[i+1][1] ##TYPE TWO
             binary=[0,0,0,0]
@@ -371,18 +353,17 @@ def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, ge
                         resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subTA) + "-" + str(subTB) + ". on the right, between " + str(b) + " and " + str(subTA) + '.'
                     elif(binary == [0,1,1,1]):
                         resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subTA) + "-" + str(subTB) + ". on the left, between " + str(a) + " and " + str(subTB) + '.' 
-            if(interval > 2):
-                if((binaryMB != [1,1,0,0]) and (binaryMB != [0,0,1,1])):
-                    gateB=False
-                    if(binaryMB == [0,1,1,0]):
-                        resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " SNP is encapsulated within " + str(subMA) + "-" + str(subMB) + '.'
-                    elif(binaryMB == [1,1,1,1]):
-                        resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is equal or encapsulating " + str(subMA) + "-" + str(subMB) + '.'
-                    elif((binaryMB == [1,1,1,0]) or (binaryMB == [0,1,1,1])):
-                        if(binaryMB == [1,1,1,0]):
-                            resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subMA) + "-" + str(subMB) + ". on the right, between " + str(b) + " and " + str(subMA) + '.'
-                        elif(binaryMB == [0,1,1,1]):
-                            resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subMA) + "-" + str(subMB) + ". on the left, between " + str(a) + " and " + str(subMB) + '.' 
+            if((binaryMB != [1,1,0,0]) and (binaryMB != [0,0,1,1])):
+                gateB=False
+                if(binaryMB == [0,1,1,0]):
+                    resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " SNP is encapsulated within " + str(subMA) + "-" + str(subMB) + '.'
+                elif(binaryMB == [1,1,1,1]):
+                    resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is equal or encapsulating " + str(subMA) + "-" + str(subMB) + '.'
+                elif((binaryMB == [1,1,1,0]) or (binaryMB == [0,1,1,1])):
+                    if(binaryMB == [1,1,1,0]):
+                        resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subMA) + "-" + str(subMB) + ". on the right, between " + str(b) + " and " + str(subMA) + '.'
+                    elif(binaryMB == [0,1,1,1]):
+                        resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subMA) + "-" + str(subMB) + ". on the left, between " + str(a) + " and " + str(subMB) + '.' 
     if(gateA):
         resultsA+="\nNo Type ONE window overlaps detected.\n"
     if(gateB):
@@ -391,11 +372,6 @@ def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, ge
     results += "\nEND OF INTERVAL CHECKS.\nXXXXXXXXXXXXXXXXXXXXXX\n"
     with open(baseOut + projectName + "_" + "WindowOverlap.txt", 'a+') as window:
         window.write(results)
-
-def fileSaver(bedMapp, outputLoc, filename, projectName, geneDir):
-        # output="".join(chain.from_iterable(bedMapp))
-        with open(outputLoc + "BED_SPLIT/" + geneDir + "_" + filename + "_new_interval.bed", "wb") as newBed: ##Change to input variables
-            newBed.write(bedMapp)
         
 def bashInputs():
     outputLoc=str(os.environ['outputLoc'])
@@ -409,9 +385,8 @@ def bashInputs():
 
 def main():
     outputLoc, filename, interval, inputFile, projectName, geneDir, baseOut=bashInputs()
-    masterList=bedMapper(interval, outputLoc, projectName, filename, geneDir)
+    masterList=bedMapper(interval, outputLoc, projectName, filename, geneDir) 
     binaryIntersect(masterList, interval, outputLoc, projectName, filename, geneDir, baseOut)
-    # fileSaver(bedmap, outputLoc, filename, projectName, geneDir)
 main()
 
 END_OF_PYTHON
@@ -569,7 +544,7 @@ VCF_SPLIT_END
 
 fastaScanner(){
 
-    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" geneTwo=${geneTwo} geneDirTwo="${geneDirTwo}" nMax="${projectDic["nMax"]}" windowLength="${projectDic["windowLength"]}" python3.6 - <<FASTA_SWEEP
+    inputFile="${projectDic["inputFile"]}" flank="${projectDic["flanks"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" geneTwo=${geneTwo} geneDirTwo="${geneDirTwo}" nMax="${projectDic["nMax"]}" windowLength="${projectDic["windowLength"]}" python3.6 - <<FASTA_SWEEP
     
 from itertools import chain
 import os
@@ -614,23 +589,22 @@ def fastaNpop(subMaster, allRejected, nMax):
     for subListing in subMaster:
         totalN = len([x for x in subListing[1] if x == "N"])
         nPercent=totalN/len(subListing[1])
-        if(nPercent >= maxP):
+        if(nPercent <= maxP):
             nMaxList.append(subListing)
         else:
             newsubMaster.append(subListing)
     return(newsubMaster, nMaxList)
-        
 
-def fastaBasePop(master, interval):
+def fastaBasePop(master, interval, flank):
     allRejected=False
     subMaster=[]
     nList=[]
-    if(interval >= 8):
-        Linterval=interval - 2 ##change to 4
-        Rinterval=interval - 1 ##change to 4
+    if(interval > 2):
+        Linterval=interval - flank ##change to 4
+        Rinterval=interval - (flank - 1) ##change to 4
     else:
-        Linterval=6 ##change to 4
-        Rinterval=7 ##change to 4
+        Linterval=0 ##change to 4
+        Rinterval=-1 ##change to 4
     for element in master: ##CHANGE TO SUBTRACT CORRECT DISTANCES
         baseIn = element[1][(Linterval):-(Rinterval)] ##MAYBE add +1 on Rinterval.
         if("N" not in baseIn):
@@ -641,7 +615,7 @@ def fastaBasePop(master, interval):
         allRejected=True
     return(subMaster, allRejected, nList)
 
-def fileSaver(subMaster, master, nList, nMaxList, gene, allRejected, baseOut):
+def fileSaver(subMaster, master, nList, nMaxList, gene, allRejected, baseOut, filename, geneDirTwo, outputLoc):
     if(allRejected != True):
         with open(gene,"w") as newFasta:
             output="".join(chain.from_iterable(subMaster))
@@ -662,21 +636,21 @@ def fileSaver(subMaster, master, nList, nMaxList, gene, allRejected, baseOut):
 
 def bashImport():
     outputLoc=str(os.environ['outputLoc'])
-    inputFile=str(os.environ['inputFile'])
+    flank=int(os.environ['flank'])
     filename=str(os.environ['filename'])
     gene=str(os.environ['geneTwo'])
     nMax=int(os.environ['nMax'])
     geneDirTwo=str(os.environ['geneDirTwo']) ##GENE Direction
     interval=int(os.environ['windowLength'])
     baseOut=str(os.environ['baseOut'])
-    return(inputFile, outputLoc, filename, gene, geneDirTwo, interval, nMax, baseOut)
+    return(outputLoc, filename, gene, geneDirTwo, interval, nMax, baseOut)
 
 def main():
-    inputFile, outputLoc, filename, gene, geneDirTwo, interval, nMax, baseOut = bashImport()
+    flank, outputLoc, filename, gene, geneDirTwo, interval, nMax, baseOut = bashImport()
     master=fastaMapper(gene)
-    subMaster, allRejected, nList = fastaBasePop(master, interval)
+    subMaster, allRejected, nList = fastaBasePop(master, interval, flank)
     subMaster, nMaxList = fastaNpop(subMaster, allRejected, nMax)
-    fileSaver(subMaster, master, nList, nMaxList, gene, allRejected, baseOut)
+    fileSaver(subMaster, master, nList, nMaxList, gene, allRejected, baseOut, filename, geneDirTwo, outputLoc)
 
 main()
 
