@@ -589,7 +589,7 @@ def fastaNpop(subMaster, allRejected, nMax):
     for subListing in subMaster:
         totalN = len([x for x in subListing[1] if x == "N"])
         nPercent=totalN/len(subListing[1])
-        if(nPercent <= maxP):
+        if(nPercent >= maxP):
             nMaxList.append(subListing)
         else:
             newsubMaster.append(subListing)
