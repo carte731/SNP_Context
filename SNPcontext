@@ -643,7 +643,7 @@ def bashImport():
     geneDirTwo=str(os.environ['geneDirTwo']) ##GENE Direction
     interval=int(os.environ['windowLength'])
     baseOut=str(os.environ['baseOut'])
-    return(outputLoc, filename, gene, geneDirTwo, interval, nMax, baseOut)
+    return(flank, outputLoc, filename, gene, geneDirTwo, interval, nMax, baseOut)
 
 def main():
     flank, outputLoc, filename, gene, geneDirTwo, interval, nMax, baseOut = bashImport()
