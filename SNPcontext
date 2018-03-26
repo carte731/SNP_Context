@@ -306,7 +306,7 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
                 final=''
                 sub=[] ## was sub=[]
                 temp=[] ## was sub=[]
-        with open("/home/corey/SNP_test/testing_one_new_interval.bed", "wb") as newBed: ##Change to input variables
+        with open(outputLoc + "BED_SPLIT/" + geneDir + "_" + filename + "_new_interval.bed", "wb") as newBed: ##Change to input variables
             newBed.write(bedMapper)
         return(masterList)
 
