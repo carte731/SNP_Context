@@ -167,7 +167,7 @@ referenceAssignment(){
     elif [[ ${var,,} == "soybean" ]] || [[ ${var,,} == "s" ]] || [[ ${var,,} == "soy" ]]; then
         projectDic["referenceGenomeChar"]+='s'
         projectDic["referenceGenome"]+='/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Soybean/PhytozomeV11/Gmax/assembly/Gmax_275_v2.0.fa'
-    # else
+    else
         # echo -e "\nPlease enter a valid reference genome. Defaulting to Barley reference.\n"
         # projectDic["referenceGenomeChar"]+='b'
         # projectDic["referenceGenome"]+='/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
