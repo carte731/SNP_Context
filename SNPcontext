@@ -340,6 +340,8 @@ def main():
         createRef()
     seqRef = referenceScanner(ref)
     return(seqRef)
+
+main()
     
 REF_END
 )
