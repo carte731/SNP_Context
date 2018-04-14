@@ -262,7 +262,7 @@ dirStructure(){
 }
 
 referenceChecker(){
-    var=${var} projectDic["referenceGenome"]=python3.6 << REF_END
+    var="${var}" projectDic["referenceGenome"]=$(python3.6 - << REF_END
 
 import os
 import csv
@@ -341,7 +341,7 @@ def main():
     return(seqRef)
     
 REF_END
-
+)
 }
 
 #    This is Python 3 code embedded in the bash script
