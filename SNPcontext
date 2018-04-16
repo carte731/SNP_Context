@@ -329,7 +329,7 @@ def newRef(ref):
     return(path)
 
 def bashInputs():
-    ref = str(os.environ['ref'])
+    ref = str(os.environ['var'])
     return(ref)
 
 def main():
