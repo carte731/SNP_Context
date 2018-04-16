@@ -166,8 +166,8 @@ referenceAssignment(){
         projectDic["referenceGenome"]+='/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
     elif [[ ${var,,} == "soybean" ]] || [[ ${var,,} == "s" ]] || [[ ${var,,} == "soy" ]]; then
         projectDic["referenceGenomeChar"]+='s'
-        # projectDic["referenceGenome"]+='/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Soybean/PhytozomeV11/Gmax/assembly/Gmax_275_v2.0.fa'
-        projectDic["referenceGenome"]+='/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Soybean/Wm82_V1/Gmax_189.fa'
+        projectDic["referenceGenome"]+='/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Soybean/PhytozomeV11/Gmax/assembly/Gmax_275_v2.0.fa'
+        # projectDic["referenceGenome"]+='/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Soybean/Wm82_V1/Gmax_189.fa'
     else
         echo -e "\nTTTTTTTTTTTTTTTEEEEEEEEEESSSSSSSSSSSSSTTTTTTTTTTTTTT!!!!!!!!!!!!"
         # echo -e "\nPlease enter a valid reference genome. Defaulting to Barley reference.\n"
@@ -264,7 +264,7 @@ dirStructure(){
 }
 
 referenceChecker(){
-    var="${var}" "${projectDic["referenceGenome"]}"=$(python3.6 - << REF_END
+    ref="${var}" "${projectDic["referenceGenome"]}"="$(python3.6 - << REF_END
 
 import os
 import csv
@@ -327,7 +327,7 @@ def newRef(ref):
     return(path)
 
 def bashInputs():
-    ref = str(os.environ['var'])
+    ref = str(os.environ['ref'])
     return(ref)
 
 def main():
@@ -340,12 +340,13 @@ def main():
         print("\nReference config file not found in home dir... Generating new file...")
         createRef()
     seqRef = referenceScanner(ref)
-    return(seqRef)
+    # return(seqRef)
+    print(seqRef)
 
 main()
     
 REF_END
-)
+)"
 }
 
 #    This is Python 3 code embedded in the bash script
