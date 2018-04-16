@@ -266,7 +266,7 @@ dirStructure(){
 referenceChecker(){
     echo -e "\nTEST.... ${var} ...TEST!!!\n"
     export ${var} 
-    TESTING=$(python3.6 - <<REF_END
+    python3.6 - <<REF_END
 
 import os
 import csv
@@ -348,7 +348,7 @@ def main():
 main()
     
 REF_END
-)
+
 }
 
 #    This is Python 3 code embedded in the bash script
