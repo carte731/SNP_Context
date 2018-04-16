@@ -264,7 +264,8 @@ dirStructure(){
 }
 
 referenceChecker(){
-    ref="${var}" "${projectDic["referenceGenome"]}"="$(python3.6 - << REF_END
+    export ${var} 
+    "${projectDic["referenceGenome"]}"="$(python3.6 - << REF_END
 
 import os
 import csv
