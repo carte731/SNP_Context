@@ -265,8 +265,8 @@ dirStructure(){
 
 referenceChecker(){
     echo -e "\nTEST.... ${var} ...TEST!!!\n"
-    export ${var} 
-    python3.6 - <<REF_END
+    # export ${var} 
+    ref="${var}" python3.6 - <<REF_END
 
 import os
 import csv
@@ -329,7 +329,7 @@ def newRef(ref):
     return(path)
 
 def bashInputs():
-    ref = str(os.environ['var'])
+    ref=str(os.environ['ref'])
     return(ref)
 
 def main():
