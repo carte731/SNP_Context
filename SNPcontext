@@ -173,8 +173,7 @@ referenceAssignment(){
         # echo -e "\nPlease enter a valid reference genome. Defaulting to Barley reference.\n"
         # projectDic["referenceGenomeChar"]+='b'
         # projectDic["referenceGenome"]+='/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
-        export tests=${var}         
-        referenceChecker
+        referenceChecker "${var}"
         projectDic["referenceGenomeChar"]+=${var}
     fi
 }
@@ -267,7 +266,11 @@ dirStructure(){
 referenceChecker(){
     echo -e "\nTEST.... ${var} ...TEST!!!\n"
     # ref="${var}" python3.6 - <<REF_END
-    peasAndCarrots=$(python3.6 - <<REF_END
+    homeRef=$HOME/".reference_config.csv"
+    if [[ -e "${homeRef}" ]]; then ##If there search
+        if grep "${var}" ${homeRef} > /dev/null; then ## Checks if var is in file
+            export refID=${var}
+            projectDic["referenceGenome"]+=$(python3.6 - <<REF_END
 
 import os
 import csv
@@ -280,51 +283,34 @@ def referenceScanner(ref):
         for row in refDic:
             if(row["Reference_Name"] == ref):      
                 return(row.get("Path"))
-    userPerf = str(input("\nreference not found, would you like to add a reference genome: "))
-    # cNum = choices(userPerf)
-    cNum = 0
-    if(cNum == 0):
-        path = newRef(ref)
-        return(path)
-    else:
-        print("\nexiting SNP context...")
-        sys.exit(1)
+    
+def bashInputs():
+    ref=str(os.environ['refID'])
+    return(ref)
 
-def choices(userPerf):
-    if((userPerf.lower() == "y") or (userPerf.lower() == "yes")):
-        return(0)
-    else:
-        return(1)
+def main():
+    ref = bashInputs()
+    refPath = referenceScanner(ref)
+    print(refPath)
+main()
 
-def createRef():
-    baseDir = os.environ["HOME"]    
-    with open(baseDir + "/" + ".reference_config.csv", "w", newline='') as newRef:
-        written = csv.writer(newRef, delimiter=";")     
-        written.writerow(["Reference_Name", "Path"])
-        print("\nReference file created...")
-    return(0)
+REF_END
+)
+        else ##make this its own IF statement
+            export refID=${var}        
+            echo -e "Reference not found, please enter full path: "
+            read newRefPath
+            ## ADD A IF STATEMENT TO CHECK IF VALID
+            projectDic["referenceGenome"]+="${newRefPath}"
+            projectDic["referenceGenomeChar"]+="${var}"
+            export newRefPath
+            python3.6 - <<REF_END
 
-def newRef(ref):
-    baseDir = os.environ["HOME"]
-    # refName = str(input("Would you like to use another access name other than " + ref + " for your key: "))
-    # cNum = choices(refName)
-    # if(cNum == 0):
-        # key = str(input("\nEnter the refernece name (This is what you enter in the parameter. *SPACES IN NAME WILL BE REMOVED*): "))
-        # key.replace(" ", "")
-    # else:
-        # key = ref
-    key = ref
-    # path = str(input("\nPlease enter the complete path to the reference genome (Full path 'pwd -P' and filename): "))
-    valid = os.path.isfile(path)
-    if(not valid):
-        print("\nNot a valid path or file...")
-        userPerf = str(input("\nWould you like to try again: "))
-        cNum = choices(userPerf)
-        if(cNum == 0):
-            newRef(ref)
-        else:
-            print("\nExiting...")
-            sys.exit(0)
+import os
+import csv
+import sys
+
+def newRef(ref, path):       
     with open(baseDir + "/" + ".reference_config.csv", 'a+', newline='') as refScan:
         written = csv.writer(refScan, delimiter=";")
         written.writerow([key,path])
@@ -332,26 +318,53 @@ def newRef(ref):
     return(path)
 
 def bashInputs():
-    ref=str(os.environ['tests'])
-    return(ref)
+    ref=str(os.environ['refID'])
+    path=str(os.environ['newRefPath'])
+    return(ref, path)
 
 def main():
-    # ref = "Isle_of_Dogs"
-    ref = bashInputs()    
-    refConfig = os.environ["HOME"] 
-    refConfig += "/.reference_config.csv"
-    valid = os.path.isfile(refConfig)
-    if(not valid):
-        print("\nReference config file not found in home dir... Generating new file...")
-        createRef()
-    seqRef = referenceScanner(ref)
-    # return(seqRef)
-    print(seqRef)
+    ref, path = bashInputs()
+    newRef(ref, path)
 
-main()
-    
 REF_END
 )
+        fi
+    else ##If not then create .ref file
+        export refID=${var}        
+        echo -e "Reference not found, please enter full path: "
+        read newRefPath
+        ## ADD A IF STATEMENT TO CHECK IF VALID
+        projectDic["referenceGenome"]+="${newRefPath}"
+        projectDic["referenceGenomeChar"]+="${var}"
+        export newRefPath
+        python3.6 - <<REF_END
+
+import os
+import csv
+import sys
+
+def absNew(ref, path):
+    baseDir = os.environ["HOME"]    
+    with open(baseDir + "/" + ".reference_config.csv", "w", newline='') as newRef:
+        written = csv.writer(newRef, delimiter=";")     
+        written.writerow(["Reference_Name", "Path"])
+        written.writerow([key,path])
+    return(0)
+
+def bashInputs():
+    ref=str(os.environ['refID'])
+    path=str(os.environ['newRefPath'])
+    return(ref, path)
+
+def main():
+    ref, path = bashInputs()
+    absNew(ref, path)
+
+main()
+
+REF_END
+        echo -e "\nReference file created..."
+    fi
 }
 
 #    This is Python 3 code embedded in the bash script
