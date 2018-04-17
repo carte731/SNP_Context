@@ -280,7 +280,7 @@ def referenceScanner(ref):
         for row in refDic:
             if(row["Reference_Name"] == ref):      
                 return(row.get("Path"))
-    # userPerf = str(input("\nreference not found, would you like to add a reference genome: "))
+    userPerf = str(input("\nreference not found, would you like to add a reference genome: "))
     # cNum = choices(userPerf)
     cNum = 0
     if(cNum == 0):
