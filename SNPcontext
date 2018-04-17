@@ -173,7 +173,8 @@ referenceAssignment(){
         # echo -e "\nPlease enter a valid reference genome. Defaulting to Barley reference.\n"
         # projectDic["referenceGenomeChar"]+='b'
         # projectDic["referenceGenome"]+='/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
-        referenceChecker "${var}"
+        export tests=${var}         
+        referenceChecker
         projectDic["referenceGenomeChar"]+=${var}
     fi
 }
@@ -265,8 +266,8 @@ dirStructure(){
 
 referenceChecker(){
     echo -e "\nTEST.... ${var} ...TEST!!!\n"
-    # export ${var} 
-    ref="${var}" python3.6 - <<REF_END
+    # ref="${var}" python3.6 - <<REF_END
+    peasAndCarrots=$(python3.6 - <<REF_END
 
 import os
 import csv
@@ -279,8 +280,9 @@ def referenceScanner(ref):
         for row in refDic:
             if(row["Reference_Name"] == ref):      
                 return(row.get("Path"))
-    userPerf = str(input("\nreference not found, would you like to add a reference genome: "))
-    cNum = choices(userPerf)
+    # userPerf = str(input("\nreference not found, would you like to add a reference genome: "))
+    # cNum = choices(userPerf)
+    cNum = 0
     if(cNum == 0):
         path = newRef(ref)
         return(path)
@@ -304,14 +306,15 @@ def createRef():
 
 def newRef(ref):
     baseDir = os.environ["HOME"]
-    refName = str(input("Would you like to use another access name other than " + ref + " for your key: "))
-    cNum = choices(refName)
-    if(cNum == 0):
-        key = str(input("\nEnter the refernece name (This is what you enter in the parameter. *SPACES IN NAME WILL BE REMOVED*): "))
-        key.replace(" ", "")
-    else:
-        key = ref
-    path = str(input("\nPlease enter the complete path to the reference genome (Full path 'pwd -P' and filename): "))
+    # refName = str(input("Would you like to use another access name other than " + ref + " for your key: "))
+    # cNum = choices(refName)
+    # if(cNum == 0):
+        # key = str(input("\nEnter the refernece name (This is what you enter in the parameter. *SPACES IN NAME WILL BE REMOVED*): "))
+        # key.replace(" ", "")
+    # else:
+        # key = ref
+    key = ref
+    # path = str(input("\nPlease enter the complete path to the reference genome (Full path 'pwd -P' and filename): "))
     valid = os.path.isfile(path)
     if(not valid):
         print("\nNot a valid path or file...")
@@ -329,7 +332,7 @@ def newRef(ref):
     return(path)
 
 def bashInputs():
-    ref=str(os.environ['ref'])
+    ref=str(os.environ['tests'])
     return(ref)
 
 def main():
@@ -348,7 +351,7 @@ def main():
 main()
     
 REF_END
-
+)
 }
 
 #    This is Python 3 code embedded in the bash script
