@@ -347,7 +347,7 @@ def absNew(ref, path):
     with open(baseDir + "/" + ".reference_config.csv", "w", newline='') as newRef:
         written = csv.writer(newRef, delimiter=";")     
         written.writerow(["Reference_Name", "Path"])
-        written.writerow([key,path])
+        written.writerow([ref,path])
     return(0)
 
 def bashInputs():
@@ -363,6 +363,7 @@ main()
 
 REF_END
         echo -e "\nReference file created..."
+        echo -e "\nThis a may REF: ${projectDic["referenceGenome"]}.\n"
     fi
 }
 
