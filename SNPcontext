@@ -169,7 +169,6 @@ referenceAssignment(){
         projectDic["referenceGenome"]+='/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Soybean/PhytozomeV11/Gmax/assembly/Gmax_275_v2.0.fa'
         # projectDic["referenceGenome"]+='/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Soybean/Wm82_V1/Gmax_189.fa'
     else
-        echo -e "\nTTTTTTTTTTTTTTTEEEEEEEEEESSSSSSSSSSSSSTTTTTTTTTTTTTT!!!!!!!!!!!!"
         # echo -e "\nPlease enter a valid reference genome. Defaulting to Barley reference.\n"
         # projectDic["referenceGenomeChar"]+='b'
         # projectDic["referenceGenome"]+='/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
@@ -313,7 +312,7 @@ import sys
 def newRef(ref, path):       
     with open(baseDir + "/" + ".reference_config.csv", 'a+', newline='') as refScan:
         written = csv.writer(refScan, delimiter=";")
-        written.writerow([key,path])
+        written.writerow([ref,path])
         print("\nPath added and loaded..")
     return(path)
 
@@ -344,7 +343,7 @@ import sys
 
 def absNew(ref, path):
     baseDir = os.environ["HOME"]    
-    with open(baseDir + "/" + ".reference_config.csv", "w", newline='') as newRef:
+    with open(baseDir + "/" + ".reference_config.csv", "a+", newline='') as newRef:
         written = csv.writer(newRef, delimiter=";")     
         written.writerow(["Reference_Name", "Path"])
         written.writerow([ref,path])
