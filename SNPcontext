@@ -327,7 +327,6 @@ def main():
     newRef(ref, path)
 
 REF_END
-)
         fi
     else ##If not then create .ref file
         export refID=${var}        
