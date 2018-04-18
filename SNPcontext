@@ -310,7 +310,8 @@ import os
 import csv
 import sys
 
-def newRef(ref, path):       
+def newRef(ref, path):      
+    baseDir = os.environ["HOME"] 
     with open(baseDir + "/" + ".reference_config.csv", 'a+', newline='') as refScan:
         written = csv.writer(refScan, delimiter=";")
         written.writerow([ref,path])
