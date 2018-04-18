@@ -291,6 +291,7 @@ def main():
     ref = bashInputs()
     refPath = referenceScanner(ref)
     print(refPath)
+    
 main()
 
 REF_END
@@ -298,7 +299,7 @@ REF_END
             echo -e "\nONE: This a may REF: ${projectDic["referenceGenome"]}.\n"
         else ##make this its own IF statement
             export refID=${var}        
-            echo -e "Reference not found, please enter full path: "
+            echo -e "\nReference not found, please enter full path: "
             read newRefPath
             ## ADD A IF STATEMENT TO CHECK IF VALID
             projectDic["referenceGenome"]+="${newRefPath}"
@@ -315,7 +316,6 @@ def newRef(ref, path):
     with open(baseDir + "/" + ".reference_config.csv", 'a+', newline='') as refScan:
         written = csv.writer(refScan, delimiter=";")
         written.writerow([ref,path])
-    return(path)
 
 def bashInputs():
     ref=str(os.environ['refID'])
@@ -325,6 +325,8 @@ def bashInputs():
 def main():
     ref, path = bashInputs()
     newRef(ref, path)
+
+main()
 
 REF_END
         echo -e "\nPath added and loaded.."
