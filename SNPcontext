@@ -263,7 +263,7 @@ dirStructure(){
 }
 
 referenceChecker(){
-    echo -e "\nTEST.... ${var} ...TEST!!!\n"
+    # echo -e "\nTEST.... ${var} ...TEST!!!\n"
     # ref="${var}" python3.6 - <<REF_END
     homeRef=$HOME/".reference_config.csv"
     if [[ -e "${homeRef}" ]]; then ##If there search
@@ -295,6 +295,7 @@ main()
 
 REF_END
 )
+            echo -e "\nONE: This a may REF: ${projectDic["referenceGenome"]}.\n"
         else ##make this its own IF statement
             export refID=${var}        
             echo -e "Reference not found, please enter full path: "
@@ -313,7 +314,6 @@ def newRef(ref, path):
     with open(baseDir + "/" + ".reference_config.csv", 'a+', newline='') as refScan:
         written = csv.writer(refScan, delimiter=";")
         written.writerow([ref,path])
-        print("\nPath added and loaded..")
     return(path)
 
 def bashInputs():
@@ -326,6 +326,7 @@ def main():
     newRef(ref, path)
 
 REF_END
+        echo -e "\nPath added and loaded.."
         fi
     else ##If not then create .ref file
         export refID=${var}        
