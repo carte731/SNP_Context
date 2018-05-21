@@ -31,117 +31,9 @@ declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 
 
 declare -a active=()
 
-#     Takes user arguments from command line and assigns values to dictionary keys in 'projectDic'
-starter(){ #grabs the arguments
-    local args=("$@")
-    if [[ "$#" > 1 ]] && [[ ${args[0],,} != "--help" ]] && [[ ${args[0],,} != "-h" ]]; then
-        local frontgate=0
-        local indexPos=0
-        for i in $@; do
-            if [[ "${i,,}" == "-w" ]]; then ##Window expansion size
-                local var=${args[${indexPos}+1]}
-                if [[ "$var" =~ ^[0-9]+$ ]]; then ##Checks if it's a number, max expansion of 1000.
-                    if (( "$var" >= 1)); then ##Changed from 2 to 1
-                        ((projectDic["windowLength"]+="$var"))
-                        frontgate=1 
-                    fi
-                else
-                    echo -e "\nPlease enter a valid integer for window expansion size, defaulting to 1 bases or flank size.\n"
-                fi
-            elif [[ "${i,,}" == "-i" ]]; then ##Input file which grabs the input file name, location and complete file path 
-                local var=${args[${indexPos}+1]}
-                if [[ "${var##*.}" == "vcf" ]] && [ -f "$var" ]; then ##Checks if it's VCF and if file exist
-                    projectDic["inputFile"]+="$var"
-                    projectDic["inputLoc"]+="${var%/*}"
-                    local filename=${var%.*} ##removes files extension
-                    filename=${filename##*/} ##removes file path
-                    projectDic["filename"]+="$filename"
-                    frontgate=1
-                else
-                    echo -e "\nERROR. Incorrect file input. Check file or directory path. (Input (.vcf) only)\nEXITING...\n"
-                    exit 1
-                fi
-            elif [[ "${i,,}" == "-o" ]]; then ##output location info
-                local var=${args[${indexPos}+1]}
-                if [ -d "$var" ]; then ##Checks if directory exist, if not it will save to input file location
-                    if [[ "${var: -1}" == "/" ]]; then
-                        projectDic["outputLoc"]+="$var"
-                    else
-                        projectDic["outputLoc"]+="$var"/
-                    fi
-                    frontgate=1
-                fi
-            elif [[ "${i,,}" == "-p" ]]; then ##Project name
-                local var=${args[${indexPos}+1]}
-                projectDic["projectName"]="$var"
-                frontgate=1
-            elif [[ "${i,,}" == "-f" ]]; then ##Flank sizes for mutation motif's aln_to_counts func
-                local var=${args[${indexPos}+1]}
-                frontgate=1
-                if [[ "$var" =~ ^[0-2]+$ ]]; then ##Checks if it's a number and if it's between 0 and 2
-                    ((projectDic["flanks"]+="$var"))
-                else
-                    echo -e "\nFlanks have to be between: 0 - 2. Defaulting to 0.\n"
-                fi
-            elif [[ "${i,,}" == "-r" ]]; then ##Which reference genome needed for FASTA file creation
-                local var=${args[${indexPos}+1]}
-                referenceAssignment ${var}
-                frontgate=1
-            elif [[ "${i}" == "-JOB" ]]; then
-                local var=${args[${indexPos}+1]}
-                projectDic["JOB"]="${var}"
-            elif [[ "${i,,}" == "-n"  ]]; then
-                local var=${args[${indexPos}+1]}
-                # if [[ "$var" =~ ^[0-9]+$ ]]; then ##CHECK WITH PETER!!!
-                #     if (( "${var}" >= 25  && "$var" <= 100 )); then
-                #         ((projectDic["nMax"]+="$var"))
-                #     elif (( "${var}" < 25 )); then
-                #         echo -e "\nMinimum N threshold is 25. Defaulting to 25% threshold."
-                #         ((projectDic["nMax"]+=25))
-                #     elif (( "${var}" > 100 )); then
-                #         echo -e "\nMaximum N threshold is 100. Defaulting to 100% threshold."
-                #         ((projectDic["nMax"]+=100))
-                #     fi
-                #     frontgate=1                    
-                # fi
-                if [[ "$var" =~ ^[0-9]+$ ]]; then
-                    if (( "${var}" >= 0  && "$var" <= 100 )); then
-                        ((projectDic["nMax"]+="$var"))
-                    elif (( "${var}" < 0 )); then
-                        echo -e "\nMinimum N threshold is 1. Defaulting to 1% threshold."
-                        ((projectDic["nMax"]+=1))
-                    elif (( "${var}" > 100 )); then
-                        echo -e "\nMaximum N threshold is 75. Defaulting to 100% threshold."
-                        ((projectDic["nMax"]+=100))
-                    fi
-                    frontgate=1                    
-                fi
-            elif [[ "${i,,}" == "-ad"  ]]; then
-                local var=${args[${indexPos}+1]}
-                projectDic["allData"]="${var,,}"
-                frontgate=1
-            fi
-            ((indexPos+=1))
-        done
-        if ((${frontgate} <= 0)); then
-            echo -e "\nPlease enter valid arguments. None were valid.\n"
-        fi
-        if [[ ${projectDic["inputFile"]} == '' ]]; then
-            echo -e "\nNo input file or working directory specified.\nEXITING...\n"
-            exit 1
-        fi
-        if [[ -z ${projectDic["outputLoc"]} ]] && [[ ${projectDic["inputFile"]} != '' ]]; then
-            echo -e "\nNot a valid output location. Re-routing to input file location.\n"
-            projectDic["outputLoc"]+=${projectDic["inputLoc"]}
-        fi
-        if [[ ${projectDic["referenceGenome"]} == "" ]]; then
-            referenceAssignment ##Function call
-        fi
-        if (( ${projectDic["flanks"]} > ${projectDic["windowLength"]} )); then
-            # ((projectDic["nMax"]+=25))
-            ${projectDic["windowLength"]}=${projectDic["flanks"]}
-        fi
-    else
+config_check(){
+    local configCheck=("$@")
+    if [[ "$#" <= 1 ]] && [[ ${configCheck[0],,} == "--help" ]] && [[ ${configCheck[0],,} == "-h" ]]; then
         local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
         helpPrintOut+=$'\nSNPcontext -i <input VCF> -o <output> -r <reference genome> -w <expansion size> -f <flank size> -p <project name> -n <acceptable Indel %> -ad <saved all data>\n'
         helpPrintOut+=$'\n\t------------------------\n'
@@ -155,6 +47,122 @@ starter(){ #grabs the arguments
         helpPrintOut+=$'\n\t-ad [(true or false) (Which stands for “all data”, this allows you to keep all intermediate files (split VCFs, BED, new interval BEDs, FASTA files)\n\t    that are normally deleted after processing. Defaults to false, which deletes intermedidate files.)]\n'
         echo "$helpPrintOut"
         exit -0
+    elif [[ "$#" == 1 ]] && [[ ${configCheck,,} == "-config" ]] && [[ ${configCheck,,} == "-c" ]]; then
+        args=$(cat "${configCheck[2]}")
+    else
+        args=("$@")        
+    fi
+
+}
+
+#     Takes user arguments from command line and assigns values to dictionary keys in 'projectDic'
+starter(){ #grabs the arguments
+    # local args=("$@")
+    local frontgate=0
+    local indexPos=0
+    for i in $@; do
+        if [[ "${i,,}" == "-w" ]]; then ##Window expansion size
+            local var=${args[${indexPos}+1]}
+            if [[ "$var" =~ ^[0-9]+$ ]]; then ##Checks if it's a number, max expansion of 1000.
+                if (( "$var" >= 1)); then ##Changed from 2 to 1
+                    ((projectDic["windowLength"]+="$var"))
+                    frontgate=1 
+                fi
+            else
+                echo -e "\nPlease enter a valid integer for window expansion size, defaulting to 1 bases or flank size.\n"
+            fi
+        elif [[ "${i,,}" == "-i" ]]; then ##Input file which grabs the input file name, location and complete file path 
+            local var=${args[${indexPos}+1]}
+            if [[ "${var##*.}" == "vcf" ]] && [ -f "$var" ]; then ##Checks if it's VCF and if file exist
+                projectDic["inputFile"]+="$var"
+                projectDic["inputLoc"]+="${var%/*}"
+                local filename=${var%.*} ##removes files extension
+                filename=${filename##*/} ##removes file path
+                projectDic["filename"]+="$filename"
+                frontgate=1
+            else
+                echo -e "\nERROR. Incorrect file input. Check file or directory path. (Input (.vcf) only)\nEXITING...\n"
+                exit 1
+            fi
+        elif [[ "${i,,}" == "-o" ]]; then ##output location info
+            local var=${args[${indexPos}+1]}
+            if [ -d "$var" ]; then ##Checks if directory exist, if not it will save to input file location
+                if [[ "${var: -1}" == "/" ]]; then
+                    projectDic["outputLoc"]+="$var"
+                else
+                    projectDic["outputLoc"]+="$var"/
+                fi
+                frontgate=1
+            fi
+        elif [[ "${i,,}" == "-p" ]]; then ##Project name
+            local var=${args[${indexPos}+1]}
+            projectDic["projectName"]="$var"
+            frontgate=1
+        elif [[ "${i,,}" == "-f" ]]; then ##Flank sizes for mutation motif's aln_to_counts func
+            local var=${args[${indexPos}+1]}
+            frontgate=1
+            if [[ "$var" =~ ^[0-2]+$ ]]; then ##Checks if it's a number and if it's between 0 and 2
+                ((projectDic["flanks"]+="$var"))
+            else
+                echo -e "\nFlanks have to be between: 0 - 2. Defaulting to 0.\n"
+            fi
+        elif [[ "${i,,}" == "-r" ]]; then ##Which reference genome needed for FASTA file creation
+            local var=${args[${indexPos}+1]}
+            referenceAssignment ${var}
+            frontgate=1
+        elif [[ "${i}" == "-JOB" ]]; then
+            local var=${args[${indexPos}+1]}
+            projectDic["JOB"]="${var}"
+        elif [[ "${i,,}" == "-n"  ]]; then
+            local var=${args[${indexPos}+1]}
+            # if [[ "$var" =~ ^[0-9]+$ ]]; then ##CHECK WITH PETER!!!
+            #     if (( "${var}" >= 25  && "$var" <= 100 )); then
+            #         ((projectDic["nMax"]+="$var"))
+            #     elif (( "${var}" < 25 )); then
+            #         echo -e "\nMinimum N threshold is 25. Defaulting to 25% threshold."
+            #         ((projectDic["nMax"]+=25))
+            #     elif (( "${var}" > 100 )); then
+            #         echo -e "\nMaximum N threshold is 100. Defaulting to 100% threshold."
+            #         ((projectDic["nMax"]+=100))
+            #     fi
+            #     frontgate=1                    
+            # fi
+            if [[ "$var" =~ ^[0-9]+$ ]]; then
+                if (( "${var}" >= 0  && "$var" <= 100 )); then
+                    ((projectDic["nMax"]+="$var"))
+                elif (( "${var}" < 0 )); then
+                    echo -e "\nMinimum N threshold is 1. Defaulting to 1% threshold."
+                    ((projectDic["nMax"]+=1))
+                elif (( "${var}" > 100 )); then
+                    echo -e "\nMaximum N threshold is 75. Defaulting to 100% threshold."
+                    ((projectDic["nMax"]+=100))
+                fi
+                frontgate=1                    
+            fi
+        elif [[ "${i,,}" == "-ad"  ]]; then
+            local var=${args[${indexPos}+1]}
+            projectDic["allData"]="${var,,}"
+            frontgate=1
+        fi
+        ((indexPos+=1))
+    done
+    if ((${frontgate} <= 0)); then
+        echo -e "\nPlease enter valid arguments. None were valid.\n"
+    fi
+    if [[ ${projectDic["inputFile"]} == '' ]]; then
+        echo -e "\nNo input file or working directory specified.\nEXITING...\n"
+        exit 1
+    fi
+    if [[ -z ${projectDic["outputLoc"]} ]] && [[ ${projectDic["inputFile"]} != '' ]]; then
+        echo -e "\nNot a valid output location. Re-routing to input file location.\n"
+        projectDic["outputLoc"]+=${projectDic["inputLoc"]}
+    fi
+    if [[ ${projectDic["referenceGenome"]} == "" ]]; then
+        referenceAssignment ##Function call
+    fi
+    if (( ${projectDic["flanks"]} > ${projectDic["windowLength"]} )); then
+        # ((projectDic["nMax"]+=25))
+        ${projectDic["windowLength"]}=${projectDic["flanks"]}
     fi
 }
 
@@ -263,8 +271,6 @@ dirStructure(){
 }
 
 referenceChecker(){
-    # echo -e "\nTEST.... ${var} ...TEST!!!\n"
-    # ref="${var}" python3.6 - <<REF_END
     homeRef=$HOME/".reference_config.csv"
     if [[ -e "${homeRef}" ]]; then ##If there search
         if grep "${var}" ${homeRef} > /dev/null; then ## Checks if var is in file
@@ -291,17 +297,17 @@ def main():
     ref = bashInputs()
     refPath = referenceScanner(ref)
     print(refPath)
-    
+
 main()
 
 REF_END
 )
-            echo -e "\nONE: This a may REF: ${projectDic["referenceGenome"]}.\n"
         else ##make this its own IF statement
             export refID=${var}        
             echo -e "\nReference not found, please enter full path: "
             read newRefPath
             ## ADD A IF STATEMENT TO CHECK IF VALID
+            if [[ -d  ]]
             projectDic["referenceGenome"]+="${newRefPath}"
             projectDic["referenceGenomeChar"]+="${var}"
             export newRefPath
@@ -333,9 +339,14 @@ REF_END
         fi
     else ##If not then create .ref file
         export refID=${var}        
-        echo -e "Reference not found, please enter full path: "
+        echo -e "\nReference not found, please enter full path: "
         read newRefPath
-        ## ADD A IF STATEMENT TO CHECK IF VALID
+        if [[ ! -f newRefPath ]]; then
+            echo -e "/nPlease try again and enter a valid path...\n"
+            # echo -e "Would you like to try again?"
+            # read choice
+            ## Finish this IF statement
+            exit 1
         projectDic["referenceGenome"]+="${newRefPath}"
         projectDic["referenceGenomeChar"]+="${var}"
         export newRefPath
@@ -365,8 +376,7 @@ def main():
 main()
 
 REF_END
-        echo -e "\nReference file created..."
-        echo -e "\nThis a may REF: ${projectDic["referenceGenome"]}.\n"
+        echo -e "\nReference file created and path loaded..."
     fi
 }
 
