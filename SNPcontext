@@ -49,17 +49,16 @@ config_check(){
         helpPrintOut+=$'\n\t-ad [(true or false) (Which stands for “all data”, this allows you to keep all intermediate files (split VCFs, BED, new interval BEDs, FASTA files)\n\t    that are normally deleted after processing. Defaults to false, which deletes intermedidate files.)]\n'
         echo "$helpPrintOut"
         exit -0
+    elif [[ "$#" == 1 ]] && [[ -f ${configCheck[1]} ]] && [[ ${configCheck[1]##*/} == "context.config" ]]; then
+        config_starter "${configCheck}"
     else
-        if [[ "$#" == 1 ]] && [[ -f ${configCheck[1]} ]] && [[ ${configCheck[1]##*/} == "context.config" ]]; then
-            config_starter "${configCheck}"
-        fi
         starter "$@"    
     fi
 
 }
 
 config_starter(){
-    source "${configCheck}"
+    source "${configCheck}" ##CHECK IF IT'S RIGHT
     if [[ "$window_length" =~ ^[0-9]+$ ]]; then ##Checks if it's a number, max expansion of 1000.
         if (( "$window_length" >= 1)); then ##Changed from 2 to 1
             ((projectDic["windowLength"]+="$window_length"))
@@ -857,7 +856,7 @@ main(){
     moduleLoader ##LOADS CORRECT MODULES    
     ## ADD CHECKER
     # starter "$@" ##ASSIGNS INPUTS TO HASHMAP ##REMOVE
-    config_starter "$@"
+    config_check "$@"
     if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
         inputSize=$( stat -c%s "${projectDic["inputFile"]}")
         if (( "${inputSize}" >= 479000000 )); then ##479MB (in decimal) and 456MB (in binary)
