@@ -65,7 +65,7 @@ config_starter(){
             ((projectDic["windowLength"]+="$window_length"))
         fi
     else
-        echo -e "\nPlease enter a valid integer for window expansion size, defaulting to 1 bases or flank size.\n"
+        echo -e "\nPlease enter a valid integer for window expansion size, defaulting to 1 bases or flank size.. TEST TEST..\n"
         exit 1
     fi
     # projectDic["windowLength"]=window_length.
