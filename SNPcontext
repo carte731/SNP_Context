@@ -102,8 +102,12 @@ config_starter(){
         echo -e "\nFlanks have to be between: 0 - 2. Defaulting to 0.\n"
     fi
     # projectDic["flanks"]=flanks CHECK if im doing this right.
-    if [[ -e "${referenceGenome}" ]] && [[ -d "${referenceGenome}" ]] && [[[ "${referenceGenome##*.}" == "fasfa" ]] || [[ "${referenceGenome##*.}" == "fa" ]]]; then
-        projectDic["referenceGenome"]="${referenceGenome}"
+    if [[ -e "${referenceGenome}" ]]; then
+        if [[ "${referenceGenome##*.}" == "fasfa" ]] || [[ "${referenceGenome##*.}" == "fa" ]]; then
+            projectDic["referenceGenome"]="${referenceGenome}"
+        else
+            referenceAssignment ${referenceGenome}
+        fi            
     else
         referenceAssignment ${referenceGenome}
     fi
