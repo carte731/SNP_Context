@@ -33,7 +33,9 @@ declare -a active=()
 
 config_check(){
     local configCheck=("$@")
-    if [[ "$#" <= 1 ]] && [[ ${configCheck[0],,} == "--help" ]] && [[ ${configCheck[0],,} == "-h" ]]; then
+    # if [[ "$#" < 1 ]] && [[ ${configCheck[1],,} == "--help" ]] && [[ ${configCheck[1],,} == "-h" ]]; then
+    echo -e "\ntest\n"
+    if [[ "$#" < 1 ]] || [[ $1,,} == "--help" ]] || [[ $1,,} == "-h" ]]; then
         local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
         helpPrintOut+=$'\nSNPcontext -i <input VCF> -o <output> -r <reference genome> -w <expansion size> -f <flank size> -p <project name> -n <acceptable Indel %> -ad <saved all data>\n'
         helpPrintOut+=$'\n\t------------------------\n'
@@ -47,12 +49,76 @@ config_check(){
         helpPrintOut+=$'\n\t-ad [(true or false) (Which stands for “all data”, this allows you to keep all intermediate files (split VCFs, BED, new interval BEDs, FASTA files)\n\t    that are normally deleted after processing. Defaults to false, which deletes intermedidate files.)]\n'
         echo "$helpPrintOut"
         exit -0
-    elif [[ "$#" == 1 ]] && [[ ${configCheck,,} == "-config" ]] && [[ ${configCheck,,} == "-c" ]]; then
-        args=$(cat "${configCheck[2]}")
     else
-        args=("$@")        
+        if [[ "$#" == 1 ]] && [[ -f ${configCheck[1]} ]] && [[ ${configCheck[1]##*/} == "context.config" ]]; then
+            config_starter "${configCheck}"
+        fi
+        starter "$@"    
     fi
 
+}
+
+config_starter(){
+    source "${configCheck}"
+    if [[ "$window_length" =~ ^[0-9]+$ ]]; then ##Checks if it's a number, max expansion of 1000.
+        if (( "$window_length" >= 1)); then ##Changed from 2 to 1
+            ((projectDic["windowLength"]+="$window_length"))
+        fi
+    else
+        echo -e "\nPlease enter a valid integer for window expansion size, defaulting to 1 bases or flank size.\n"
+        exit 1
+    fi
+    # projectDic["windowLength"]=window_length.
+    if [[ $input_file != '' ]] && [[ "${input_file##*.}" == "vcf" ]] && [ -f "$input_file" ]; then
+        projectDic["inputFile"]+="$input_file"
+        projectDic["inputLoc"]+="${input_file%/*}"
+        local filename=${input_file%.*} ##removes files extension
+        filename=${filename##*/} ##removes file path
+        projectDic["filename"]+="$filename"
+    else
+        echo -e "\nERROR. Incorrect file input. Check file is valid or directory path. (Input (.vcf) only)\nEXITING...\n"
+        exit 1
+    fi
+    # projectDic["inputFile"]=input_file
+    if [[ -z $output_location ]]; then
+        echo -e "\nNot a valid output location. Re-routing to input file location.\n"
+        projectDic["outputLoc"]+=${projectDic["inputLoc"]}
+    fi
+    if [ -d "$output_location" ]; then ##Checks if directory exist, if not it will save to input file location
+        if [[ "${output_location: -1}" == "/" ]]; then
+            projectDic["outputLoc"]+="$output_location"
+        else
+            projectDic["outputLoc"]+="$output_location"/
+        fi
+    fi
+    # projectDic["outputLoc"]=output_location
+    projectDic["projectName"]=project_name
+    if [[ "$flanks" =~ ^[0-2]+$ ]]; then ##Checks if it's a number and if it's between 0 and 2
+        ((projectDic["flanks"]+="$flanks"))
+        if (( ${projectDic["flanks"]} > ${projectDic["windowLength"]} )); then
+            ${projectDic["windowLength"]}=${projectDic["flanks"]}
+        fi
+    else
+        echo -e "\nFlanks have to be between: 0 - 2. Defaulting to 0.\n"
+    fi
+    # projectDic["flanks"]=flanks
+    referenceAssignment ${referenceGenome}
+    # projectDic["referenceGenome"]=referenceGenome
+    if [[ "$indel_max_amount" =~ ^[0-9]+$ ]]; then
+        if (( "${indel_max_amount}" >= 0  && "$indel_max_amount" <= 100 )); then
+            ((projectDic["nMax"]+="$indel_max_amount"))
+        elif (( "${indel_max_amount}" < 0 )); then
+            echo -e "\nMinimum N threshold is 1. Defaulting to 1% threshold."
+            ((projectDic["nMax"]+=1))
+        elif (( "${indel_max_amount}" > 100 )); then
+            echo -e "\nMaximum N threshold is 75. Defaulting to 100% threshold."
+            ((projectDic["nMax"]+=100))
+        fi            
+    fi
+    # projectDic["nMax"]=indel_max_amount
+    projectDic["allData"]=${save_all_data,,}
+    # projectDic["dropBox"]=dropbox
+    # projectDic["oneDrive"]=onedrive
 }
 
 #     Takes user arguments from command line and assigns values to dictionary keys in 'projectDic'
@@ -261,7 +327,7 @@ dirStructure(){
         mkdir "${projectDic[outputLoc]}"FASTA_SPLIT
         mkdir "${projectDic[outputLoc]}"BED_SPLIT
         projectDic["tempOut"]="${projectDic[outputLoc]}"
-    elif [[ ${projectDic["allData"]} == "false" ]];then
+    elif [[ ${projectDic["allData"]} == "false" ]]; then
         projectDic["TempLoc"]+=$(mktemp -d)
         mkdir "${projectDic[TempLoc]}"/SPLITVCF
         mkdir "${projectDic[TempLoc]}"/FASTA_SPLIT
@@ -307,7 +373,7 @@ REF_END
             echo -e "\nReference not found, please enter full path: "
             read newRefPath
             ## ADD A IF STATEMENT TO CHECK IF VALID
-            if [[ -d  ]]
+            # if [[ -d  ]]
             projectDic["referenceGenome"]+="${newRefPath}"
             projectDic["referenceGenomeChar"]+="${var}"
             export newRefPath
@@ -347,6 +413,7 @@ REF_END
             # read choice
             ## Finish this IF statement
             exit 1
+        fi
         projectDic["referenceGenome"]+="${newRefPath}"
         projectDic["referenceGenomeChar"]+="${var}"
         export newRefPath
@@ -781,7 +848,9 @@ FASTA_SWEEP
 
 main(){
     moduleLoader ##LOADS CORRECT MODULES    
-    starter "$@" ##ASSIGNS INPUTS TO HASHMAP
+    ## ADD CHECKER
+    # starter "$@" ##ASSIGNS INPUTS TO HASHMAP ##REMOVE
+    config_starter "$@"
     if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
         inputSize=$( stat -c%s "${projectDic["inputFile"]}")
         if (( "${inputSize}" >= 479000000 )); then ##479MB (in decimal) and 456MB (in binary)
