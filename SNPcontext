@@ -33,9 +33,9 @@ declare -a active=()
 
 config_check(){
     local configCheck=("$@")
-    # if [[ "$#" < 1 ]] && [[ ${configCheck[1],,} == "--help" ]] && [[ ${configCheck[1],,} == "-h" ]]; then
-    echo -e "\ntest\n"
-    if [[ "$#" < 1 ]] || [[ $1,,} == "--help" ]] || [[ $1,,} == "-h" ]]; then
+    if [[ "$#" < 1 ]] && [[ ${configCheck[1],,} == "--help" ]] && [[ ${configCheck[1],,} == "-h" ]]; then
+    # echo -e "\ntest\n"
+    # if [[ "$#" < 1 ]] || [[ $1,,} == "--help" ]] || [[ $1,,} == "-h" ]]; then
         local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
         helpPrintOut+=$'\nSNPcontext -i <input VCF> -o <output> -r <reference genome> -w <expansion size> -f <flank size> -p <project name> -n <acceptable Indel %> -ad <saved all data>\n'
         helpPrintOut+=$'\n\t------------------------\n'
@@ -50,8 +50,10 @@ config_check(){
         echo "$helpPrintOut"
         exit -0
     elif [[ "$#" == 1 ]] && [[ -f ${configCheck[1]} ]] && [[ ${configCheck[1]##*/} == "context.config" ]]; then
+        echo -e "CONFIG LOADER"
         config_starter "${configCheck}"
     else
+        echo -e "STARTER"
         starter "$@"    
     fi
 
