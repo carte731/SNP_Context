@@ -101,9 +101,12 @@ config_starter(){
     else
         echo -e "\nFlanks have to be between: 0 - 2. Defaulting to 0.\n"
     fi
-    # projectDic["flanks"]=flanks
-    referenceAssignment ${referenceGenome}
-    # projectDic["referenceGenome"]=referenceGenome
+    # projectDic["flanks"]=flanks CHECK if im doing this right.
+    if [[ -e "${referenceGenome}" ]] && [[ -d "${referenceGenome}" ]] && [[[ "${referenceGenome##*.}" == "fasfa" ]] || [[ "${referenceGenome##*.}" == "fa" ]]]; then
+        projectDic["referenceGenome"]="${referenceGenome}"
+    else
+        referenceAssignment ${referenceGenome}
+    fi
     if [[ "$indel_max_amount" =~ ^[0-9]+$ ]]; then
         if (( "${indel_max_amount}" >= 0  && "$indel_max_amount" <= 100 )); then
             ((projectDic["nMax"]+="$indel_max_amount"))
