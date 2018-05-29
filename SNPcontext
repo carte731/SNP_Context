@@ -937,6 +937,9 @@ main(){
         rm -rf "${templocation}"
     fi
     ##Add dropbox intergration
+    if [[ "${projectDic["S3"],,}" == 'true' ]]; then
+        s3Saver
+    fi
     echo -e "operations completed...\n"
         
 }
