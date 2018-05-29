@@ -113,12 +113,16 @@ config_starter(){
     # fi
     echo -e "\n${referenceGenome}\n"
     if [[ -f "${referenceGenome}" ]]; then
+    echo -e "INTO THE BREACH\n"
         if [[ "${referenceGenome##*.}" == "fasfa" ]] || [[ "${referenceGenome##*.}" == "fa" ]]; then
+            echo -e "IF ONE\n"
             projectDic["referenceGenome"]="${referenceGenome}"
         else
+            echo -e "ELSE ONE\n"
             referenceAssignment ${referenceGenome}
         fi            
     else
+        echo -e "ELSE BREACH\n"
         referenceAssignment ${referenceGenome}
     fi
     if [[ "$indel_max_amount" =~ ^[0-9]+$ ]]; then
