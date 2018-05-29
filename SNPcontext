@@ -256,7 +256,7 @@ starter(){ #grabs the arguments
 #     Current reference genomes for barley and soybean are hard coded here. For other species or reference updates,
 #     this will need to be changed.
 referenceAssignment(){
-    echo -e "\nMUSATFAR, ${var}\n"
+    echo -e "\nMUSATFAR, ${1}\n"
     # if [[ ${var,,} == "barley" ]] || [[ ${var,,} == "b" ]]; then ##forced lowercase with ,,
     if [[ ${1,,} == "barley" ]] || [[ ${1,,} == "b" ]]; then ##forced lowercase with ,,
         projectDic["referenceGenomeChar"]+='b'
