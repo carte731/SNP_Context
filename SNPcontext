@@ -23,6 +23,7 @@ declare -A projectDic=(
     ["TempLoc"]=''
     ["tempOut"]=''
     ["allData"]='false' #-ad
+    ["S3"]='false' #####
     
 )
 
@@ -140,6 +141,12 @@ config_starter(){
     projectDic["allData"]=${save_all_data,,}
     # projectDic["dropBox"]=dropbox
     # projectDic["oneDrive"]=onedrive
+    if [[ msi_S3 == "" ]]; then
+        echo -e "Null space, defaulting to false...\n"
+        projectDic["S3"]='false'
+    else
+        projectDic["S3"]=msi_S3
+    fi
 }
 
 #     Takes user arguments from command line and assigns values to dictionary keys in 'projectDic'
@@ -357,6 +364,24 @@ dirStructure(){
         mkdir "${projectDic[TempLoc]}"/BED_SPLIT
         projectDic["tempOut"]="${projectDic["TempLoc"]}"/
     fi
+}
+
+s3Saver(){
+    s3Base=$(s3info keys --machine-output)
+    subGate=0
+    access=''
+    secret=''
+    for t in ${s3Base}; do
+        if [[ "$t" != ' ' ]] && [[ subGate == 0 ]]; then
+            access+="${t}"
+        elif [[ "$t" != ' ' ]] && [[ subGate == 1 ]]; then
+            secret+="${t}"
+        elif [[ "$t" == ' ' ]]; then
+            subGate+=1
+        fi
+    done
+    echo -e "${access}"
+    echo -e "${secret}"
 }
 
 referenceChecker(){
