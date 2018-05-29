@@ -256,6 +256,7 @@ starter(){ #grabs the arguments
 #     Current reference genomes for barley and soybean are hard coded here. For other species or reference updates,
 #     this will need to be changed.
 referenceAssignment(){
+    echo -e "\nMUSATFAR, ${var}\n"
     if [[ ${var,,} == "barley" ]] || [[ ${var,,} == "b" ]]; then ##forced lowercase with ,,
         projectDic["referenceGenomeChar"]+='b'
         projectDic["referenceGenome"]+='/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
