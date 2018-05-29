@@ -367,21 +367,48 @@ dirStructure(){
 }
 
 s3Saver(){
-    s3Base=$(s3info keys --machine-output)
-    subGate=0
+    local s3Base=$(s3info keys --machine-output)
+    # subGate=0
+    # access=''
+    # secret=''
+    # for t in ${s3Base}; do
+    #     if [[ "$t" != ' ' ]] && [[ subGate == 0 ]]; then
+    #         access+="${t}"
+    #     elif [[ "$t" != ' ' ]] && [[ subGate == 1 ]]; then
+    #         secret+="${t}"
+    #     elif [[ "$t" == ' ' ]]; then
+    #         subGate+=1
+    #     fi
+    # done
+    # echo -e "${access}"
+    # echo -e "${secret}"
+    "${s3Base}" python3 - <<S3_save
+
+def s3_saver(s3Base):
     access=''
     secret=''
-    for t in ${s3Base}; do
-        if [[ "$t" != ' ' ]] && [[ subGate == 0 ]]; then
-            access+="${t}"
-        elif [[ "$t" != ' ' ]] && [[ subGate == 1 ]]; then
-            secret+="${t}"
-        elif [[ "$t" == ' ' ]]; then
-            subGate+=1
-        fi
-    done
-    echo -e "${access}"
-    echo -e "${secret}"
+    stage=0
+    for i in s3Base:
+        if(i != '\n') && (stage == 0):
+            access+=i
+        if(i != '\n') && (stage == 1):
+            secret+=i
+        if(i == '\n'):
+            stage+=1
+    print(access + "\n")
+    print(secret + "\n")
+    return(access, secret)
+
+def bashInputs():
+    s3Base=str(os.environ['s3Base'])
+    return(s3Base)
+
+def main():
+    s3Base = bashInputs()
+    access, secret = s3_saver(s3Base)
+main()
+
+S3_save
 }
 
 referenceChecker(){
@@ -456,7 +483,7 @@ REF_END
         echo -e "\nReference not found, please enter full path: "
         read newRefPath
         if [[ ! -f newRefPath ]]; then
-            echo -e "/nPlease try again and enter a valid path...\n"
+            echo -e "\nPlease try again and enter a valid path...\n"
             # echo -e "Would you like to try again?"
             # read choice
             ## Finish this IF statement
