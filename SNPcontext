@@ -257,10 +257,11 @@ starter(){ #grabs the arguments
 #     this will need to be changed.
 referenceAssignment(){
     echo -e "\nMUSATFAR, ${var}\n"
-    if [[ ${var,,} == "barley" ]] || [[ ${var,,} == "b" ]]; then ##forced lowercase with ,,
+    # if [[ ${var,,} == "barley" ]] || [[ ${var,,} == "b" ]]; then ##forced lowercase with ,,
+    if [[ ${1,,} == "barley" ]] || [[ ${1,,} == "b" ]]; then ##forced lowercase with ,,
         projectDic["referenceGenomeChar"]+='b'
         projectDic["referenceGenome"]+='/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
-    elif [[ ${var,,} == "soybean" ]] || [[ ${var,,} == "s" ]] || [[ ${var,,} == "soy" ]]; then
+    elif [[ ${1,,} == "soybean" ]] || [[ ${1,,} == "s" ]] || [[ ${1,,} == "soy" ]]; then
         projectDic["referenceGenomeChar"]+='s'
         projectDic["referenceGenome"]+='/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Soybean/PhytozomeV11/Gmax/assembly/Gmax_275_v2.0.fa'
         # projectDic["referenceGenome"]+='/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Soybean/Wm82_V1/Gmax_189.fa'
@@ -268,8 +269,8 @@ referenceAssignment(){
         # echo -e "\nPlease enter a valid reference genome. Defaulting to Barley reference.\n"
         # projectDic["referenceGenomeChar"]+='b'
         # projectDic["referenceGenome"]+='/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
-        referenceChecker "${var}"
-        projectDic["referenceGenomeChar"]+=${var}
+        referenceChecker "${1}"
+        projectDic["referenceGenomeChar"]+=${1}
     fi
 }
 
