@@ -9,7 +9,7 @@
 
 declare -A projectDic=(
     ["windowLength"]=1 #-w
-    ["inputFile"]='' #-i
+    ["inputFile"]='' #-i0
     ["inputLoc"]=''
     ["outputLoc"]='' #-o
     ["filename"]=''
@@ -102,7 +102,16 @@ config_starter(){
         echo -e "\nFlanks have to be between: 0 - 2. Defaulting to 0.\n"
     fi
     # projectDic["flanks"]=flanks CHECK if im doing this right.
-    if [[ -e "${referenceGenome}" ]]; then
+    # if [[ -e "${referenceGenome}" ]]; then
+    #     if [[ "${referenceGenome##*.}" == "fasfa" ]] || [[ "${referenceGenome##*.}" == "fa" ]]; then
+    #         projectDic["referenceGenome"]="${referenceGenome}"
+    #     else
+    #         referenceAssignment ${referenceGenome}
+    #     fi            
+    # else
+    #     referenceAssignment ${referenceGenome}
+    # fi
+    if [[ -f "${referenceGenome}" ]]; then
         if [[ "${referenceGenome##*.}" == "fasfa" ]] || [[ "${referenceGenome##*.}" == "fa" ]]; then
             projectDic["referenceGenome"]="${referenceGenome}"
         else
