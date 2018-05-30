@@ -965,6 +965,7 @@ main(){
     fi
     ##Add dropbox intergration
     if [[ "${projectDic["S3"],,}" == 'true' ]]; then
+        echo -e "\nTEST\n"
         s3Saver
     fi
     echo -e "operations completed...\n"
