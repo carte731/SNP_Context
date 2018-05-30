@@ -141,12 +141,12 @@ config_starter(){
     projectDic["allData"]=${save_all_data,,}
     # projectDic["dropBox"]=dropbox
     # projectDic["oneDrive"]=onedrive
-    # if [[ msi_S3 == "" ]]; then
-    #     echo -e "Null space, defaulting to false...\n"
-    #     projectDic["S3"]='false'
-    # else
-    #     projectDic["S3"]=msi_S3
-    # fi
+    if [[ msi_S3 == "" ]]; then
+        echo -e "Null space, defaulting to false...\n"
+        projectDic["S3"]='false'
+    else
+        projectDic["S3"]=msi_S3
+    fi
 }
 
 #     Takes user arguments from command line and assigns values to dictionary keys in 'projectDic'
@@ -382,7 +382,7 @@ s3Saver(){
     # done
     # echo -e "${access}"
     # echo -e "${secret}"
-    "${s3Base}" python3 - <<S3_save
+    "${s3Base}" python3.6 - <<S3_save
 
 def s3_saver(s3Base):
     access=''
@@ -406,6 +406,7 @@ def bashInputs():
 def main():
     s3Base = bashInputs()
     access, secret = s3_saver(s3Base)
+
 main()
 
 S3_save
@@ -964,10 +965,10 @@ main(){
         rm -rf "${templocation}"
     fi
     ##Add dropbox intergration
-    # if [[ "${projectDic["S3"],,}" == 'true' ]]; then
-    #     echo -e "\nTEST\n"
-    #     s3Saver
-    # fi
+    if [[ "${projectDic["S3"]}" == 'true' ]]; then
+        echo -e "\nTEST\n"
+        s3Saver
+    fi
     echo -e "operations completed...\n"
         
 }
