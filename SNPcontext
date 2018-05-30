@@ -145,6 +145,7 @@ config_starter(){
         echo -e "Null space, defaulting to false...\n"
         projectDic["S3"]='false'
     else
+        echo -e "MSI S3 SPLIT!\n"
         projectDic["S3"]=msi_S3
     fi
 }
@@ -384,6 +385,8 @@ s3Saver(){
     # echo -e "${secret}"
     "${s3Base}" python3.6 - <<S3_save
 
+import boto3
+
 def s3_saver(s3Base):
     access=''
     secret=''
@@ -398,6 +401,7 @@ def s3_saver(s3Base):
     print(access + "\n")
     print(secret + "\n")
     return(access, secret)
+    
 
 def bashInputs():
     s3Base=str(os.environ['s3Base'])
