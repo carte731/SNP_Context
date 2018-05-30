@@ -141,12 +141,12 @@ config_starter(){
     projectDic["allData"]=${save_all_data,,}
     # projectDic["dropBox"]=dropbox
     # projectDic["oneDrive"]=onedrive
-    if [[ msi_S3 == "" ]]; then
-        echo -e "Null space, defaulting to false...\n"
-        projectDic["S3"]='false'
-    else
-        projectDic["S3"]=msi_S3
-    fi
+    # if [[ msi_S3 == "" ]]; then
+    #     echo -e "Null space, defaulting to false...\n"
+    #     projectDic["S3"]='false'
+    # else
+    #     projectDic["S3"]=msi_S3
+    # fi
 }
 
 #     Takes user arguments from command line and assigns values to dictionary keys in 'projectDic'
