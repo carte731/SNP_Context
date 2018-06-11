@@ -144,7 +144,7 @@ config_starter(){
     if [[ msi_S3 == "" ]]; then
         echo -e "Null space, defaulting to false...\n"
         projectDic["S3"]='false'
-    else
+    else ##ADD SOMETHING TO CHECK IF IT'S ONLY true OR false
         echo -e "MSI S3 SPLIT!\n"
         projectDic["S3"]=msi_S3
     fi
@@ -368,53 +368,59 @@ dirStructure(){
 }
 
 s3Saver(){
-    local s3Base=$(s3info keys --machine-output)
-    # subGate=0
-    # access=''
-    # secret=''
-    # for t in ${s3Base}; do
-    #     if [[ "$t" != ' ' ]] && [[ subGate == 0 ]]; then
-    #         access+="${t}"
-    #     elif [[ "$t" != ' ' ]] && [[ subGate == 1 ]]; then
-    #         secret+="${t}"
-    #     elif [[ "$t" == ' ' ]]; then
-    #         subGate+=1
-    #     fi
-    # done
-    # echo -e "${access}"
-    # echo -e "${secret}"
-    "${s3Base}" python3.6 - <<S3_save
+    # local s3Base=$(s3info keys --machine-output) 
+#     s3Base="${s3Base}" procDir="${projectDic["tempOut"]}" projectName="${projectDic["projectName"],,}" python3.6 - <<S3_save
 
-import boto3
+# import boto
+# from boto.s3.connection import S3Connection
+# from boto.s3.key import Key
+# import os
 
-def s3_saver(s3Base):
-    access=''
-    secret=''
-    stage=0
-    for i in s3Base:
-        if(i != '\n') && (stage == 0):
-            access+=i
-        if(i != '\n') && (stage == 1):
-            secret+=i
-        if(i == '\n'):
-            stage+=1
-    print(access + "\n")
-    print(secret + "\n")
-    return(access, secret)
+# def s3_access_secret(s3Base):
+#     access=''
+#     secret=''
+#     stage=0
+#     for i in s3Base:
+#         if(i == ' '):
+#             stage+=1
+#         if(i != '\n') and (stage == 0):
+#             access+=i
+#         if(i != '\n') and (stage == 1):
+#             secret+=i
+#     return(access, secret)
     
+# def s3_save(project, procDir, access, secret):
+#     # geneDir = ['AtoC', 'AtoG', 'AtoT', 'CtoA', 'CtoG', 'CtoT', 'GtoA', 'GtoC', 'GtoT', 'TtoA', 'TtoC','TtoG']
+#     # geneDir2 = ['AtoC']
+#     # TierTwoConn = S3Connection(access, secret, host='s3.msi.umn.edu')
+#     TierTwoConn = boto.connect_s3(access, secret, host='s3.msi.umn.edu')
+#     # newBucket = TierTwoConn.create_bucket(project)
+#     TierTwoConn.create_bucket(project)
+#     # with open(procDir + "/COUNTS_TABLES", 'r')
+#     loc = procDir + "/COUNTS_TABLES"
+#     file = open(loc)
+#     bucketKey = Key(newBucket)
+#     bucketKey.key = project
+#     result = bucketKey.set_contents_from_file(file)
+#     # for u in geneDir2:
+#     #     for t in geneDir:
 
-def bashInputs():
-    s3Base=str(os.environ['s3Base'])
-    return(s3Base)
 
-def main():
-    s3Base = bashInputs()
-    access, secret = s3_saver(s3Base)
+# def bashInputs():
+#     s3Base=str(os.environ['s3Base'])
+#     project=str(os.environ['projectName'])
+#     procDir=str(os.environ['procDir'])
+#     return(s3Base, project, procDir)
 
-main()
+# def main():
+#     s3Base, project, procDir = bashInputs()
+#     access, secret = s3_access_secret(s3Base)
+#     s3_save(project, procDir, access, secret)
 
-S3_save
-}
+# main()
+
+# S3_save
+# }
 
 referenceChecker(){
     homeRef=$HOME/".reference_config.csv"
