@@ -35,7 +35,7 @@ declare -a active=()
 config_check(){
     local configCheck=("$@")
     if (( "$#" <= 1 )); then
-        if [[ ${configCheck[0],,} == "--help" ]] || [[ ${configCheck[0],,} == "-h" ]]; then
+        if [[ ${configCheck[0],,} == "--help" ]] || [[ ${configCheck[0],,} == "-h" ]] || (( "$#" == 0 )); then
             local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
             helpPrintOut+=$'\nSNPcontext -i <input VCF> -o <output> -r <reference genome> -w <expansion size> -f <flank size> -p <project name> -n <acceptable Indel %> -ad <saved all data>\n'
             helpPrintOut+=$'\n\t------------------------\n'
@@ -146,7 +146,7 @@ config_starter(){
         projectDic["S3"]='false'
     else ##ADD SOMETHING TO CHECK IF IT'S ONLY true OR false
         echo -e "MSI S3 SPLIT!\n"
-        projectDic["S3"]="${msi_S3}"
+        projectDic["S3"]="${msi_S3,,}"
     fi
 }
 
