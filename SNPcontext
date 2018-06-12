@@ -368,6 +368,8 @@ dirStructure(){
 }
 
 s3Saver(){
+    s3cmd mb s3://${projectDic["projectName"],,}
+    s3cmd put "${projectDic[outputLoc]}"COUNTS_TABLES/ s3://${projectDic["projectName"],,}
     # local s3Base=$(s3info keys --machine-output) 
 #     s3Base="${s3Base}" procDir="${projectDic["tempOut"]}" projectName="${projectDic["projectName"],,}" python3.6 - <<S3_save
 
@@ -420,7 +422,7 @@ s3Saver(){
 # main()
 
 # S3_save
-# }
+}
 
 referenceChecker(){
     homeRef=$HOME/".reference_config.csv"
