@@ -61,41 +61,41 @@ config_check(){
 
 config_starter(){
     source "${configCheck}" ##CHECK IF IT'S RIGHT
-    if [[ "$window_length" =~ ^[0-9]+$ ]]; then ##Checks if it's a number, max expansion of 1000.
-        if (( "$window_length" >= 1)); then ##Changed from 2 to 1
-            ((projectDic["windowLength"]+="$window_length"))
+    if [[ "${window_length}" =~ ^[0-9]+$ ]]; then ##Checks if it's a number, max expansion of 1000.
+        if (( "${window_length}" >= 1)); then ##Changed from 2 to 1
+            ((projectDic["windowLength"]+="${window_length}"))
         fi
     else
         echo -e "\nPlease enter a valid integer for window expansion size, defaulting to 1 bases or flank size.. TEST TEST..\n"
         exit 1
     fi
     # projectDic["windowLength"]=window_length.
-    if [[ $input_file != '' ]] && [[ "${input_file##*.}" == "vcf" ]] && [ -f "$input_file" ]; then
-        projectDic["inputFile"]+="$input_file"
+    if [[ "${input_file}" != '' ]] && [[ "${input_file##*.}" == "vcf" ]] && [ -f "${input_file}" ]; then
+        projectDic["inputFile"]+="${input_file}"
         projectDic["inputLoc"]+="${input_file%/*}"
         local filename=${input_file%.*} ##removes files extension
-        filename=${filename##*/} ##removes file path
-        projectDic["filename"]+="$filename"
+        filename="${filename##*/}" ##removes file path
+        projectDic["filename"]+="${filename}"
     else
         echo -e "\nERROR. Incorrect file input. Check file is valid or directory path. (Input (.vcf) only)\nEXITING...\n"
         exit 1
     fi
     # projectDic["inputFile"]=input_file
-    if [[ -z $output_location ]]; then
+    if [[ -z "${output_location}" ]]; then
         echo -e "\nNot a valid output location. Re-routing to input file location.\n"
-        projectDic["outputLoc"]+=${projectDic["inputLoc"]}
+        projectDic["outputLoc"]+="${projectDic["inputLoc"]}"
     fi
     if [ -d "$output_location" ]; then ##Checks if directory exist, if not it will save to input file location
         if [[ "${output_location: -1}" == "/" ]]; then
-            projectDic["outputLoc"]+="$output_location"
+            projectDic["outputLoc"]+="${output_location}"
         else
-            projectDic["outputLoc"]+="$output_location"/
+            projectDic["outputLoc"]+="${output_location}"/
         fi
     fi
     # projectDic["outputLoc"]=output_location
-    projectDic["projectName"]=project_name
-    if [[ "$flanks" =~ ^[0-2]+$ ]]; then ##Checks if it's a number and if it's between 0 and 2
-        ((projectDic["flanks"]+="$flanks"))
+    projectDic["projectName"]="${project_name}"
+    if [[ "${flanks}" =~ ^[0-2]+$ ]]; then ##Checks if it's a number and if it's between 0 and 2
+        ((projectDic["flanks"]+="${flanks}"))
         if (( ${projectDic["flanks"]} > ${projectDic["windowLength"]} )); then
             ${projectDic["windowLength"]}=${projectDic["flanks"]}
         fi
@@ -126,8 +126,8 @@ config_starter(){
         echo -e "ELSE BREACH\n"
         referenceAssignment ${referenceGenome}
     fi
-    if [[ "$indel_max_amount" =~ ^[0-9]+$ ]]; then
-        if (( "${indel_max_amount}" >= 0  && "$indel_max_amount" <= 100 )); then
+    if [[ "${indel_max_amount}" =~ ^[0-9]+$ ]]; then
+        if (( "${indel_max_amount}" >= 0  && "${indel_max_amount}" <= 100 )); then
             ((projectDic["nMax"]+="$indel_max_amount"))
         elif (( "${indel_max_amount}" < 0 )); then
             echo -e "\nMinimum N threshold is 1. Defaulting to 1% threshold."
@@ -141,7 +141,7 @@ config_starter(){
     projectDic["allData"]=${save_all_data,,}
     # projectDic["dropBox"]=dropbox
     # projectDic["oneDrive"]=onedrive
-    if [[ msi_S3 == "" ]]; then
+    if [[ "${msi_S3}" == "" ]]; then
         echo -e "Null space, defaulting to false...\n"
         projectDic["S3"]='false'
     else ##ADD SOMETHING TO CHECK IF IT'S ONLY true OR false
@@ -369,7 +369,7 @@ dirStructure(){
 
 s3Saver(){
     s3cmd mb s3://${projectDic["projectName"],,}
-    s3cmd put "${projectDic[outputLoc]}"COUNTS_TABLES/ s3://${projectDic["projectName"],,}
+    s3cmd put --recursive "${projectDic[outputLoc]}"COUNTS_TABLES/ s3://${projectDic["projectName"],,}
     # local s3Base=$(s3info keys --machine-output) 
 #     s3Base="${s3Base}" procDir="${projectDic["tempOut"]}" projectName="${projectDic["projectName"],,}" python3.6 - <<S3_save
 
