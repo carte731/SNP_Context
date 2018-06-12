@@ -368,8 +368,14 @@ dirStructure(){
 }
 
 s3Saver(){
-    s3cmd mb s3://${projectDic["projectName"],,}
-    s3cmd put --recursive "${projectDic[outputLoc]}"COUNTS_TABLES/ s3://${projectDic["projectName"],,}
+    s3cmd mb s3://${projectDic["projectName"],,} > /dev/null
+    echo -e "\nS3 bucket created..."
+    echo -e "\ntransfering files..."
+    if $(( s3cmd put --recursive "${projectDic[outputLoc]}"COUNTS_TABLES/ s3://${projectDic["projectName"],,} > /dev/null )); then
+        echo -e "\n Files transfered...\n"
+    else
+        echo -e "File transfer failed...\n"
+    fi
     # local s3Base=$(s3info keys --machine-output) 
 #     s3Base="${s3Base}" procDir="${projectDic["tempOut"]}" projectName="${projectDic["projectName"],,}" python3.6 - <<S3_save
 
