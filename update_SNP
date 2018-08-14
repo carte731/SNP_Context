@@ -1,0 +1,230 @@
+#!/bin/bash
+
+#    Corey Carter, St. Paul, MN - 09 January 2018
+#    This bash script is designed to pull contextual sequence flanking a SNP (variants) from a reference genome.
+#    The window size for contextual sequence can be user specificed.
+#    The program checks for the presence of more than one variant within user specified windows.
+
+#     A bash dictionary for input parameters
+#    SNP_CONTEXT Version: 2.0.0
+
+declare -A projectDic=(
+    ["windowLength"]=1 #-w
+    ["inputFile"]='' #-i
+    ["inputLoc"]=''
+    ["outputLoc"]='' #-o
+    ["filename"]=''
+    ["projectName"]='out' #-p
+    ["flanks"]=0 #-f
+    ["referenceGenomeChar"]=''
+    ["referenceGenome"]='' #-r
+    ["OperationalStage"]='vcfTObed'
+    ["nMax"]=25 ##-n
+    ["JOB"]='NO_JOB_NOW'
+    ["TempLoc"]=''
+    ["tempOut"]=''
+    ["allData"]='false' #-ad
+    ["S3"]='false' #-s3
+    [""]='' 
+    ["S3"]='' 
+    
+)
+
+#     A bash list of all possible nucleotide state transitions
+declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
+
+declare -a active=()
+
+cleanit(){
+    unset "${1}"
+}
+
+help_display(){ ## UPDATE TO INCLUDE ALL CMDS AND MENTION THE CONFIG FILE IS THE PREFERED WAY OF OPERATING
+    local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
+    helpPrintOut+=$'\nSNPcontext -i <input VCF> -o <output> -r <reference genome> -w <expansion size> -f <flank size> -p <project name> -n <acceptable Indel %> -ad <saved all data>\n'
+    helpPrintOut+=$'\n\t------------------------\n'
+    helpPrintOut+=$'\n\t**Input arguments can be in ANY order.**\n'
+    helpPrintOut+=$'\n\t-i [(complete path to VCF file) (the VCF input file)]\n\t-o [(complete path to location) (The output location, if not entered it will default to the same location as your input file.)]'
+    helpPrintOut+=$'\n\t-r [(barley or b, soy bean or s )(Selects the reference genome, defaults to Barley if not specified.)]\n\t-w [(Expansion window size)(The expandable window size around the SNP location, 8 on both ends is the deafult.)]'
+    helpPrintOut+=$'\n\t-p [project name]\n\t-n [max percentage of indels allowed in fasta files]'
+    helpPrintOut+=$'\n\t-a [(true/false) Do you want all temp files (vcf,bed and fasta) to be saved in your output directory]'
+    helpPrintOut+=$'\n\t-f [(number between 0 and 2) (flank size for aln_to_counts)]'
+    helpPrintOut+=$'\n\t-n [(number)(The percentage of accepted indels in the FASTA file)]'
+    helpPrintOut+=$'\n\t-ad [(true or false) (Which stands for “all data”, this allows you to keep all intermediate files (split VCFs, BED, new interval BEDs, FASTA files)\n\t    that are normally deleted after processing. Defaults to false, which deletes intermedidate files.)]\n'
+    echo "$helpPrintOut"
+    exit -0
+}
+
+configFileLoader(){
+    isCmd="false"
+    source ${args[0]}
+    declare -a startList=(
+        ${window_length}
+        ${input_file} # Declares unset variables (NULL), uses -v to check if NULL
+        ${output_location}
+        ${project_name}
+        ${flanks}
+        ${referenceGenome}
+        ${indel_max_amount}
+        ${save_all_data}
+        ${save_S3}
+        ${3_login}
+        ${s3_password}
+    )
+    declare -a cleanUp=(
+        window_length
+        input_file # Declares unset variables (NULL), uses -v to check if NULL
+        output_location
+        project_name
+        flanks
+        referenceGenome
+        indel_max_amount
+        save_all_data
+        save_S3
+        s3_login
+        s3_password
+    )
+}
+
+config_check(){
+    # local configCheck=("$@")
+    if (( "$#" >= 1 )); then
+        if (( "$#" == 1 ))
+            if [[ ${args[0],,} == "--help" ]] || [[ ${args[0],,} == "-h" ]]; then
+                help_display
+            elif [[ -d "${args[0]}" ]] || [[ -f "${args[0]}" ]] || [[ ! -z "${args[0]}" ]]; then
+                local var=${args[0]##*/} ## Removes directory path
+                local var=${var##*.} ## Grabs only the extension
+                if [[ ${args[0]%.*} == ".config" ]]; then ## Checks if it's a .config file
+                    configFileLoader
+                fi
+            fi
+        elif (( "$#" > 1 ));then
+            isCmd="true"
+            startList=("$@")
+        fi
+    else
+        help_display
+    fi
+}
+
+#     Takes user arguments from command line and assigns values to dictionary keys in 'projectDic'
+starter(){ #grabs the arguments
+    # local args=("$@")
+    local frontgate=0
+    local indexPos=0
+    # for i in $@; do
+    for i in ${startList[@]}; do
+        if [[ "${isCmd}" == "true" ]]; then
+            local var=${startList[${indexPos}+1]}
+        else
+            local var=${i]}
+        if [[ "${i,,}" == "-w" ]] || (( ${window_length} > 0)); then ##Window expansion size
+            if [[ "$var" =~ ^[0-9]+$ ]]; then ##Checks if it's a number, max expansion of 1000.
+                if (( "$var" >= 1)); then ##Changed from 2 to 1
+                    ((projectDic["windowLength"]+="$var"))
+                    frontgate=1 
+                fi
+            else
+                echo -e "\nPlease enter a valid integer for window expansion size, defaulting to 1 bases or flank size.\n"
+            fi
+        elif [[ "${i,,}" == "-i" ]] || [[ -v ${input_file} ]]; then ##Input file which grabs the input file name, location and complete file path 
+            if [[ "${var##*.}" == "vcf" ]] && [ -f "$var" ]; then ##Checks if it's VCF and if file exist
+                projectDic["inputFile"]+="$var"
+                projectDic["inputLoc"]+="${var%/*}"
+                local filename=${var%.*} ##removes files extension
+                filename=${filename##*/} ##removes file path
+                projectDic["filename"]+="$filename"
+                frontgate=1
+            else
+                echo -e "\nERROR. Incorrect file input. Check file or directory path. (Input (.vcf) only)\nEXITING...\n"
+                exit 1
+            fi
+        elif [[ "${i,,}" == "-o" ]] || [[ -v ${output_location} ]]; then ##output location info
+            if [ -d "$var" ]; then ##Checks if directory exist, if not it will save to input file location
+                if [[ "${var: -1}" == "/" ]]; then
+                    projectDic["outputLoc"]+="$var"
+                else
+                    projectDic["outputLoc"]+="$var"/
+                fi
+                frontgate=1
+            fi
+        elif [[ "${i,,}" == "-p" ]] || [[ -v ${project_name} ]]; then ##Project name
+            projectDic["projectName"]="$var"
+            frontgate=1
+        elif [[ "${i,,}" == "-f" ]] || (( "${flanks}" > 0 )); then ##Flank sizes for mutation motif's aln_to_counts func
+            frontgate=1
+            if [[ "$var" =~ ^[0-2]+$ ]]; then ##Checks if it's a number and if it's between 0 and 2
+                ((projectDic["flanks"]+="$var"))
+            else
+                echo -e "\nFlanks have to be between: 0 - 2. Defaulting to 0.\n"
+            fi
+        elif [[ "${i,,}" == "-r" ]] || [[ -v ${referenceGenome} ]]; then ##Which reference genome needed for FASTA file creation
+            referenceAssignment ${var}
+            frontgate=1
+        elif [[ "${i}" == "-JOB" ]]; then #####
+            projectDic["JOB"]="${var}"
+        elif [[ "${i,,}" == "-n"  ]] || [[ "${indel_max_amount}" > 0 ]]; then
+            if [[ "$var" =~ ^[0-9]+$ ]]; then ##CHECK WITH PETER!!!
+                if (( "${var}" >= 25  && "$var" <= 100 )); then
+                    ((projectDic["nMax"]+="$var"))
+                elif (( "${var}" < 25 )); then
+                    echo -e "\nMinimum N threshold is 25. Defaulting to 25% threshold."
+                    ((projectDic["nMax"]+=25))
+                elif (( "${var}" > 100 )); then
+                    echo -e "\nMaximum N threshold is 100. Defaulting to 100% threshold."
+                    ((projectDic["nMax"]+=100))
+                fi
+                frontgate=1                    
+            fi
+            # if [[ "$var" =~ ^[0-9]+$ ]]; then
+            #     if (( "${var}" >= 0  && "$var" <= 100 )); then
+            #         ((projectDic["nMax"]+="$var"))
+            #     elif (( "${var}" < 0 )); then
+            #         echo -e "\nMinimum N threshold is 1. Defaulting to 1% threshold."
+            #         ((projectDic["nMax"]+=1))
+            #     elif (( "${var}" > 100 )); then
+            #         echo -e "\nMaximum N threshold is 75. Defaulting to 100% threshold."
+            #         ((projectDic["nMax"]+=100))
+            #     fi
+            #     frontgate=1                    
+            fi
+        elif [[ "${i,,}" == "-ad"  ]] || [[ -v ${save_all_data} ]]; then
+            projectDic["allData"]="${var,,}"
+            frontgate=1
+        fi
+        ((indexPos+=1))
+        if [[ "${i,,}" == "-s3" ]] || [[ -v ${save_S3} ]]; then
+            if [[  ]]; then
+            projectDic["S3"]="${var,,}"
+        fi
+    done
+    if ((${frontgate} <= 0)); then
+        echo -e "\nPlease enter valid arguments. None were valid.\n"
+    fi
+    if [[ ${projectDic["inputFile"]} == '' ]]; then
+        echo -e "\nNo input file or working directory specified.\nEXITING...\n"
+        exit 1
+    fi
+    if [[ -z ${projectDic["outputLoc"]} ]] && [[ ${projectDic["inputFile"]} != '' ]]; then
+        echo -e "\nNot a valid output location. Re-routing to input file location.\n"
+        projectDic["outputLoc"]+=${projectDic["inputLoc"]}
+    fi
+    if [[ ${projectDic["referenceGenome"]} == "" ]]; then
+        referenceAssignment ##Function call
+    fi
+    if (( ${projectDic["flanks"]} > ${projectDic["windowLength"]} )); then
+        # ((projectDic["nMax"]+=25))
+        ${projectDic["windowLength"]}=${projectDic["flanks"]}
+    fi
+    for clean in "${cleanUp[@]}" #clears out variables I wont be using later.
+        cleanit $clean
+    cleanit "${startList}"
+}
+
+main(){
+    config_check "$@"
+    starter
+}
+
+main "$@"
