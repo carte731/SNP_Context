@@ -20,13 +20,12 @@ declare -A projectDic=(
     ["referenceGenome"]='' #-r
     ["OperationalStage"]='vcfTObed'
     ["nMax"]=25 ##-n
-    ["JOB"]='NO_JOB_NOW'
     ["TempLoc"]=''
     ["tempOut"]=''
     ["allData"]='false' #-ad
-    ["S3"]='false' #-s3
-    [""]='' 
-    ["S3"]='' 
+    ["s3"]='false' #-s3
+    ["s3User"]='' 
+    ["S3Password"]='' 
     
 )
 
@@ -35,13 +34,9 @@ declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 
 
 declare -a active=()
 
-cleanit(){
-    unset "${1}"
-}
-
 help_display(){ ## UPDATE TO INCLUDE ALL CMDS AND MENTION THE CONFIG FILE IS THE PREFERED WAY OF OPERATING
     local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
-    helpPrintOut+=$'\nSNPcontext -i <input VCF> -o <output> -r <reference genome> -w <expansion size> -f <flank size> -p <project name> -n <acceptable Indel %> -ad <saved all data>\n'
+    helpPrintOut+=$'\n\tSNPcontext -i <input VCF> -o <output> -r <reference genome> -w <expansion size> -f <flank size> -p <project name> -n <acceptable Indel %> -ad <saved all data>\n'
     helpPrintOut+=$'\n\t------------------------\n'
     helpPrintOut+=$'\n\t**Input arguments can be in ANY order.**\n'
     helpPrintOut+=$'\n\t-i [(complete path to VCF file) (the VCF input file)]\n\t-o [(complete path to location) (The output location, if not entered it will default to the same location as your input file.)]'
@@ -55,80 +50,90 @@ help_display(){ ## UPDATE TO INCLUDE ALL CMDS AND MENTION THE CONFIG FILE IS THE
     exit -0
 }
 
-configFileLoader(){
-    isCmd="false"
-    source ${args[0]}
-    declare -a startList=(
-        ${window_length}
-        ${input_file} # Declares unset variables (NULL), uses -v to check if NULL
-        ${output_location}
-        ${project_name}
-        ${flanks}
-        ${referenceGenome}
-        ${indel_max_amount}
-        ${save_all_data}
-        ${save_S3}
-        ${3_login}
-        ${s3_password}
-    )
-    declare -a cleanUp=(
-        window_length
-        input_file # Declares unset variables (NULL), uses -v to check if NULL
-        output_location
-        project_name
-        flanks
-        referenceGenome
-        indel_max_amount
-        save_all_data
-        save_S3
-        s3_login
-        s3_password
-    )
-}
-
 config_check(){
-    # local configCheck=("$@")
+    local args=($@)
     if (( "$#" >= 1 )); then
-        if (( "$#" == 1 ))
+        # echo -e "LauraOne"
+        # echo "$#"
+        if (( "$#" == 1 )); then
+            # echo -e "LauraTWO-PRIME"
+            # echo -e "${args[0],,}"
             if [[ ${args[0],,} == "--help" ]] || [[ ${args[0],,} == "-h" ]]; then
+                # echo -e "LauraTwo"
                 help_display
-            elif [[ -d "${args[0]}" ]] || [[ -f "${args[0]}" ]] || [[ ! -z "${args[0]}" ]]; then
-                local var=${args[0]##*/} ## Removes directory path
-                local var=${var##*.} ## Grabs only the extension
-                if [[ ${args[0]%.*} == ".config" ]]; then ## Checks if it's a .config file
-                    configFileLoader
+            elif [[ -f "${args[0]}" ]] || [[ ! -z "${args[0]}" ]]; then
+                # echo -e "LauraThree"
+                local var=${args##*.} ## Grabs only the extension
+                if [[ ${var,,} == "config" ]]; then ## Checks if it's a .config file
+                    # echo -e "LauraBases"
+                    isCmd="false"
+                    source "${args[0]}"
+                    declare -a startList=(
+                        ${window_length}
+                        ${input_file} # Declares unset variables (NULL), uses -v to check if NULL
+                        ${output_location}
+                        ${project_name}
+                        ${flanks}
+                        ${referenceGenome}
+                        ${indel_max_amount}
+                        ${save_all_data}
+                        ${save_S3}
+                        ${s3_login}
+                        ${s3_password}
+                    )
+                    starter ${startList}
                 fi
             fi
-        elif (( "$#" > 1 ));then
+            echo -e "Invalid '.Config' file extension. Exiting..."
+            exit 1
+        elif (( "$#" > 1 )); then
+            # echo -e "LAURA-MEGA"
             isCmd="true"
             startList=("$@")
+            starter ${startList}
         fi
+        echo -e "Invalid entries. Exiting..."
+        exit 1
     else
+        # echo -e "LauraBottom"
         help_display
     fi
 }
 
 #     Takes user arguments from command line and assigns values to dictionary keys in 'projectDic'
 starter(){ #grabs the arguments
-    # local args=("$@")
+    # echo -e ${startList[@]}
+
+    echo -e "STARTTT"
     local frontgate=0
     local indexPos=0
-    # for i in $@; do
+    # echo -e ${startList[@]}
     for i in ${startList[@]}; do
-        if [[ "${isCmd}" == "true" ]]; then
-            local var=${startList[${indexPos}+1]}
-        else
-            local var=${i]}
-        if [[ "${i,,}" == "-w" ]] || (( ${window_length} > 0)); then ##Window expansion size
+        # echo -e "${i}"
+        if [[ "${isCmd}" == "true" ]] && [[ ${#startList[@]} != ${indexPos} ]]; then
+            # echo -e "start_top"
+            local var="${startList[${indexPos}+1]}"
+        elif [[ "${isCmd}" == "false" ]]; then
+            # echo -e "start_bottom"
+            # echo -e $i
+            local var="${i}"
+        fi
+        # echo -e "${window_length}"
+        # if [[ "${i,,}" == "-w" ]] || [[ ! -v ${window_length} ]]; then ##Window expansion size
+        if [[ "${i,,}" == "-w" ]] || [[ ${window_length} == $i ]]; then ##Window expansion size
+            # echo -e "ISN'T EMPTY"
+            # echo $i
             if [[ "$var" =~ ^[0-9]+$ ]]; then ##Checks if it's a number, max expansion of 1000.
                 if (( "$var" >= 1)); then ##Changed from 2 to 1
                     ((projectDic["windowLength"]+="$var"))
                     frontgate=1 
+                    unset window_length
                 fi
             else
                 echo -e "\nPlease enter a valid integer for window expansion size, defaulting to 1 bases or flank size.\n"
             fi
-        elif [[ "${i,,}" == "-i" ]] || [[ -v ${input_file} ]]; then ##Input file which grabs the input file name, location and complete file path 
+        elif [[ "${i,,}" == "-i" ]] || [[ ${input_file} == $i ]]; then ##Input file which grabs the input file name, location and complete file path
+            # echo -e "IT'S BIG!" 
             if [[ "${var##*.}" == "vcf" ]] && [ -f "$var" ]; then ##Checks if it's VCF and if file exist
                 projectDic["inputFile"]+="$var"
                 projectDic["inputLoc"]+="${var%/*}"
@@ -136,11 +141,12 @@ starter(){ #grabs the arguments
                 filename=${filename##*/} ##removes file path
                 projectDic["filename"]+="$filename"
                 frontgate=1
+                unset input_file
             else
                 echo -e "\nERROR. Incorrect file input. Check file or directory path. (Input (.vcf) only)\nEXITING...\n"
                 exit 1
             fi
-        elif [[ "${i,,}" == "-o" ]] || [[ -v ${output_location} ]]; then ##output location info
+        elif [[ "${i,,}" == "-o" ]] || [[ ${output_location} == $i ]]; then ##output location info
             if [ -d "$var" ]; then ##Checks if directory exist, if not it will save to input file location
                 if [[ "${var: -1}" == "/" ]]; then
                     projectDic["outputLoc"]+="$var"
@@ -148,23 +154,30 @@ starter(){ #grabs the arguments
                     projectDic["outputLoc"]+="$var"/
                 fi
                 frontgate=1
+                unset output_location
             fi
-        elif [[ "${i,,}" == "-p" ]] || [[ -v ${project_name} ]]; then ##Project name
+        elif [[ "${i,,}" == "-p" ]] || [[ ${project_name} == $i ]]; then ##Project name
             projectDic["projectName"]="$var"
             frontgate=1
-        elif [[ "${i,,}" == "-f" ]] || (( "${flanks}" > 0 )); then ##Flank sizes for mutation motif's aln_to_counts func
-            frontgate=1
+            unset project_name
+        elif [[ "${i,,}" == "-f" ]] || [[ "${flanks}" == $i ]]; then ##Flank sizes for mutation motif's aln_to_counts func
             if [[ "$var" =~ ^[0-2]+$ ]]; then ##Checks if it's a number and if it's between 0 and 2
                 ((projectDic["flanks"]+="$var"))
             else
                 echo -e "\nFlanks have to be between: 0 - 2. Defaulting to 0.\n"
             fi
-        elif [[ "${i,,}" == "-r" ]] || [[ -v ${referenceGenome} ]]; then ##Which reference genome needed for FASTA file creation
-            referenceAssignment ${var}
             frontgate=1
-        elif [[ "${i}" == "-JOB" ]]; then #####
-            projectDic["JOB"]="${var}"
-        elif [[ "${i,,}" == "-n"  ]] || [[ "${indel_max_amount}" > 0 ]]; then
+            unset flanks
+        elif [[ "${i,,}" == "-r" ]] || [[ ${referenceGenome} == $i ]]; then ##Which reference genome needed for FASTA file creation
+            if [[ -f "${var}" ]]; then
+                projectDic["referenceGenome"]="${var}"
+                frontgate=1
+            else
+                echo -e "Enter a valid reference genome."
+                exit 1
+            fi
+            unset referenceGenome
+        elif [[ "${i,,}" == "-n"  ]] || [[ "${indel_max_amount}" == $i ]]; then
             if [[ "$var" =~ ^[0-9]+$ ]]; then ##CHECK WITH PETER!!!
                 if (( "${var}" >= 25  && "$var" <= 100 )); then
                     ((projectDic["nMax"]+="$var"))
@@ -175,7 +188,8 @@ starter(){ #grabs the arguments
                     echo -e "\nMaximum N threshold is 100. Defaulting to 100% threshold."
                     ((projectDic["nMax"]+=100))
                 fi
-                frontgate=1                    
+                frontgate=1
+                unset indel_max_amount                 
             fi
             # if [[ "$var" =~ ^[0-9]+$ ]]; then
             #     if (( "${var}" >= 0  && "$var" <= 100 )); then
@@ -188,19 +202,21 @@ starter(){ #grabs the arguments
             #         ((projectDic["nMax"]+=100))
             #     fi
             #     frontgate=1                    
-            fi
-        elif [[ "${i,,}" == "-ad"  ]] || [[ -v ${save_all_data} ]]; then
+            # fi
+        elif [[ "${i,,}" == "-ad"  ]] || [[ ${save_all_data} == $i ]]; then
             projectDic["allData"]="${var,,}"
             frontgate=1
+            unset save_all_data
+        elif [[ "${i,,}" == "-s3" ]] || [[ ${save_S3} == $i ]]; then ## ADD A CHECK FOR USERNAME AND PASSWORD
+            projectDic["s3"]="${var,,}"
+            frontgate=1
+            unset save_S3
         fi
         ((indexPos+=1))
-        if [[ "${i,,}" == "-s3" ]] || [[ -v ${save_S3} ]]; then
-            if [[  ]]; then
-            projectDic["S3"]="${var,,}"
-        fi
     done
     if ((${frontgate} <= 0)); then
         echo -e "\nPlease enter valid arguments. None were valid.\n"
+        exit 1
     fi
     if [[ ${projectDic["inputFile"]} == '' ]]; then
         echo -e "\nNo input file or working directory specified.\nEXITING...\n"
@@ -211,20 +227,28 @@ starter(){ #grabs the arguments
         projectDic["outputLoc"]+=${projectDic["inputLoc"]}
     fi
     if [[ ${projectDic["referenceGenome"]} == "" ]]; then
-        referenceAssignment ##Function call
+        echo -e "No reference genome enetered. Exiting..."
+        exit 1
     fi
     if (( ${projectDic["flanks"]} > ${projectDic["windowLength"]} )); then
         # ((projectDic["nMax"]+=25))
         ${projectDic["windowLength"]}=${projectDic["flanks"]}
     fi
-    for clean in "${cleanUp[@]}" #clears out variables I wont be using later.
-        cleanit $clean
-    cleanit "${startList}"
+    # if [[ $isCmd == "false" ]]; then
+    #     for clean in ${cleanUp[@]}; do #clears out global variables I wont be using later.
+    #         unset "${clean}"
+    #     done
+    # fi
+    unset startList
 }
 
 main(){
     config_check "$@"
-    starter
+    
+    echo -e
+    for u in ${projectDic[@]}; do
+        echo -e "${u}"
+    done
 }
 
 main "$@"

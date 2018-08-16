@@ -266,6 +266,7 @@ starter(){ #grabs the arguments
     fi
 }
 
+### REMOVED
 #     Current reference genomes for barley and soybean are hard coded here. For other species or reference updates,
 #     this will need to be changed.
 referenceAssignment(){
