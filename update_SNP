@@ -82,18 +82,23 @@ config_check(){
                         ${s3_password}
                     )
                     starter ${startList}
+                else   
+                    echo -e "Invalid '.Config' file extension. Exiting..."
+                    exit 1
                 fi
+            else   
+                echo -e "Invalid single entry, either enter config file with correct path or --help/-h. Exiting..."
+                exit 1
             fi
-            echo -e "Invalid '.Config' file extension. Exiting..."
-            exit 1
         elif (( "$#" > 1 )); then
             # echo -e "LAURA-MEGA"
             isCmd="true"
             startList=("$@")
             starter ${startList}
+        else 
+            echo -e "Invalid entries. Exiting..."
+            exit 1
         fi
-        echo -e "Invalid entries. Exiting..."
-        exit 1
     else
         # echo -e "LauraBottom"
         help_display
@@ -103,8 +108,7 @@ config_check(){
 #     Takes user arguments from command line and assigns values to dictionary keys in 'projectDic'
 starter(){ #grabs the arguments
     # echo -e ${startList[@]}
-
-    echo -e "STARTTT"
+    # echo -e "STARTTT"
     local frontgate=0
     local indexPos=0
     # echo -e ${startList[@]}
@@ -123,14 +127,15 @@ starter(){ #grabs the arguments
         if [[ "${i,,}" == "-w" ]] || [[ ${window_length} == $i ]]; then ##Window expansion size
             # echo -e "ISN'T EMPTY"
             # echo $i
-            if [[ "$var" =~ ^[0-9]+$ ]]; then ##Checks if it's a number, max expansion of 1000.
-                if (( "$var" >= 1)); then ##Changed from 2 to 1
-                    ((projectDic["windowLength"]+="$var"))
+            if (( "$var" <= 0 )) && (( "$var" >= 10 )); then ##Checks if it's a number, max expansion of 10
+                if (( "$var" > 10 )); then ##Changed from 2 to 1
+                    ((projectDic["windowLength"]=10))
                     frontgate=1 
                     unset window_length
                 fi
             else
-                echo -e "\nPlease enter a valid integer for window expansion size, defaulting to 1 bases or flank size.\n"
+                echo -e "\nPlease enter a valid integer for window expansion size - defaulting to 1.\n"
+                projectDic["windowLength"]=1
             fi
         elif [[ "${i,,}" == "-i" ]] || [[ ${input_file} == $i ]]; then ##Input file which grabs the input file name, location and complete file path
             # echo -e "IT'S BIG!" 
@@ -161,10 +166,11 @@ starter(){ #grabs the arguments
             frontgate=1
             unset project_name
         elif [[ "${i,,}" == "-f" ]] || [[ "${flanks}" == $i ]]; then ##Flank sizes for mutation motif's aln_to_counts func
-            if [[ "$var" =~ ^[0-2]+$ ]]; then ##Checks if it's a number and if it's between 0 and 2
-                ((projectDic["flanks"]+="$var"))
+            if [[ "$var" =~ [0-2] ]]; then ##Checks if it's a number and if it's between 0 and 2, Regex search
+                ((projectDic["flanks"]="$var"))
             else
                 echo -e "\nFlanks have to be between: 0 - 2. Defaulting to 0.\n"
+                projectDic["flanks"]=0
             fi
             frontgate=1
             unset flanks
@@ -178,15 +184,15 @@ starter(){ #grabs the arguments
             fi
             unset referenceGenome
         elif [[ "${i,,}" == "-n"  ]] || [[ "${indel_max_amount}" == $i ]]; then
-            if [[ "$var" =~ ^[0-9]+$ ]]; then ##CHECK WITH PETER!!!
-                if (( "${var}" >= 25  && "$var" <= 100 )); then
-                    ((projectDic["nMax"]+="$var"))
-                elif (( "${var}" < 25 )); then
+            if [[ "$var" =~ r'^[25-100]+$' ]]; then ##CHECK WITH PETER!!!
+                if (( "${projectDic["nMax"]}" >= 25  && "${projectDic["nMax"]}" <= 100 )); then
+                    ((projectDic["nMax"]="$var"))
+                elif (( "${projectDic["nMax"]}" < 25 )); then
                     echo -e "\nMinimum N threshold is 25. Defaulting to 25% threshold."
-                    ((projectDic["nMax"]+=25))
-                elif (( "${var}" > 100 )); then
+                    ((projectDic["nMax"]=25))
+                elif (( "${projectDic["nMax"]}" > 100 )); then
                     echo -e "\nMaximum N threshold is 100. Defaulting to 100% threshold."
-                    ((projectDic["nMax"]+=100))
+                    ((projectDic["nMax"]=100))
                 fi
                 frontgate=1
                 unset indel_max_amount                 
@@ -204,13 +210,21 @@ starter(){ #grabs the arguments
             #     frontgate=1                    
             # fi
         elif [[ "${i,,}" == "-ad"  ]] || [[ ${save_all_data} == $i ]]; then
-            projectDic["allData"]="${var,,}"
-            frontgate=1
-            unset save_all_data
+            if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
+                projectDic["allData"]="${var,,}"
+                frontgate=1
+                unset save_all_data
+            else
+                echo -e "No valid all data entry, defaulting to false. Only counts tables will be saved."
+            fi
         elif [[ "${i,,}" == "-s3" ]] || [[ ${save_S3} == $i ]]; then ## ADD A CHECK FOR USERNAME AND PASSWORD
-            projectDic["s3"]="${var,,}"
-            frontgate=1
-            unset save_S3
+            if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
+                projectDic["s3"]="${var,,}"
+                frontgate=1
+                unset save_S3
+            else
+                echo -e "No valid all data entry, defaulting to false."
+            fi
         fi
         ((indexPos+=1))
     done
@@ -230,21 +244,24 @@ starter(){ #grabs the arguments
         echo -e "No reference genome enetered. Exiting..."
         exit 1
     fi
-    if (( ${projectDic["flanks"]} > ${projectDic["windowLength"]} )); then
-        # ((projectDic["nMax"]+=25))
-        ${projectDic["windowLength"]}=${projectDic["flanks"]}
-    fi
-    # if [[ $isCmd == "false" ]]; then
-    #     for clean in ${cleanUp[@]}; do #clears out global variables I wont be using later.
-    #         unset "${clean}"
-    #     done
+    # if (( "${projectDic["windowLength"]}" < 0 )); then
+    #     echo -e "Window expansion less than 0. Defaulting to 1."
+    #     projectDic["windowLength"]=1
     # fi
+    # if (( "${projectDic["flanks"]}" < 0 )); then
+    #     echo -e "Flank size less than 0. Defaulting flank size to 0."
+    #     projectDic["flanks"]=0
+    # fi
+    if (( ${projectDic["flanks"]} > ${projectDic["windowLength"]} )); then
+        echo -e "Flank larger than window expansion, defaulting to flank size of ${projectDic["flanks"]}"
+        projectDic["windowLength"]=${projectDic["flanks"]}
+    fi
+
     unset startList
 }
 
 main(){
     config_check "$@"
-    
     echo -e
     for u in ${projectDic[@]}; do
         echo -e "${u}"
