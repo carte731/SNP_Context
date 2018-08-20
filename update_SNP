@@ -16,7 +16,7 @@ declare -A projectDic=(
     ["filename"]=''
     ["projectName"]='out' #-p
     ["flanks"]=0 #-f
-    ["referenceGenomeChar"]=''
+    # ["referenceGenomeChar"]=''
     ["referenceGenome"]='' #-r
     ["OperationalStage"]='vcfTObed'
     ["nMax"]=25 ##-n
@@ -24,11 +24,11 @@ declare -A projectDic=(
     ["tempOut"]=''
     ["allData"]='false' #-ad
     ["s3"]='false' #-s3
-    ["s3User"]='' 
-    ["S3Password"]='' 
-    ["msi"]='true'
-    ["dropbox"]='false'
-    ["dropboxAuth"]=''
+    ["msi"]='true' #-msi
+    ["dropbox"]='false' #-dpb
+    ["dropboxAuth"]='' #-dpba
+    ["JOB"]='NO_JOB_NOW'
+    
 )
 
 #     A bash list of all possible nucleotide state transitions
@@ -244,6 +244,7 @@ starter(){ #grabs the arguments
                 projectDic["dropbox"]="${var,,}"
                 frontgate=1
                 unset dropbox
+
             else
                 echo -e "No valid entry for Dropbox uploading (true or false), defaulting to false."
             fi
@@ -277,14 +278,6 @@ starter(){ #grabs the arguments
         echo -e "No reference genome enetered. Exiting..."
         exit 1
     fi
-    # if (( "${projectDic["windowLength"]}" < 0 )); then
-    #     echo -e "Window expansion less than 0. Defaulting to 1."
-    #     projectDic["windowLength"]=1
-    # fi
-    # if (( "${projectDic["flanks"]}" < 0 )); then
-    #     echo -e "Flank size less than 0. Defaulting flank size to 0."
-    #     projectDic["flanks"]=0
-    # fi
     if (( ${projectDic["flanks"]} > ${projectDic["windowLength"]} )); then
         echo -e "Flank larger than window expansion, defaulting to flank size of ${projectDic["flanks"]}"
         projectDic["windowLength"]=${projectDic["flanks"]}
@@ -310,7 +303,7 @@ moduleLoader(){ #load modules need for operations
             # echo -e "${inProgram}"
             if [[ -x $(command -v "${inProgram}") ]]; then
                 if [[ "${inProgram}" == "python3" ]] && [[ $(python3 -c 'import sys; print(sys.version_info[0:2])') == '(3, 6)' ]]; then
-                    echo -e "WHAT'S UP"
+                    # echo -e "WHAT'S UP"
                     if [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import mutation_motif') ]]; then
                         echo -e "Python module Mutation Motif is not installed. Please follow the link for instrutions: (https://bitbucket.org/pycogent3/mutationmotif).\n"
                     fi
@@ -396,35 +389,101 @@ dirStructure(){
         mkdir "${projectDic[outputLoc]}"SPLITVCF
         mkdir "${projectDic[outputLoc]}"FASTA_SPLIT
         mkdir "${projectDic[outputLoc]}"BED_SPLIT
+        mkdir "${projectDic[outputLoc]}"ERRORS
         projectDic["tempOut"]="${projectDic[outputLoc]}"
     elif [[ ${projectDic["allData"]} == "false" ]]; then
         projectDic["TempLoc"]+=$(mktemp -d)
         mkdir "${projectDic[TempLoc]}"/SPLITVCF
         mkdir "${projectDic[TempLoc]}"/FASTA_SPLIT
         mkdir "${projectDic[TempLoc]}"/BED_SPLIT
+        mkdir "${projectDic[TempLoc]}"/ERRORS
         projectDic["tempOut"]="${projectDic["TempLoc"]}"/
     fi
 }
 
 s3Saver(){
     if [[ "${projectDic["s3"]}" == 'true' ]]; then
-        s3cmd mb s3://${projectDic["projectName"],,} > /dev/null
-        echo -e "\nS3 bucket created..."
-        echo -e "\ntransfering files..."
-        if $(( s3cmd put --recursive "${projectDic[outputLoc]}"COUNTS_TABLES/ s3://${projectDic["projectName"],,} > /dev/null )); then
-            echo -e "\n Files transfered...\n"
+        if [[ "${projectDic["msi"]}" == "true" ]]; then
+            s3cmd mb s3://${projectDic["projectName"],,} > /dev/null
+            echo -e "\nS3 bucket created..."
+            echo -e "\ntransfering files..."
+            if $(( s3cmd put --recursive "${projectDic["outputLoc"]}"COUNTS_TABLES/ s3://${projectDic["projectName"],,} > /dev/null )); then
+                echo -e "\n Files transfered to S3...\n"
+            else
+                echo -e "S3 file transfer failed...\n"
+            fi
         else
-            echo -e "File transfer failed...\n"
+           ${projectDic["projectName"]}=project "${projectDic["tempOut"]}"=output python3.6 - << END_OF_TRANSFER
+
+ import boto3
+ import os
+
+s3sentit(output, project):
+    allFiles=[]
+    s3 = boto3.resource('s3')
+    s3.create_bucket(Bucket=project)
+    countsDirs = next(os.walk(output + "COUNTS_TABLES/"))[1]
+    for files in countsDirs:
+        currentDir = countsDirs + files
+        [ allFiles.append(currentDir + f) for f in os.listdir(currentDir) if os.path.isfile(currentDir + f) ]
+    for sentFile in allFiles:
+        s3.meta.client.upload_file(sentFile, project, sentFile)
+
+bashimports():
+    project = str(os.environ['project'])
+    output = str(os.environ['output'])
+    return(output, project)
+
+main():
+    output, project=bashimports()
+    s3sentit(output, project)
+
+main()
+
+END_OF_TRANSFER
+
         fi
-    else
-        echo -e "\Place S3 Python code here.\n"
     fi
+
+    echo -e "S3 transfer complete.\n"
+
 }
 
 dropboxSaver(){
-    if [[ "${projectDic["dropbox"]}" == 'true' ]]; then
-        echo -e "\nPlace python dropbox vode here.\n"
-    fi
+    ${projectDic["projectName"]}=project "${projectDic["tempOut"]}"=output python3.6 - << END_OF_TRANSFER
+
+ import dropbox
+ import os
+
+dpsentit(output, project):
+    allFiles=[]
+    dbx = dropbox.Dropbox("${projectDic["dropboxAuth"]}")
+    countsDirs = next(os.walk(output + "COUNTS_TABLES/"))[1]
+    for files in countsDirs:
+        currentDir = countsDirs + files
+        [ allFiles.append(currentDir + f) for f in os.listdir(currentDir) if os.path.isfile(currentDir + f) ]
+    newDBDir = "~/" + project
+    bdx.files_create_folder_v2(newDBDir)
+    for sentFile in allFiles:
+        with open(output, 'r') as sendDP:
+            # dbx.files_upload(sendDP.read(), sentFile, mode=dropbox.files.WriteMode.overwrite)
+            dbx.put_file(sendDP.read(), newDBDir + "/" + sentFile, mode=dropbox.files.WriteMode.overwrite)
+
+bashimports():
+    project = str(os.environ['project'])
+    output = str(os.environ['output'])
+    return(output, project)
+
+main():
+    output, project=bashimports()
+    dpsentit(output, project)
+
+main()
+
+END_OF_TRANSFER
+
+    echo -e "Dropbox transfer complete.\n"
+
 }
 
 #    This is Python 3 code embedded in the bash script
@@ -774,26 +833,89 @@ FASTA_SWEEP
 }
 
 jobCreator(){
-    if [[  ]]; then
-    scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
+    scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" ## Grabs the file path location for script
     qsub -l "${job_specs}" /
     -m abe /
     -o "${projectDic["tempOut"]}" /
-    -e "${projectDic["tempOut"]}" /
+    -e "${projectDic["tempOut"]}"/ERRORS /
     -M "${input_email}" /
     -N "${projectDic["projectName"]}" /
-
+    # bash scriptPath/SNPcontext /
+    bash "${scriptPath}"/update_SNP /
+    -i "${projectDic["inputFile"]}" /
+    -o "${projectDic["outputLoc"]}" /
+    -w "${projectDic["windowLength"]}" /
+    -f "${projectDic["flanks"]}" /
+    -p "${projectDic["projectName"]}" /
+    -r "${projectDic["referenceGenome"]}" /
+    -ad "${projectDic["allData"]}" /
+    -n "${projectDic["nMax"]}" /
+    -JOB "${projectDic["THIS_IS_A_JOB"]}" /
+    -s3 "${projectDic["s3"]}" /
+    -msi "${projectDic["msi"]}" /
+    -dpb "${projectDic["dropbox"]}" /
+    -dpba "${projectDic["dropboxAuth"]}" /
 
 }
 
 main(){
-    echo -e
     config_check "$@"
     moduleLoader
     echo -e
     for u in ${!projectDic[@]}; do
         echo -e "${u} : ${projectDic[$u]}"
     done
+}
+
+main2(){
+    ## ADD CHECKER
+    # starter "$@" ##ASSIGNS INPUTS TO HASHMAP ##REMOVE
+    config_check "$@"
+    if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
+        jobCreator
+    fi
+    moduleLoader ##LOADS CORRECT MODULES        
+    dirStructure
+    vcfSplit
+    fileConverter ##MAKES BED FILE
+    local temp="${projectDic["tempOut"]}"BED_SPLIT/
+    local splitDir=("${temp}"*_split_"${projectDic[filename]}".bed*)
+    for gene in "${splitDir[@]}"; do
+        local geneDir="${gene%.*}"
+        geneDir="${geneDir##*/}"
+        geneDir=${geneDir:0:4} ##BASH IS BASE 1
+        pythonBEDScanner "$geneDir" & ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
+    done
+    wait
+    echo -e "\nOverlap checks completed..."
+    echo -e "See Overlap results located in 'WindowOverlap.txt' in your main output directory.\n"
+    fileConverter ##CREATES FASTA FILE
+    local tempTwo="${projectDic["tempOut"]}"FASTA_SPLIT/
+    local fastalisting=("${tempTwo}"*_"${projectDic[filename]}".fasta*)
+    for geneTwo in "${fastalisting[@]}"; do
+        local geneDirTwo="${geneTwo%.*}"
+        geneDirTwo="${geneDirTwo##*/}"
+        geneDirTwo=${geneDirTwo:0:4}
+        fastaScanner "${geneDirTwo}" "${geneTwo}" & ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
+    done
+    wait
+    fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
+    fileConverter ##ALL_COUNTS
+    if [[ "${projectDic["allData"]}" == "false"  ]]; then
+        local templocation="${projectDic["TempLoc"]}"
+        rm -rf "${templocation}"
+    fi
+    ##Add dropbox intergration
+    if [[ "${projectDic["s3"]}" == 'true' ]]; then
+        echo -e "\nTEST\n"
+        s3Saver
+    fi
+    if [[ "${projectDic["dropbox"]}" == 'true' ]]; then
+        echo -e "\nTEST\n"
+        dropboxSaver
+    fi
+    echo -e "operations completed...\n"
+        
 }
 
 main "$@"
