@@ -288,6 +288,7 @@ referenceAssignment(){
     fi
 }
 
+# XXXX UPDATED
 #    Loading modules on UMN MSI system. Three of the four are maintained by Morrell Lab (Corey Carter).
 #    Will need to be changed for use outside UMN/MSI
 moduleLoader(){ #load modules need for operations
@@ -298,6 +299,7 @@ moduleLoader(){ #load modules need for operations
 
 }
 
+# XXXX
 #    Performing vcf to bed conversion using bedops 'vcf2bed' function
 fileConverter(){
     if [ "${projectDic[OperationalStage]}" == "vcfTObed" ]; then ##Key and new input LOCATION
@@ -353,6 +355,7 @@ fileConverter(){
 
 }
 
+# XXXX
 #    Creates output directories
 dirStructure(){
     DATE=`date +"%m%d%Y-%H%M"`
@@ -373,6 +376,7 @@ dirStructure(){
     fi
 }
 
+# XXXX UPDATED
 s3Saver(){
     s3cmd mb s3://${projectDic["projectName"],,} > /dev/null
     echo -e "\nS3 bucket created..."
@@ -436,6 +440,7 @@ s3Saver(){
 # S3_save
 }
 
+# REMOVED
 referenceChecker(){
     homeRef=$HOME/".reference_config.csv"
     if [[ -e "${homeRef}" ]]; then ##If there search
@@ -547,6 +552,7 @@ REF_END
     fi
 }
 
+# XXXX
 #    This is Python 3 code embedded in the bash script
 #    Expands coverage windows based on user-specified intervals
 #    Also checks for "Type One" and "Type Two" overlaps
@@ -734,6 +740,7 @@ exit 0
 
 }
 
+# XXXX
 vcfSplit(){
     inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" python3.6 - <<VCF_SPLIT_END
 
@@ -830,6 +837,7 @@ VCF_SPLIT_END
 
 }
 
+# XXXX
 fastaScanner(){
 
     inputFile="${projectDic["inputFile"]}" flank="${projectDic["flanks"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" geneTwo=${geneTwo} geneDirTwo="${geneDirTwo}" nMax="${projectDic["nMax"]}" windowLength="${projectDic["windowLength"]}" python3.6 - <<FASTA_SWEEP

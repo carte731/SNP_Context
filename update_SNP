@@ -27,6 +27,8 @@ declare -A projectDic=(
     ["s3User"]='' 
     ["S3Password"]='' 
     ["msi"]='true'
+    ["dropbox"]='false'
+    ["dropboxAuth"]=''
 )
 
 #     A bash list of all possible nucleotide state transitions
@@ -237,6 +239,14 @@ starter(){ #grabs the arguments
             else
                 echo -e "No valid entry for S3 storage (true or false), defaulting to false."
             fi
+        elif [[ "${i,,}" == "-dpb" ]] || [[ ${save_S3} == $i ]]; then ## ADD A CHECK FOR USERNAME AND PASSWORD 
+            if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
+                projectDic["dropbox"]="${var,,}"
+                frontgate=1
+                unset dropbox
+            else
+                echo -e "No valid entry for Dropbox uploading (true or false), defaulting to false."
+            fi
         elif [[ "${i,,}" == "-msi" ]] || [[ ${MSI_Mode} == $i ]]; then
             if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
                 projectDic["msi"]="${var,,}"
@@ -283,6 +293,7 @@ starter(){ #grabs the arguments
     unset startList
 }
 
+### CHECK AND DO TESTING ON MSI AND LOCAL MACHINES
 #    Loading modules on UMN MSI system. Three of the four are maintained by Morrell Lab (Corey Carter).
 #    Will need to be changed for use outside UMN/MSI
 moduleLoader(){ #load modules need for operations
@@ -296,15 +307,482 @@ moduleLoader(){ #load modules need for operations
     else
         declare -A testlisting=( ["python3"]=3.6.4 ["bedops"]=2.4.20 ["bedtools"]=2.23.0 )
         for inProgram in ${!testlisting[@]}; do
-            if [[ ! -x $(command -v "${inProgram}") ]]; then
-                if [[ "${inProgram}" == "python3" ]]; then
-                    python3 -c 'import sys; print(sys.version_info[0:2])'
-                    echo -e "${inProgram} is installed\n"
+            # echo -e "${inProgram}"
+            if [[ -x $(command -v "${inProgram}") ]]; then
+                if [[ "${inProgram}" == "python3" ]] && [[ $(python3 -c 'import sys; print(sys.version_info[0:2])') == '(3, 6)' ]]; then
+                    echo -e "WHAT'S UP"
+                    if [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import mutation_motif') ]]; then
+                        echo -e "Python module Mutation Motif is not installed. Please follow the link for instrutions: (https://bitbucket.org/pycogent3/mutationmotif).\n"
+                    fi
+                    if [[ "${projectDic["s3"]}" == "true" ]] && [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import boto3') ]]; then
+                        echo -e "Python module boto3 (S3) is not installed. Please pip install boto3 for Amazon save S3 support. Use command: pip3 install boto3\n"
+                    fi
+                    if [[ "${projectDic["dropbox"]}" == "true" ]] && [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import dropbox') ]]; then
+                        echo -e "Python module for dropbox is not installed. Please pip install dropbox for dropbox save support. Use command: pip3 install dropbox\n"
+                    fi
+                elif [[ ! "${inProgram}" == "python3" ]] && [[ ! $(python3 -c 'import sys; print(sys.version_info[0:2])') == '(3, 6)' ]]; then
+                    echo -e "Python version out of date. Please install Python 3.6.x.\n"
+                fi
             else
                 echo -e "${inProgram} is not installed, please install ${inProgram} version: ${testlisting[$inProgram]}.\n"
             fi
         done
     fi
+
+}
+
+#    Performing vcf to bed conversion using bedops 'vcf2bed' function
+fileConverter(){
+    if [ "${projectDic[OperationalStage]}" == "vcfTObed" ]; then ##Key and new input LOCATION
+        local temp="${projectDic["tempOut"]}"SPLITVCF/
+        local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
+        for gene in "${splitDir[@]}"; do
+            local targetVCF="${gene%.*}"
+            targetVCF="${targetVCF##*/}"
+            vcf2bed < "${gene}" > "${projectDic["tempOut"]}"BED_SPLIT/"${targetVCF}".bed & ##sort later
+        done
+        wait
+        projectDic[OperationalStage]="bedTOfasta"
+    #    Takes a reference genome and bed file and generates small fasta files from reference genome intervals
+    elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
+        local temp="${projectDic["tempOut"]}"BED_SPLIT/
+        local splitDir=("${temp}"*"${projectDic[filename]}"_new_interval.bed*)
+        for gene in "${splitDir[@]}"; do
+            local targetBED="${gene%.*}"
+            targetBED="${targetBED##*/}"
+            targetBED=${targetBED:0:4}
+            bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${gene}" -fo "${projectDic["tempOut"]}"FASTA_SPLIT/"${targetBED}"_"${projectDic[filename]}".fasta &
+        done
+        wait
+        projectDic[OperationalStage]="alnToCounts"
+    elif [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
+        local temp="${projectDic["tempOut"]}"FASTA_SPLIT/
+        local splitDir=("${temp}"*_"${projectDic[filename]}".fasta*)
+        echo -e "creating counts tables..."
+        for gene in "${splitDir[@]}"; do
+            local countfile="${gene%.*}"
+            countfile="${countfile##*/}"
+            local geneDirection=${countfile:0:4}
+            mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"
+            mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS
+            for loopGene in "${dirL[@]}"; do
+                aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/ --flank_size "${projectDic[flanks]}" --direction "${loopGene}" -F > /dev/null
+                mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".txt
+                mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".log ##FIX Unique Log ID'S            
+            done
+            active+=("${geneDirection}")
+        done
+        projectDic["OperationalStage"]="allCounts"
+    elif [ "${projectDic[OperationalStage]}" == "allCounts" ]; then
+        echo -e "creating combined tables..."
+        mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS
+        for loopGene in "${active[@]}"; do
+            cd "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/
+            all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/ --strand_symmetric > /dev/null 
+            mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${loopGene}"_combined_counts.txt
+        done
+        projectDic["OperationalStage"]="DONE..."
+    fi
+
+}
+
+#    Creates output directories
+dirStructure(){
+    DATE=`date +"%m%d%Y-%H%M"`
+    mkdir "${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
+    projectDic["outputLoc"]="${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
+    mkdir "${projectDic[outputLoc]}"COUNTS_TABLES
+    if [[ ${projectDic["allData"]} == "true" ]]; then
+        mkdir "${projectDic[outputLoc]}"SPLITVCF
+        mkdir "${projectDic[outputLoc]}"FASTA_SPLIT
+        mkdir "${projectDic[outputLoc]}"BED_SPLIT
+        projectDic["tempOut"]="${projectDic[outputLoc]}"
+    elif [[ ${projectDic["allData"]} == "false" ]]; then
+        projectDic["TempLoc"]+=$(mktemp -d)
+        mkdir "${projectDic[TempLoc]}"/SPLITVCF
+        mkdir "${projectDic[TempLoc]}"/FASTA_SPLIT
+        mkdir "${projectDic[TempLoc]}"/BED_SPLIT
+        projectDic["tempOut"]="${projectDic["TempLoc"]}"/
+    fi
+}
+
+s3Saver(){
+    if [[ "${projectDic["s3"]}" == 'true' ]]; then
+        s3cmd mb s3://${projectDic["projectName"],,} > /dev/null
+        echo -e "\nS3 bucket created..."
+        echo -e "\ntransfering files..."
+        if $(( s3cmd put --recursive "${projectDic[outputLoc]}"COUNTS_TABLES/ s3://${projectDic["projectName"],,} > /dev/null )); then
+            echo -e "\n Files transfered...\n"
+        else
+            echo -e "File transfer failed...\n"
+        fi
+    else
+        echo -e "\Place S3 Python code here.\n"
+    fi
+}
+
+dropboxSaver(){
+    if [[ "${projectDic["dropbox"]}" == 'true' ]]; then
+        echo -e "\nPlace python dropbox vode here.\n"
+    fi
+}
+
+#    This is Python 3 code embedded in the bash script
+#    Expands coverage windows based on user-specified intervals
+#    Also checks for "Type One" and "Type Two" overlaps
+#    A "Type One overlap" is another SNP within immediate contextual sequence
+#    A "Type Two overlap" is another SNP within the expanded flanking contextual sequencing
+pythonBEDScanner(){
+    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" interval="${projectDic["windowLength"]}" geneDir="$geneDir" python3.6 - <<END_OF_PYTHON
+    
+import os
+import re
+import subprocess
+from itertools import chain
+import datetime
+
+def bedMapper(interval, outputLoc, projectName, filename, geneDir):
+    output = str(subprocess.check_output(['wc', '-m', outputLoc + "BED_SPLIT/" + geneDir + "_split_" + filename + ".bed"]))
+    length = re.findall(r'\d+', output)
+    length = int(length[0])
+    bedMapper=bytearray()
+    masterList=[]
+    sub=[] ##FOR BEDMAPPER
+    temp=[] ##FOR MASTERLIST
+    final=''
+    with open(outputLoc + "BED_SPLIT/" + geneDir + "_split_" + filename + ".bed", "rb") as bed_test: ##Change to input variables
+        for i in range(length):
+            element = bed_test.read(1).decode("ascii")
+            if((element != '\t') and (element != '\n')):
+                final = final + element
+            elif((element == '\t') and (element != '\n')):
+                sub.append(final)
+                final=''
+                sub.append(element)
+            if(element == "\n"):
+                sub.append(final)
+                sub.append(element)
+                sub[2] = str(int(sub[2]) - interval)
+                sub[4] = str(int(sub[4]) + interval)         
+                a = sub[2]
+                b = sub[4]
+                temp.append(int(a))
+                temp.append(int(b))
+                temp.sort()
+                bedMapper.extend(''.join(sub).encode("utf-8"))
+                masterList.append(temp)
+                final=''
+                sub=[] ## was sub=[]
+                temp=[] ## was sub=[]
+        with open(outputLoc + "BED_SPLIT/" + geneDir + "_" + filename + "_new_interval.bed", "wb") as newBed: ##Change to input variables
+            newBed.write(bedMapper)
+        return(masterList)
+
+def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, geneDir, baseOut):
+    gateA=True
+    gateB=True
+    now = datetime.datetime.now()
+    results = '\n**********************\nTYPE ONE and TYPE TWO CHECKS FOR: ' + geneDir + " ON " + now.strftime("%Y-%m-%d, %H:%M") + '\n----------------------------------------------------\n' ##ADD PROJECT NAME TO THIS
+    resultsA = '\n**' + geneDir + ' TYPE ONE: OVERLAPS INTO ORIGINAL SNPs**\n------------------------------------\n'
+    resultsB = '\n**' + geneDir + ' TYPE TWO: OVERLAPS INTO SNP EXPANSION WINDOWS**\n-------------------------------------\n'
+    for i in range(len(expandedList)-1): #Checks for Type One SNP overlaps (ORIGINAL INTERVAL CHECK)
+            a=expandedList[i][0] ##A= left side
+            b=expandedList[i][1] ##B= right side
+            subTA=expandedList[i+1][0]-(interval) ##TYPE ONE SWITCHED FROM - TO +
+            subTB=expandedList[i+1][1]+(interval) ##TYPE ONE SWITCHED FROM - TO +
+            subMA=expandedList[i+1][0] ##TYPE TWO
+            subMB=expandedList[i+1][1] ##TYPE TWO
+            binary=[0,0,0,0]
+            binaryMB=[0,0,0,0]
+            if(a <= subTA):
+                binary[0]=1
+            if(a <= subTB):
+                binary[1]=1
+            if(b >= subTA):
+                binary[2]=1
+            if(b >= subTB):
+                binary[3]=1
+            if(a <= subMA): ##
+                binaryMB[0]=1
+            if(a <= subMB):
+                binaryMB[1]=1
+            if(b >= subMA):
+                binaryMB[2]=1
+            if(b >= subMB):
+                binaryMB[3]=1
+            if((binary != [1,1,0,0]) and (binary != [0,0,1,1])):
+                gateA=False
+                if(binary == [0,1,1,0]):
+                    resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " SNP is encapsulated within " + str(subTA) + "-" + str(subTB) + '.'
+                elif(binary == [1,1,1,1]):
+                    resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " is equal or encapsulating " + str(subTA) + "-" + str(subTB) + '.'
+                elif((binary == [1,1,1,0]) or (binary == [0,1,1,1])):
+                    if(binary == [1,1,1,0]):
+                        resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subTA) + "-" + str(subTB) + ". on the right, between " + str(b) + " and " + str(subTA) + '.'
+                    elif(binary == [0,1,1,1]):
+                        resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subTA) + "-" + str(subTB) + ". on the left, between " + str(a) + " and " + str(subTB) + '.' 
+            if((binaryMB != [1,1,0,0]) and (binaryMB != [0,0,1,1])):
+                gateB=False
+                if(binaryMB == [0,1,1,0]):
+                    resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " SNP is encapsulated within " + str(subMA) + "-" + str(subMB) + '.'
+                elif(binaryMB == [1,1,1,1]):
+                    resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is equal or encapsulating " + str(subMA) + "-" + str(subMB) + '.'
+                elif((binaryMB == [1,1,1,0]) or (binaryMB == [0,1,1,1])):
+                    if(binaryMB == [1,1,1,0]):
+                        resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subMA) + "-" + str(subMB) + ". on the right, between " + str(b) + " and " + str(subMA) + '.'
+                    elif(binaryMB == [0,1,1,1]):
+                        resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subMA) + "-" + str(subMB) + ". on the left, between " + str(a) + " and " + str(subMB) + '.' 
+    if(gateA):
+        resultsA+="\nNo Type ONE window overlaps detected.\n"
+    if(gateB):
+        resultsB+="\nNo Type TWO window overlaps detected.\n"
+    results += resultsA + "\n" + resultsB + "\n"
+    results += "\nEND OF INTERVAL CHECKS.\nXXXXXXXXXXXXXXXXXXXXXX\n"
+    with open(baseOut + projectName + "_" + "WindowOverlap.txt", 'a+') as window:
+        window.write(results)
+        
+def bashInputs():
+    outputLoc=str(os.environ['outputLoc'])
+    filename=str(os.environ['filename'])
+    interval=int(os.environ['interval'])
+    inputFile=str(os.environ['inputFile'])
+    projectName=str(os.environ['projectName'])
+    geneDir=str(os.environ['geneDir'])
+    baseOut=str(os.environ['baseOut'])
+    return(outputLoc, filename, interval, inputFile, projectName, geneDir, baseOut)
+
+def main():
+    outputLoc, filename, interval, inputFile, projectName, geneDir, baseOut=bashInputs()
+    masterList=bedMapper(interval, outputLoc, projectName, filename, geneDir) 
+    binaryIntersect(masterList, interval, outputLoc, projectName, filename, geneDir, baseOut)
+main()
+
+END_OF_PYTHON
+
+}
+
+vcfSplit(){
+    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" python3.6 - <<VCF_SPLIT_END
+
+import os
+
+def geneDirCreate():
+    geneDir={
+
+        'AtoC':bytearray(),
+        'AtoG':bytearray(),
+        'AtoT':bytearray(),
+        'CtoA':bytearray(),
+        'CtoG':bytearray(),
+        'CtoT':bytearray(),
+        'GtoA':bytearray(),
+        'GtoC':bytearray(),
+        'GtoT':bytearray(),
+        'TtoA':bytearray(),
+        'TtoC':bytearray(),
+        'TtoG':bytearray(),
+        'rejected':bytearray(),
+        'header':bytearray(),
+        
+    }
+    return(geneDir)
+
+def vcfSegments(inputFile, geneDir):
+    with open(inputFile, "rb") as raw:
+        sub=[]
+        counter=0
+        gene=''
+        results=''
+        for readLine in raw:
+            sub.clear()
+            gene=''
+            results=''
+            gate=True
+            counter=0
+            while((gate == True) and (counter <= len(readLine))):
+                element = chr(readLine[counter])
+                if((element != '#') or (chr(readLine[0]) != "#")):                                
+                    if((element != '\t') and (element != '\n')):
+                        results = results + element
+                    elif((element == '\t') and (element != '\n')):
+                        sub.append(results)
+                        sub.append(element)
+                        results=''
+                    if((element == "\n") or (len(sub) == 9)):
+                        gene= str(sub[6]) + "to" + str(sub[8])
+                        if gene in geneDir:
+                            geneDir[gene].extend(readLine)
+                            sub.clear()
+                            gate=False
+                        else:
+                            geneDir['rejected'].extend(readLine)
+                            sub.clear()
+                            gate=False
+                else:
+                    geneDir['header'].extend(readLine)
+                    gate=False
+                counter+=1
+    return(geneDir)
+
+def vcfSpliter(geneDir, outputLoc, filename, baseOut):
+    for key in geneDir:
+        if(geneDir[key]):
+            if((key != "rejected") and (key != "header")):
+                with open(outputLoc + "SPLITVCF/" + key + "_split_" + filename + ".vcf","ab") as vcfOut:
+                    vcfOut.write(geneDir['header'])
+                    vcfOut.write(geneDir[key])
+            else:
+                if(key != "header"):
+                    with open(baseOut + "REJECTEDVCFs_" + filename + ".vcf","ab") as vcfOut:
+                        vcfOut.write(geneDir['header'])
+                        vcfOut.write(geneDir[key])
+
+def bashImport():
+    outputLoc=str(os.environ['outputLoc'])
+    inputFile=str(os.environ['inputFile'])
+    filename=str(os.environ['filename'])
+    projectName=str(os.environ['projectName'])
+    baseOut=str(os.environ['baseOut'])
+    return(projectName, inputFile, outputLoc, filename, baseOut)
+
+def main():
+    projectName, inputFile, outputLoc, filename, baseOut=bashImport()
+    geneDir=geneDirCreate()
+    geneDir=vcfSegments(inputFile, geneDir)
+    vcfSpliter(geneDir, outputLoc, filename, baseOut)
+
+main()
+
+VCF_SPLIT_END
+
+}
+
+fastaScanner(){
+
+    inputFile="${projectDic["inputFile"]}" flank="${projectDic["flanks"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" geneTwo=${geneTwo} geneDirTwo="${geneDirTwo}" nMax="${projectDic["nMax"]}" windowLength="${projectDic["windowLength"]}" python3.6 - <<FASTA_SWEEP
+    
+from itertools import chain
+import os
+
+def fastaMapper(gene):
+    with open(gene ,"rb") as fasta:
+        fastafile=fasta.read()
+        totalN=0
+        master=[]
+        sub=[]
+        final=''
+        for counter, i in enumerate(fastafile):
+            element=chr(i)
+            if(element == 'N'):
+                totalN+=1
+            if((element != "\n") and (element != ">")):
+                final = final + str(element)
+            if((element == "\n") and (element != ">")):
+                final = final + str(element)
+                sub.append(final)
+                final=''
+            if((element == ">") and (element != "\n")):
+                if(sub != []):
+                    if(sub[0] != ">"):
+                        sub = [u.upper() for u in sub]
+                    master.append(sub)
+                    sub=[]
+                    final=''
+                    final = final + str(element)
+                else:
+                    final = final + str(element)
+            if(counter == (len(fastafile)-1)):
+                final = final + str(element)
+                sub.append(final)
+                master.append(sub)
+    return(master)
+
+def fastaNpop(subMaster, allRejected, nMax):
+    maxP=nMax/100
+    newsubMaster=[]
+    nMaxList=[]
+    for subListing in subMaster:
+        totalN = len([x for x in subListing[1] if x == "N"])
+        nPercent=totalN/len(subListing[1])
+        if(nPercent >= maxP):
+            nMaxList.append(subListing)
+        else:
+            newsubMaster.append(subListing)
+    return(newsubMaster, nMaxList)
+
+def fastaBasePop(master, interval, flank):
+    allRejected=False
+    subMaster=[]
+    nList=[]
+    if(interval > 2):
+        Linterval=interval - flank ##change to 4
+        Rinterval=interval - (flank - 1) ##change to 4
+    else:
+        Linterval=0 ##change to 4
+        Rinterval=-1 ##change to 4
+    for element in master: ##CHANGE TO SUBTRACT CORRECT DISTANCES
+        baseIn = element[1][(Linterval):-(Rinterval)] ##MAYBE add +1 on Rinterval.
+        if("N" not in baseIn):
+            subMaster.append(element)
+        else:
+            nList.append(element)
+    if(len(subMaster) == 0):
+        allRejected=True
+    return(subMaster, allRejected, nList)
+
+def fileSaver(subMaster, master, nList, nMaxList, gene, allRejected, baseOut, filename, geneDirTwo, outputLoc):
+    if(allRejected != True):
+        with open(gene,"w") as newFasta:
+            output="".join(chain.from_iterable(subMaster))
+            newFasta.write(output)
+    else:
+        with open(baseOut + "FASTA_SPLIT/" + geneDirTwo + filename + ".fasta","w") as newFasta:
+            output="".join(chain.from_iterable(master))
+            newFasta.write(output)
+        os.rename(outputLoc + "FASTA_SPLIT/" + geneDirTwo + filename + ".fasta", outputLoc + "ALLREJECTED_" + geneDirTwo + "_" + filename + ".fasta")
+    if(len(nList) != 0):
+        with open(baseOut + "N-BASE_FAILED_FASTAS.fasta","a") as newFasta:
+            output="".join(chain.from_iterable(nList))
+            newFasta.write(output)
+    if(len(nMaxList) != 0):
+        with open(baseOut + "N-THRESHOLD_FAILED_FASTAS.fasta","a") as newFasta:
+            output="".join(chain.from_iterable(nMaxList))
+            newFasta.write(output)
+
+def bashImport():
+    outputLoc=str(os.environ['outputLoc'])
+    flank=int(os.environ['flank'])
+    filename=str(os.environ['filename'])
+    gene=str(os.environ['geneTwo'])
+    nMax=int(os.environ['nMax'])
+    geneDirTwo=str(os.environ['geneDirTwo']) ##GENE Direction
+    interval=int(os.environ['windowLength'])
+    baseOut=str(os.environ['baseOut'])
+    return(flank, outputLoc, filename, gene, geneDirTwo, interval, nMax, baseOut)
+
+def main():
+    flank, outputLoc, filename, gene, geneDirTwo, interval, nMax, baseOut = bashImport()
+    master=fastaMapper(gene)
+    subMaster, allRejected, nList = fastaBasePop(master, interval, flank)
+    subMaster, nMaxList = fastaNpop(subMaster, allRejected, nMax)
+    fileSaver(subMaster, master, nList, nMaxList, gene, allRejected, baseOut, filename, geneDirTwo, outputLoc)
+
+main()
+
+FASTA_SWEEP
+
+}
+
+jobCreator(){
+    if [[  ]]; then
+    scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
+    qsub -l "${job_specs}" /
+    -m abe /
+    -o "${projectDic["tempOut"]}" /
+    -e "${projectDic["tempOut"]}" /
+    -M "${input_email}" /
+    -N "${projectDic["projectName"]}" /
+
 
 }
 
