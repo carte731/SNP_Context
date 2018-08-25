@@ -415,26 +415,31 @@ s3Saver(){
         else
            ${projectDic["projectName"]}=project "${projectDic["tempOut"]}"=output python3.6 - << END_OF_TRANSFER
 
- import boto3
- import os
 
-s3sentit(output, project):
-    allFiles=[]
+import boto3
+import os
+import sys
+
+def s3sentit(inputLoc, project):
+    allFiles={}
+    currentDir = inputLoc
     s3 = boto3.resource('s3')
-    s3.create_bucket(Bucket=project)
-    countsDirs = next(os.walk(output + "COUNTS_TABLES/"))[1]
+    my_session = boto3.session.Session()
+    userRegion = my_session.region_name
+    s3.create_bucket(Bucket=project, CreateBucketConfiguration={'LocationConstraint': userRegion})
+    countsDirs = next(os.walk(currentDir + "COUNTS_TABLES/"))[1]
     for files in countsDirs:
-        currentDir = countsDirs + files
-        [ allFiles.append(currentDir + f) for f in os.listdir(currentDir) if os.path.isfile(currentDir + f) ]
-    for sentFile in allFiles:
-        s3.meta.client.upload_file(sentFile, project, sentFile)
+        bottomDirs = currentDir + "COUNTS_TABLES/" + files + "/"
+        [ allFiles.update({f: bottomDirs + f}) for f in os.listdir(bottomDirs) if os.path.isfile(bottomDirs + f) ]
+    for file, path in allFiles.items():
+        s3.meta.client.upload_file(path, project, file)
 
-bashimports():
+def bashimports():
     project = str(os.environ['project'])
-    output = str(os.environ['output'])
-    return(output, project)
+    inputLoc = str(os.environ['output'])
+    return(inputLoc, project)
 
-main():
+def main():
     output, project=bashimports()
     s3sentit(output, project)
 
