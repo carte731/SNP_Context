@@ -455,7 +455,7 @@ END_OF_TRANSFER
 }
 
 dropboxSaver(){
-    ${projectDic["projectName"]}=project "${projectDic["tempOut"]}"=output python3.6 - << END_OF_TRANSFER
+    ${projectDic["projectName"]}=project "${projectDic["tempOut"]}"=output dbAuth="${projectDic["dropboxAuth"]}" python3.6 - << END_OF_TRANSFER
 
  import dropbox
  import os
