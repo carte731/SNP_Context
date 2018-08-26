@@ -232,14 +232,14 @@ starter(){ #grabs the arguments
                 echo -e "No valid all data entry (true or false), defaulting to false. Only counts tables will be saved."
             fi
         elif [[ "${i,,}" == "-s3" ]] || [[ ${save_S3} == $i ]]; then ## ADD A CHECK FOR USERNAME AND PASSWORD 
-            if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
+            if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]] || "${var,,}" == "truenomsi"; then
                 projectDic["s3"]="${var,,}"
                 frontgate=1
                 unset save_S3
             else
                 echo -e "No valid entry for S3 storage (true or false), defaulting to false."
             fi
-        elif [[ "${i,,}" == "-dpb" ]] || [[ ${save_S3} == $i ]]; then ## ADD A CHECK FOR USERNAME AND PASSWORD 
+        elif [[ "${i,,}" == "-dpb" ]] || [[ ${dropbox} == $i ]]; then ## ADD A CHECK FOR USERNAME AND PASSWORD 
             if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
                 projectDic["dropbox"]="${var,,}"
                 frontgate=1
@@ -259,6 +259,10 @@ starter(){ #grabs the arguments
                 frontgate=1
                 unset MSI_Mode                
             fi
+        elif [[ "${i,,}" == "-dpba" ]] || [[ ${dropbox_auth} == $i ]]; then
+                projectDic["dropboxAuth"]="${var,,}"
+                frontgate=1
+                unset dropbox_auth
         fi
         ((indexPos+=1))
     done
@@ -281,6 +285,11 @@ starter(){ #grabs the arguments
     if (( ${projectDic["flanks"]} > ${projectDic["windowLength"]} )); then
         echo -e "Flank larger than window expansion, defaulting to flank size of ${projectDic["flanks"]}"
         projectDic["windowLength"]=${projectDic["flanks"]}
+    fi
+    if [[ "${projectDic["dropbox"],,}" == "true" ]] && [[ "${projectDic["dropboxAuth"]}" == '']]; then 
+        echo -e "Dropbox mode is set to true but there is no Generated access token was proved."
+        echo -e "Changing Dropbox mode to false"
+        projectDic["dropbox"]="false"
     fi
 
     unset startList
@@ -402,7 +411,7 @@ dirStructure(){
 }
 
 s3Saver(){
-    if [[ "${projectDic["s3"]}" == 'true' ]]; then
+    if [[ "${projectDic["s3"]}" == 'true' ]] || [[ "${projectDic["s3"]}" == 'truenomsi' ]]; then
         if [[ "${projectDic["msi"]}" == "true" ]]; then
             s3cmd mb s3://${projectDic["projectName"],,} > /dev/null
             echo -e "\nS3 bucket created..."
