@@ -415,24 +415,25 @@ s3Saver(){
         else
            ${projectDic["projectName"]}=project "${projectDic["tempOut"]}"=output python3.6 - << END_OF_TRANSFER
 
-
 import boto3
 import os
-import sys
+import datetime
 
 def s3sentit(inputLoc, project):
+    date = datetime.datetime.now()    
     allFiles={}
     currentDir = inputLoc
     s3 = boto3.resource('s3')
     my_session = boto3.session.Session()
     userRegion = my_session.region_name
-    s3.create_bucket(Bucket=project, CreateBucketConfiguration={'LocationConstraint': userRegion})
+    newFolder = project + "-" + date.strftime("%Y%m%d") + "-" + date.strftime("%H%M")
+    s3.create_bucket(Bucket=newFolder, CreateBucketConfiguration={'LocationConstraint': userRegion})
     countsDirs = next(os.walk(currentDir + "COUNTS_TABLES/"))[1]
     for files in countsDirs:
         bottomDirs = currentDir + "COUNTS_TABLES/" + files + "/"
         [ allFiles.update({f: bottomDirs + f}) for f in os.listdir(bottomDirs) if os.path.isfile(bottomDirs + f) ]
     for file, path in allFiles.items():
-        s3.meta.client.upload_file(path, project, file)
+        s3.meta.client.upload_file(path, newFolder, file)
 
 def bashimports():
     project = str(os.environ['project'])
@@ -457,32 +458,35 @@ END_OF_TRANSFER
 dropboxSaver(){
     ${projectDic["projectName"]}=project "${projectDic["tempOut"]}"=output dbAuth="${projectDic["dropboxAuth"]}" python3.6 - << END_OF_TRANSFER
 
- import dropbox
- import os
+import dropbox
+import os
+import datetime
 
-dpsentit(output, project):
-    allFiles=[]
-    dbx = dropbox.Dropbox("${projectDic["dropboxAuth"]}")
-    countsDirs = next(os.walk(output + "COUNTS_TABLES/"))[1]
+def dpsentit(inputLoc, project, dbAuth):
+    date = datetime.datetime.now()
+    allFiles={}
+    currentDir = inputLoc  
+    dbx = dropbox.Dropbox(dbAuth)
+    newFolder = "/" + project + "_" + date.strftime("%Y%m%d") + "_" + date.strftime("%H%M")
+    dbx.files_create_folder_v2(newFolder)
+    countsDirs = next(os.walk(inputLoc + "COUNTS_TABLES/"))[1]
     for files in countsDirs:
-        currentDir = countsDirs + files
-        [ allFiles.append(currentDir + f) for f in os.listdir(currentDir) if os.path.isfile(currentDir + f) ]
-    newDBDir = "~/" + project
-    bdx.files_create_folder_v2(newDBDir)
-    for sentFile in allFiles:
-        with open(output, 'r') as sendDP:
-            # dbx.files_upload(sendDP.read(), sentFile, mode=dropbox.files.WriteMode.overwrite)
-            dbx.put_file(sendDP.read(), newDBDir + "/" + sentFile, mode=dropbox.files.WriteMode.overwrite)
+        bottomDirs = currentDir + "COUNTS_TABLES/" + files + "/"        
+        [ allFiles.update({f: bottomDirs + f}) for f in os.listdir(bottomDirs) if os.path.isfile(bottomDirs + f) ]
+    for file, path in allFiles.items():
+        with open(path, 'rb') as sendDP:
+            dbx.files_upload(sendDP.read(), newFolder + "/" + file, mode=dropbox.files.WriteMode.overwrite)
 
-bashimports():
+def bashimports():
+    dbAuth = str(os.environ['dbAuth'])    
     project = str(os.environ['project'])
-    output = str(os.environ['output'])
-    return(output, project)
+    inputLoc = str(os.environ['output'])
+    return(inputLoc, project, dbAuth)
 
-main():
-    output, project=bashimports()
-    dpsentit(output, project)
-
+def main():
+    inputLoc, project, dbAuth=bashimports()
+    dpsentit(inputLoc, project, dbAuth)
+    
 main()
 
 END_OF_TRANSFER
