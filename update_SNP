@@ -23,10 +23,15 @@ declare -A projectDic=(
     ["TempLoc"]=''
     ["tempOut"]=''
     ["allData"]='false' #-ad
-    ["s3"]='false' #-s3
     ["msi"]='true' #-msi
+    ["s3"]=0 #-s3
     ["dropbox"]='false' #-dpb
     ["dropboxAuth"]='' #-dpba
+    ["github"]='false' #-gh
+    ["gitUser"]='' #-ghu
+    ["gitPass"]='' #-ghp
+    ["owner"]='' #-gho
+    ["Myrepository"]='' #-ghr
     ["JOB"]='NO_JOB_NOW'
     
 )
@@ -232,7 +237,7 @@ starter(){ #grabs the arguments
                 echo -e "No valid all data entry (true or false), defaulting to false. Only counts tables will be saved."
             fi
         elif [[ "${i,,}" == "-s3" ]] || [[ ${save_S3} == $i ]]; then ## ADD A CHECK FOR USERNAME AND PASSWORD 
-            if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]] || "${var,,}" == "truenomsi"; then
+            if [[ "${var,,}" == 1 ]] || [[ "${var,,}" == 2 ]] || [[ "${var,,}" == 3 ]]; then
                 projectDic["s3"]="${var,,}"
                 frontgate=1
                 unset save_S3
@@ -248,6 +253,15 @@ starter(){ #grabs the arguments
             else
                 echo -e "No valid entry for Dropbox uploading (true or false), defaulting to false."
             fi
+        elif [[ "${i,,}" == "-gh" ]] || [[ ${save_github} == $i ]]; then ## ADD A CHECK FOR USERNAME AND PASSWORD 
+            if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
+                projectDic["github"]="${var,,}"
+                frontgate=1
+                unset save_github
+
+            else
+                echo -e "No valid entry for github uploading (true or false), defaulting to false."
+            fi
         elif [[ "${i,,}" == "-msi" ]] || [[ ${MSI_Mode} == $i ]]; then
             if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
                 projectDic["msi"]="${var,,}"
@@ -260,9 +274,25 @@ starter(){ #grabs the arguments
                 unset MSI_Mode                
             fi
         elif [[ "${i,,}" == "-dpba" ]] || [[ ${dropbox_auth} == $i ]]; then
-                projectDic["dropboxAuth"]="${var,,}"
-                frontgate=1
-                unset dropbox_auth
+            projectDic["dropboxAuth"]="${var,,}"
+            frontgate=1
+            unset dropbox_auth
+        elif [[ "${i,,}" == "-ghu" ]] || [[ ${gitUser} == $i ]]; then
+            projectDic["gitUser"]="${var,,}"
+            frontgate=1
+            unset gitUser
+        elif [[ "${i,,}" == "-ghp" ]] || [[ ${gitPass} == $i ]]; then
+            projectDic["gitPass"]="${var,,}"
+            frontgate=1
+            unset gitPass
+        elif [[ "${i,,}" == "-gho" ]] || [[ ${owner} == $i ]]; then
+            projectDic["owner"]="${var,,}"
+            frontgate=1
+            unset owner
+        elif [[ "${i,,}" == "-ghr" ]] || [[ ${Myrepository} == $i ]]; then
+            projectDic["Myrepository"]="${var,,}"
+            frontgate=1
+            unset Myrepository           
         fi
         ((indexPos+=1))
     done
@@ -291,6 +321,26 @@ starter(){ #grabs the arguments
         echo -e "Changing Dropbox mode to false"
         projectDic["dropbox"]="false"
     fi
+    if [[ "${projectDic["s3"]}" == 2 ]] || [[ "${projectDic["s3"],,}" == 3 ]]; then
+        if [[ ! -d ~/.aws ]]; then 
+            echo -e "AWS isn't set up in your home directory."
+            echo -e "Changing S3 mode to false"
+            projectDic["s3"]=0
+        fi
+    fi
+    if [[ "${projectDic["github"],,}" == "true" ]]; then 
+        if "${projectDic[[ ["gitUser"]}" == '' ]] || /
+        [[ "${projectDic["gitPass"]}" == '' ]] || /
+        [[ "${projectDic["Myrepository"]}" == '' ]]; then
+            echo -e "Github input parameters not filled out correctly, defaulting Github to false"
+            echo -e "Changing Github mode to false"
+            projectDic["github"]="false"
+        fi
+        if [[ "${projectDic["owner"]}" == ""]]; then
+            echo -e "Owner of Giithub repo not specified, defaulting to your username."
+            projectDic["owner"]="${projectDic["gitUser"]}"
+        fi
+    fi
 
     unset startList
 }
@@ -316,8 +366,10 @@ moduleLoader(){ #load modules need for operations
                     if [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import mutation_motif') ]]; then
                         echo -e "Python module Mutation Motif is not installed. Please follow the link for instrutions: (https://bitbucket.org/pycogent3/mutationmotif).\n"
                     fi
-                    if [[ "${projectDic["s3"]}" == "true" ]] && [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import boto3') ]]; then
-                        echo -e "Python module boto3 (S3) is not installed. Please pip install boto3 for Amazon save S3 support. Use command: pip3 install boto3\n"
+                    if [[ "${projectDic["s3"]}" > 0 ]] && [[ "${projectDic["s3"]}" <= 3 ]]; then
+                        if [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import boto3') ]]; then
+                            echo -e "Python module boto3 (S3) is not installed. Please pip install boto3 for Amazon save S3 support. Use command: pip3 install boto3\n"
+                        fi
                     fi
                     if [[ "${projectDic["dropbox"]}" == "true" ]] && [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import dropbox') ]]; then
                         echo -e "Python module for dropbox is not installed. Please pip install dropbox for dropbox save support. Use command: pip3 install dropbox\n"
@@ -411,8 +463,13 @@ dirStructure(){
 }
 
 s3Saver(){
-    if [[ "${projectDic["s3"]}" == 'true' ]] || [[ "${projectDic["s3"]}" == 'truenomsi' ]]; then
-        if [[ "${projectDic["msi"]}" == "true" ]]; then
+    if [[ ${projectDic["iscmd"]} == "true" ]]; then
+        config=("$@")
+    else
+        config="none"
+    fi
+    if [[ "${projectDic["s3"]}" > 0 ]] || [[ "${projectDic["s3"]}" <= 3 ]]; then
+        if [[ "${projectDic["s3"]}" == 1 ]] || [[ "${projectDic["mss3i"]}" == 3 ]]; 
             s3cmd mb s3://${projectDic["projectName"],,} > /dev/null
             echo -e "\nS3 bucket created..."
             echo -e "\ntransfering files..."
@@ -421,37 +478,64 @@ s3Saver(){
             else
                 echo -e "S3 file transfer failed...\n"
             fi
-        else
-           ${projectDic["projectName"]}=project "${projectDic["tempOut"]}"=output python3.6 - << END_OF_TRANSFER
+        fi
+        if [[ "${projectDic["msi"]}" == 2 ]] || [[ "${projectDic["msi"]}" == 3 ]]; then
+
+            iscmd=${projectDic["iscmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" python3.6 - << END_OF_TRANSFER
 
 import boto3
 import os
+import io
 import datetime
 
-def s3sentit(inputLoc, project):
-    date = datetime.datetime.now()    
+def s3sentit(inputLoc, project, iscmd, config):
+    date = datetime.datetime.now() 
     allFiles={}
     currentDir = inputLoc
     s3 = boto3.resource('s3')
     my_session = boto3.session.Session()
     userRegion = my_session.region_name
-    newFolder = project + "-" + date.strftime("%Y%m%d") + "-" + date.strftime("%H%M")
+    newFolder = project + "-countfiles" + "-" + date.strftime("%Y%m%d") + "-" + date.strftime("%H%M")
     s3.create_bucket(Bucket=newFolder, CreateBucketConfiguration={'LocationConstraint': userRegion})
     countsDirs = next(os.walk(currentDir + "COUNTS_TABLES/"))[1]
     for files in countsDirs:
         bottomDirs = currentDir + "COUNTS_TABLES/" + files + "/"
-        [ allFiles.update({f: bottomDirs + f}) for f in os.listdir(bottomDirs) if os.path.isfile(bottomDirs + f) ]
+        [ allFiles.update({f: [bottomDirs + f, files]}) for f in os.listdir(bottomDirs) if os.path.isfile(bottomDirs + f) ]
+        
     for file, path in allFiles.items():
-        s3.meta.client.upload_file(path, newFolder, file)
+        with open(path[0], "rb") as fileIO:
+            myPath = path[1] + "/" + file
+            s3.Object(newFolder, myPath).upload_fileobj(fileIO)                     
+    if( iscmd == "true"):
+        out=''
+        with open(config, "r") as configScanner:
+            out_buffer = io.BytesIO()
+            line_counter = 0  
+            for i in configScanner.readlines():
+                if(i.startswith("dropbox_auth")):
+                    out="dropbox_auth=***REDACTED*** removed to maintain account security.\n"
+                elif(i.startswith("gitPass")):
+                    out="gitPass=***REDACTED*** removed to maintain account security.\n"
+                elif(i.startswith("input_email")):
+                    out="input_email=***REDACTED*** removed to maintain account security.\n"
+                else:
+                    out=i
+                out_buffer.write(out.encode())
+                line_counter += 1
+            out_buffer.seek(0)
+            s3.Object(newFolder, "context.config").upload_fileobj(out_buffer)
+            out_buffer.close()    
 
 def bashimports():
     project = str(os.environ['project'])
     inputLoc = str(os.environ['output'])
-    return(inputLoc, project)
+    iscmd = str(os.environ['iscmd'])
+    config = str(os.environ['config'])
+    return(inputLoc, project, iscmd, config)
 
 def main():
-    output, project=bashimports()
-    s3sentit(output, project)
+    output, project, iscmd, config=bashimports()
+    s3sentit(output, project, iscmd, config)
 
 main()
 
@@ -465,42 +549,135 @@ END_OF_TRANSFER
 }
 
 dropboxSaver(){
-    ${projectDic["projectName"]}=project "${projectDic["tempOut"]}"=output dbAuth="${projectDic["dropboxAuth"]}" python3.6 - << END_OF_TRANSFER
+    if [[ ${projectDic["iscmd"]} == "true" ]]; then
+        config=("$@")
+    else
+        config="none"
+    fi
+    iscmd=${projectDic["iscmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" dbAuth="${projectDic["dropboxAuth"]}" python3.6 - << END_OF_TRANSFER
 
 import dropbox
 import os
 import datetime
 
-def dpsentit(inputLoc, project, dbAuth):
+def dpsentit(inputLoc, project, dbAuth, iscmd, config):
     date = datetime.datetime.now()
     allFiles={}
     currentDir = inputLoc  
     dbx = dropbox.Dropbox(dbAuth)
-    newFolder = "/" + project + "_" + date.strftime("%Y%m%d") + "_" + date.strftime("%H%M")
-    dbx.files_create_folder_v2(newFolder)
+    newFolder = "/" + project + "-countfiles" + "-" + date.strftime("%Y%m%d") + "-" + date.strftime("%H%M")
     countsDirs = next(os.walk(inputLoc + "COUNTS_TABLES/"))[1]
     for files in countsDirs:
         bottomDirs = currentDir + "COUNTS_TABLES/" + files + "/"        
-        [ allFiles.update({f: bottomDirs + f}) for f in os.listdir(bottomDirs) if os.path.isfile(bottomDirs + f) ]
+        [ allFiles.update({f: [bottomDirs + f, files]}) for f in os.listdir(bottomDirs) if os.path.isfile(bottomDirs + f) ]
     for file, path in allFiles.items():
-        with open(path, 'rb') as sendDP:
-            dbx.files_upload(sendDP.read(), newFolder + "/" + file, mode=dropbox.files.WriteMode.overwrite)
+        with open(path[0], 'rb') as sendDP:
+            myPath= newFolder + "/" + path[1] + "/" + file
+            dbx.files_upload(sendDP.read(), myPath, mode=dropbox.files.WriteMode.overwrite)
+
+    if( iscmd == "true"):
+        out=''
+        with open(config, "r") as configScanner:
+            for i in configScanner.readlines():
+                if(i.startswith("dropbox_auth")):
+                    out+="dropbox_auth=***REDACTED*** removed to maintain account security.\n"
+                elif(i.startswith("gitPass")):
+                    out+="gitPass=***REDACTED*** removed to maintain account security.\n"
+                elif(i.startswith("input_email")):
+                    out+="input_email=***REDACTED*** removed to maintain account security.\n"
+                else:
+                    out+=i            
+        outBytes = out.encode()
+        dbx.files_upload(outBytes, newFolder + "/context.config", mode=dropbox.files.WriteMode.overwrite)
 
 def bashimports():
     dbAuth = str(os.environ['dbAuth'])    
     project = str(os.environ['project'])
     inputLoc = str(os.environ['output'])
-    return(inputLoc, project, dbAuth)
+    iscmd = str(os.environ['iscmd'])
+    config = str(os.environ['config'])
+    return(inputLoc, project, dbAuth, iscmd, config)
 
 def main():
-    inputLoc, project, dbAuth=bashimports()
-    dpsentit(inputLoc, project, dbAuth)
+    inputLoc, project, dbAuth, iscmd, config=bashimports()
+    dpsentit(inputLoc, project, dbAuth, iscmd, config)
     
 main()
 
 END_OF_TRANSFER
 
     echo -e "Dropbox transfer complete.\n"
+
+}
+
+gitHubSendIt() {
+    if [[ ${projectDic["iscmd"]} == "true" ]]; then
+        config=("$@")
+    else
+        config="none"
+    fi
+           iscmd=${projectDic["iscmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" gitUser="${projectDic["gitUser"]}" gitPass="${projectDic["gitPass"]}" repo="${projectDic["repo"]}" gitowner="${projectDic["gitowner"]}" python3.6 - << END_OF_TRANSFER
+
+import os
+import github3
+import datetime
+
+def githubSend(inputLoc, project, gitUser, gitPass, Myrepository, owner, iscmd, config):
+    date = datetime.datetime.now() 
+    allFiles={}
+    currentDir = inputLoc
+
+    gh = github3.login(username=gitUser, password=gitPass)
+    repo = gh.repository(owner=owner, repository=Myrepository)
+
+    newFolder = project + "-countfiles" + "-" + date.strftime("%Y%m%d") + "-" + date.strftime("%H%M")
+    countsDirs = next(os.walk(currentDir + "COUNTS_TABLES/"))[1]
+
+    for files in countsDirs:
+        bottomDirs = currentDir + "COUNTS_TABLES/" + files + "/"   
+        [ allFiles.update({f: [bottomDirs + f, files]}) for f in os.listdir(bottomDirs) if os.path.isfile(bottomDirs + f) ]
+    
+    for file, path in allFiles.items():
+        with open(path[0], "rb") as fileIO:
+            direction = fileIO.read()
+        myPath= newFolder + "/" + path[1] + "/" + file
+        repo.create_file(path=myPath, message="Uploading " + file, content=direction)
+    
+    if( iscmd == "true"):
+        out=''
+        with open(config, "r") as configScanner:
+            for i in configScanner.readlines():
+                if(i.startswith("dropbox_auth")):
+                    out+="dropbox_auth=***REDACTED*** removed to maintain account security.\n"
+                elif(i.startswith("gitPass")):
+                    out+="gitPass=***REDACTED*** removed to maintain account security.\n"
+                elif(i.startswith("input_email")):
+                    out+="input_email=***REDACTED*** removed to maintain account security.\n"
+                else:
+                    out+=i
+        outBytes = out.encode()
+        repo.create_file(path=newFolder + "/context.config", message="Uploading Config file", content=outBytes)
+
+def bashimports():
+    project = str(os.environ['project'])
+    inputLoc = str(os.environ['output'])
+    gitUser = str(os.environ['gitUser'])
+    gitPass = str(os.environ['gitPass'])
+    Myrepository = str(os.environ['repo'])
+    owner = str(os.environ['gitowner'])
+    iscmd = str(os.environ['iscmd'])
+    config = str(os.environ['config'])  
+    return(inputLoc, project, gitUser, gitPass, Myrepository, owner, iscmd, config)
+
+def main():
+    inputLoc, project, gitUser, gitPass, Myrepository, owner, iscmd, config = bashimports()
+    githubSend(inputLoc, project, gitUser, gitPass, Myrepository, owner, iscmd, config)
+
+main()
+
+END_OF_TRANSFER
+
+    echo -e "Counts table data and config file sent to your github"
 
 }
 
@@ -924,13 +1101,14 @@ main2(){
         rm -rf "${templocation}"
     fi
     ##Add dropbox intergration
-    if [[ "${projectDic["s3"]}" == 'true' ]]; then
-        echo -e "\nTEST\n"
-        s3Saver
+    if [[ "${projectDic["s3"]}" > 0 ]] || [[ "${projectDic["s3"]}" <= 3 ]]; then
+        s3Saver "$@"
     fi
     if [[ "${projectDic["dropbox"]}" == 'true' ]]; then
-        echo -e "\nTEST\n"
-        dropboxSaver
+        dropboxSaver "$@"
+    fi
+    if [[ "${projectDic["github"]}" == 'true' ]]; then
+        gitHubSaver "$@"
     fi
     echo -e "operations completed...\n"
         
