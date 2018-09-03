@@ -8,6 +8,10 @@
 #     A bash dictionary for input parameters
 #    SNP_CONTEXT Version: 2.0.0
 
+set -o errtrace
+trap 'echo -e "There has been an error, please check SNP Context error log for detailed traceback\n"' ERR
+exec 2>>~/SNP_CONTEXT_ERROR_LOG.txt
+
 declare -A projectDic=(
     ["windowLength"]=1 #-w
     ["inputFile"]='' #-i
@@ -1063,6 +1067,7 @@ main(){
 }
 
 main2(){
+
     ## ADD CHECKER
     # starter "$@" ##ASSIGNS INPUTS TO HASHMAP ##REMOVE
     config_check "$@"
