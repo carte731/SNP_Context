@@ -454,14 +454,12 @@ dirStructure(){
         mkdir "${projectDic[outputLoc]}"SPLITVCF
         mkdir "${projectDic[outputLoc]}"FASTA_SPLIT
         mkdir "${projectDic[outputLoc]}"BED_SPLIT
-        mkdir "${projectDic[outputLoc]}"ERRORS
         projectDic["tempOut"]="${projectDic[outputLoc]}"
     elif [[ ${projectDic["allData"]} == "false" ]]; then
         projectDic["TempLoc"]+=$(mktemp -d)
         mkdir "${projectDic[TempLoc]}"/SPLITVCF
         mkdir "${projectDic[TempLoc]}"/FASTA_SPLIT
         mkdir "${projectDic[TempLoc]}"/BED_SPLIT
-        mkdir "${projectDic[TempLoc]}"/ERRORS
         projectDic["tempOut"]="${projectDic["TempLoc"]}"/
     fi
 }
@@ -1036,7 +1034,7 @@ jobCreator(){
     qsub -l "${job_specs}" /
     -m abe /
     -o "${projectDic["tempOut"]}" /
-    -e "${projectDic["tempOut"]}"/ERRORS /
+    -e "${projectDic["tempOut"]}"/
     -M "${input_email}" /
     -N "${projectDic["projectName"]}" /
     # bash scriptPath/SNPcontext /
