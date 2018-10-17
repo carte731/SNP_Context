@@ -61,7 +61,7 @@ SNP Context can be used from either the command line or through a config file, w
 
 * **owner (String)**: The owner (their username) of the repository, leave blank if you're the owner
 
-## Command Line equivalents of the config file (can be run in any other).
+## Command Line equivalents to the config file (can be run in any other).
 
 **-w = Window Length (Integer, 0-99)**
 
