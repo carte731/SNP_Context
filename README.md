@@ -91,13 +91,13 @@ SNP Context can be used from either the command line or through a config file, w
 
 **-dpa = DropBox (Boolean, true or false)**
 
-**-dpba = DropBox auth (String) *REDACTED WHEN UPLOADED**
+**-dpba = DropBox auth (String) *REDACTED WHEN UPLOADED***
 
 **-gh = Github (Boolean, true or false)**
 
-**-ghu = gitUser (String) *REDACTED WHEN UPLOADED**
+**-ghu = gitUser (String) *REDACTED WHEN UPLOADED***
 
-**-ghp = gitPass (String) *REDACTED WHEN UPLOADED**
+**-ghp = gitPass (String) *REDACTED WHEN UPLOADED***
 
 **-gho = owner (String)**
 
@@ -105,9 +105,9 @@ SNP Context can be used from either the command line or through a config file, w
 
 ## Outputs
 
-If the parameter `all data` is `true`, than all intermediate files are save in the output directory, if `all data` is `false` than only the Word and Combined Counts Tables and rejected files (.VCF, .BAM, .FASTA) are saved in the outout drictory.
+If the parameter `all data` is `true`, than all intermediate files are save in the output directory, if `all data` is `false` than only the Word and Combined Counts Tables and rejected files (.VCF, .BAM, .FASTA) are saved in the output drictory.
 
-### If 'all Data' is TRUE:
+### If 'all Data' is **TRUE**:
 * Parsed .VCF files
 * Parsed .BAM files
 * Parsed .BED files
@@ -117,7 +117,7 @@ If the parameter `all data` is `true`, than all intermediate files are save in t
 * Word Counts tables
 * Combined Counts tables
 
-### If 'all Data' is FALSE (default):
+### If 'all Data' is **FALSE** (default):
 * Consolidated rejected nuleotide positions from .BAM file
 * Consolidated rejceted Indels .FASTA files
 * Word Counts tables
