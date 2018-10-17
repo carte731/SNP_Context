@@ -64,24 +64,43 @@ SNP Context can be used from either the command line or through a config file, w
 ## Command Line equivalents of the config file (can be run in any other).
 
 **-w = Window Length (Integer, 0-99)**
+
 **NEED EMAIL (String)**
+
 **-i = Input file (String)**
+
 **-o = Output location (String)**
+
 **NEED MSI MODE**
+
 **NEED PBS PARAMETERS (Intergers)**
+
 **-p = Project name (String)**
+
 **-f = Flanks (integer, 0-2)**
+
 **-r = referenceGenome (String)**
+
 **-n = Indel maximum amount (Integer, 25-100)**
+
 **-ad = Save all data (Boolean, true or false)**
+
 **-msi = MSI Mode (Boolean, true or false)**
+
 **-s3 = Save S3 (Interger, 0 - 3)**
+
 **-dpa = DropBox (Boolean, true or false)**
+
 **-dpba = DropBox auth (String) *REDACTED WHEN UPLOADED**
+
 **-gh = Github (Boolean, true or false)**
+
 **-ghu = gitUser (String) *REDACTED WHEN UPLOADED**
+
 **-ghp = gitPass (String) *REDACTED WHEN UPLOADED**
+
 **-gho = owner (String)**
+
 **-ghr = Myrepository (String)**
 
 ## Outputs
