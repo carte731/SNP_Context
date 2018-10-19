@@ -488,8 +488,8 @@ s3Saver(){
     else
         config="none"
     fi
-    if $(( "${projectDic["s3"]}" > 0 )) || $(( "${projectDic["s3"]}" <= 3 )); then
-        if $(( "${projectDic["s3"]}" == 1 )) || $(( "${projectDic["mss3i"]}" == 3 )); then
+    if [[ "${projectDic["s3"]}" != "0" ]]; then
+        if [[ "${projectDic["s3"]}" == "1" ]] || [[ "${projectDic["mss3i"]}" == "3" ]]; then
             s3cmd mb s3://${projectDic["projectName"],,} > /dev/null
             echo -e "\nS3 bucket created..."
             echo -e "\ntransfering files..."
@@ -499,7 +499,7 @@ s3Saver(){
                 echo -e "S3 file transfer failed...\n"
             fi
         fi
-        if $(( "${projectDic["msi"]}" == 2 )) || $(( "${projectDic["msi"]}" == 3 )); then
+        if [[ "${projectDic["msi"]}" == "2" ]] || [[ "${projectDic["msi"]}" == "3" ]]; then
 
             iscmd=${projectDic["iscmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" python3.6 - << END_OF_TRANSFER
 
@@ -1176,7 +1176,7 @@ main(){
         rm -rf "${templocation}"
     fi
     ##Add dropbox intergration
-    if [[ "${projectDic["s3"]}" > "0" ]] || [[ "${projectDic["s3"]}" <= "3" ]]; then
+    if [[ "${projectDic["s3"]}" != "0" ]]; then
         s3Saver "$@"
     fi
     if [[ "${projectDic["dropbox"]}" == 'true' ]]; then
