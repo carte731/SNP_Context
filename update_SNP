@@ -1069,7 +1069,7 @@ jobCreator(){
 
 }
 
-main(){
+main2(){
     config_check "$@"
     moduleLoader
     echo -e
@@ -1078,7 +1078,7 @@ main(){
     done
 }
 
-main2(){
+main(){
 
     ## ADD CHECKER
     # starter "$@" ##ASSIGNS INPUTS TO HASHMAP ##REMOVE
