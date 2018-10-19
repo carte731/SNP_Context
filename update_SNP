@@ -15,10 +15,10 @@
 #     # exec 2>>~/SNP_CONTEXT_ERROR_LOG.txt
 # }
 
-# set -o errtrace
-# # set -eE
-# trap "echo -e There has been an error on $LINEON, please check SNP Context error log for detailed traceback\n" ERR
-# exec 2>>~/SNP_CONTEXT_ERROR_LOG.txt
+set -o errtrace
+# set -eE
+trap "echo -e There has been an error on $LINEON, please check SNP Context error log for detailed traceback\n" ERR
+exec 2>>~/SNP_CONTEXT_ERROR_LOG.txt
 
 # trap error_trap ERR
 
