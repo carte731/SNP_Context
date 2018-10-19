@@ -15,14 +15,15 @@
 #     # exec 2>>~/SNP_CONTEXT_ERROR_LOG.txt
 # }
 
-set -o errtrace
-# set -eE
+# set -o errtrace
+set -eE
 trap "echo -e There has been an error on $LINEON, please check SNP Context error log for detailed traceback\n" ERR
 exec 2>>~/SNP_CONTEXT_ERROR_LOG.txt
 
 # trap error_trap ERR
 
 declare -A projectDic=(
+    ["email"]='' #-em
     ["windowLength"]=1 #-w
     ["inputFile"]='' #-i
     ["inputLoc"]=''
@@ -101,6 +102,7 @@ config_check(){
                         ${save_S3}
                         ${s3_login}
                         ${s3_password}
+                        ${input_email}
                     )
                     starter ${startList}
                 else   
@@ -145,7 +147,10 @@ starter(){ #grabs the arguments
         fi
         # echo -e "${window_length}"
         # if [[ "${i,,}" == "-w" ]] || [[ ! -v ${window_length} ]]; then ##Window expansion size
-        if [[ "${i,,}" == "-w" ]] || [[ ${window_length} == $i ]]; then ##Window expansion size
+        if [[ "${i,,}" == "-e" ]] || [[ ${input_email} == $i ]]; then
+            projectDic["email"]="${var}"
+            unset input_email
+        elif [[ "${i,,}" == "-w" ]] || [[ ${window_length} == $i ]]; then ##Window expansion size
             # echo -e "ISN'T EMPTY"
             # echo $i
             if [[ "$var" =~ ^[0-9]$ ]] && (( "$var" >= 0 )); then ##Checks if it's a number, max expansion of 10
@@ -1043,29 +1048,82 @@ FASTA_SWEEP
 
 }
 
+# jobCreator(){
+#     scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" ## Grabs the file path location for script
+#     qsub -l "${job_specs}" /
+#     -m abe /
+#     -o "${projectDic["tempOut"]}" /
+#     -e "${projectDic["tempOut"]}"/
+#     -M "${input_email}" /
+#     -N "${projectDic["projectName"]}" /
+#     # bash scriptPath/SNPcontext /
+#     bash "${scriptPath}"/update_SNP /
+#     -i "${projectDic["inputFile"]}" /
+#     -o "${projectDic["outputLoc"]}" /
+#     -w "${projectDic["windowLength"]}" /
+#     -f "${projectDic["flanks"]}" /
+#     -p "${projectDic["projectName"]}" /
+#     -r "${projectDic["referenceGenome"]}" /
+#     -ad "${projectDic["allData"]}" /
+#     -n "${projectDic["nMax"]}" /
+#     -JOB "${projectDic["THIS_IS_A_JOB"]}" /
+#     -s3 "${projectDic["s3"]}" /
+#     -msi "${projectDic["msi"]}" /
+#     -dpb "${projectDic["dropbox"]}" /
+#     -dpba "${projectDic["dropboxAuth"]}" /
+
+# }
+
 jobCreator(){
-    scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" ## Grabs the file path location for script
-    qsub -l "${job_specs}" /
-    -m abe /
-    -o "${projectDic["tempOut"]}" /
-    -e "${projectDic["tempOut"]}"/
-    -M "${input_email}" /
-    -N "${projectDic["projectName"]}" /
-    # bash scriptPath/SNPcontext /
-    bash "${scriptPath}"/update_SNP /
-    -i "${projectDic["inputFile"]}" /
-    -o "${projectDic["outputLoc"]}" /
-    -w "${projectDic["windowLength"]}" /
-    -f "${projectDic["flanks"]}" /
-    -p "${projectDic["projectName"]}" /
-    -r "${projectDic["referenceGenome"]}" /
-    -ad "${projectDic["allData"]}" /
-    -n "${projectDic["nMax"]}" /
-    -JOB "${projectDic["THIS_IS_A_JOB"]}" /
-    -s3 "${projectDic["s3"]}" /
-    -msi "${projectDic["msi"]}" /
-    -dpb "${projectDic["dropbox"]}" /
-    -dpba "${projectDic["dropboxAuth"]}" /
+    # echo -e "Enter email for PBS job updates: "
+    # read userEmail
+    email="${projectDic["email"]}" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenomeChar"]}" python3.6 - <<JOB_CREATED
+
+import os
+
+def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax):
+    job="#!/bin/bash -l\n\n#PBS -l walltime=24:00:00,nodes=2:ppn=10,mem=20gb\n#PBS -m abe\n#PBS -M " + email + "\n"
+    job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\n#PBS -q small\nset -e\nset -o pipefail\n\n"
+    job+="#PBS -o " + outputLoc + "_" + projectName + "\n#PBS -e " + outputLoc + "_" + projectName + "\n"
+    job+="\nmodule load snpContext/1.0.0\n\n"
+    # job+="snpcontext "
+    job+="/panfs/roc/groups/9/morrellp/public/Software/SNP_Context/SNPcontext "
+    job+= "-i " + inputFile + " "
+    job+= "-o " + outputLoc + " "
+    job+= "-w " + windowLength + " "
+    job+= "-f " + flanks + " "
+    job+= "-p " + projectName + " "
+    job+= "-r " + referenceGenome + " "
+    job+= "-ad " + allData + " "
+    job+= "-n " + nMax + " "
+    job+= "-JOB THIS_IS_A_JOB"
+
+    with open(outputLoc + projectName + ".job", "w") as jobScript:
+        jobScript.write(job)
+
+def bashImport():
+    outputLoc=str(os.environ['outputLoc'])
+    email=str(os.environ['email'])
+    flanks=str(os.environ['flanks'])
+    referenceGenome=str(os.environ['referenceGenome'])
+    windowLength=str(os.environ['windowLength'])
+    inputFile=str(os.environ['inputFile'])
+    projectName=str(os.environ['projectName'])
+    allData=str(os.environ['allData'])
+    nMax=str(os.environ['nMax'])
+    return(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax)
+
+def main():
+    projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax = bashImport()
+    jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax)
+
+main()
+    
+JOB_CREATED
+
+qsub "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
+echo -e "\njob submited.\nEXITING...\n"
+exit 0
 
 }
 
@@ -1083,7 +1141,7 @@ main(){
     ## ADD CHECKER
     # starter "$@" ##ASSIGNS INPUTS TO HASHMAP ##REMOVE
     config_check "$@"
-    if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]] || [[ "${projectDic["msi"]}" == 'true' ]]; then
+    if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]] && [[ "${projectDic["msi"]}" == 'true' ]]; then
         jobCreator
     fi
     moduleLoader ##LOADS CORRECT MODULES        
@@ -1118,7 +1176,7 @@ main(){
         rm -rf "${templocation}"
     fi
     ##Add dropbox intergration
-    if $(( "${projectDic["s3"]}" > 0 )) || $(( "${projectDic["s3"]}" <= 3 )); then
+    if [[ "${projectDic["s3"]}" > "0" ]] || [[ "${projectDic["s3"]}" <= "3" ]]; then
         s3Saver "$@"
     fi
     if [[ "${projectDic["dropbox"]}" == 'true' ]]; then
