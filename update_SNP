@@ -1104,7 +1104,7 @@ FASTA_SWEEP
 jobCreator(){
     # echo -e "Enter email for PBS job updates: "
     # read userEmail
-    email="${projectDic["email"]}" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" python3.6 - <<JOB_CREATED
+    myEmail="${projectDic["email"]}" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" python3.6 - <<JOB_CREATED
 
 import os
 
@@ -1130,7 +1130,7 @@ def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, ema
 
 def bashImport():
     outputLoc=str(os.environ['outputLoc'])
-    email=str(os.environ['email'])
+    email=str(os.environ['myEmail'])
     flanks=str(os.environ['flanks'])
     referenceGenome=str(os.environ['referenceGenome'])
     windowLength=str(os.environ['windowLength'])
@@ -1154,7 +1154,7 @@ exit 0
 
 }
 
-main(){
+main2(){
     config_check "$@"
     # moduleLoader
     echo -e
@@ -1163,7 +1163,7 @@ main(){
     done
 }
 
-main2(){
+main(){
 
     ## ADD CHECKER
     # starter "$@" ##ASSIGNS INPUTS TO HASHMAP ##REMOVE
