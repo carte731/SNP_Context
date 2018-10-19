@@ -8,9 +8,19 @@
 #     A bash dictionary for input parameters
 #    SNP_CONTEXT Version: 2.0.0
 
-set -o errtrace
-trap 'echo -e "There has been an error, please check SNP Context error log for detailed traceback\n"' ERR
-exec 2>>~/SNP_CONTEXT_ERROR_LOG.txt
+# function error_trap(){
+#     echo -e "There has been an error on line $1"
+#     echo -e "Saving error to your home directory as SNP_CONTEXT_ERROR_LOG.txt\n"
+#     exit 0
+#     # exec 2>>~/SNP_CONTEXT_ERROR_LOG.txt
+# }
+
+# set -o errtrace
+# # set -eE
+# trap "echo -e There has been an error on $LINEON, please check SNP Context error log for detailed traceback\n" ERR
+# exec 2>>~/SNP_CONTEXT_ERROR_LOG.txt
+
+# trap error_trap ERR
 
 declare -A projectDic=(
     ["windowLength"]=1 #-w
@@ -320,12 +330,12 @@ starter(){ #grabs the arguments
         echo -e "Flank larger than window expansion, defaulting to flank size of ${projectDic["flanks"]}"
         projectDic["windowLength"]=${projectDic["flanks"]}
     fi
-    if [[ "${projectDic["dropbox"],,}" == "true" ]] && [[ "${projectDic["dropboxAuth"]}" == '']]; then 
+    if [[ "${projectDic["dropbox"],,}" == "true" ]] && [[ "${projectDic["dropboxAuth"]}" == '' ]]; then 
         echo -e "Dropbox mode is set to true but there is no Generated access token was proved."
         echo -e "Changing Dropbox mode to false"
         projectDic["dropbox"]="false"
     fi
-    if [[ "${projectDic["s3"]}" == 2 ]] || [[ "${projectDic["s3"],,}" == 3 ]]; then
+    if $(( "${projectDic["s3"]}" == 2  ||  "${projectDic["s3"],,}" == 3 )); then
         if [[ ! -d ~/.aws ]]; then 
             echo -e "AWS isn't set up in your home directory."
             echo -e "Changing S3 mode to false"
@@ -340,7 +350,7 @@ starter(){ #grabs the arguments
             echo -e "Changing Github mode to false"
             projectDic["github"]="false"
         fi
-        if [[ "${projectDic["owner"]}" == ""]]; then
+        if [[ "${projectDic["owner"]}" == "" ]]; then
             echo -e "Owner of Giithub repo not specified, defaulting to your username."
             projectDic["owner"]="${projectDic["gitUser"]}"
         fi
@@ -371,7 +381,7 @@ moduleLoader(){ #load modules need for operations
                     if [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import mutation_motif') ]]; then
                         echo -e "Python module Mutation Motif is not installed. Please follow the link for instrutions: (https://bitbucket.org/pycogent3/mutationmotif).\n"
                     fi
-                    if [[ "${projectDic["s3"]}" > 0 ]] && [[ "${projectDic["s3"]}" <= 3 ]]; then
+                    if $(( "${projectDic["s3"]}" > 0 ]] && [[ "${projectDic["s3"]}" <= 3 )); then
                         if [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import boto3') ]]; then
                             echo -e "Python module boto3 (S3) is not installed. Please pip install boto3 for Amazon save S3 support. Use command: pip3 install boto3\n"
                         fi
@@ -471,8 +481,8 @@ s3Saver(){
     else
         config="none"
     fi
-    if [[ "${projectDic["s3"]}" > 0 ]] || [[ "${projectDic["s3"]}" <= 3 ]]; then
-        if [[ "${projectDic["s3"]}" == 1 ]] || [[ "${projectDic["mss3i"]}" == 3 ]]; 
+    if $(( "${projectDic["s3"]}" > 0 )) || $(( "${projectDic["s3"]}" <= 3 )); then
+        if $(( "${projectDic["s3"]}" == 1 )) || $(( "${projectDic["mss3i"]}" == 3 )); then
             s3cmd mb s3://${projectDic["projectName"],,} > /dev/null
             echo -e "\nS3 bucket created..."
             echo -e "\ntransfering files..."
@@ -482,7 +492,7 @@ s3Saver(){
                 echo -e "S3 file transfer failed...\n"
             fi
         fi
-        if [[ "${projectDic["msi"]}" == 2 ]] || [[ "${projectDic["msi"]}" == 3 ]]; then
+        if $(( "${projectDic["msi"]}" == 2 )) || $(( "${projectDic["msi"]}" == 3 )); then
 
             iscmd=${projectDic["iscmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" python3.6 - << END_OF_TRANSFER
 
@@ -545,6 +555,7 @@ main()
 END_OF_TRANSFER
 
         fi
+
     fi
 
     echo -e "S3 transfer complete.\n"
@@ -1105,7 +1116,7 @@ main2(){
         rm -rf "${templocation}"
     fi
     ##Add dropbox intergration
-    if [[ "${projectDic["s3"]}" > 0 ]] || [[ "${projectDic["s3"]}" <= 3 ]]; then
+    if $(( "${projectDic["s3"]}" > 0 )) || $(( "${projectDic["s3"]}" <= 3 )); then
         s3Saver "$@"
     fi
     if [[ "${projectDic["dropbox"]}" == 'true' ]]; then
@@ -1118,4 +1129,4 @@ main2(){
         
 }
 
-main2 "$@"
+main "$@"
