@@ -251,8 +251,8 @@ starter(){ #grabs the arguments
                 echo -e "No valid all data entry (true or false), defaulting to false. Only counts tables will be saved."
             fi
         elif [[ "${i,,}" == "-s3" ]] || [[ ${save_S3} == $i ]]; then ## ADD A CHECK FOR USERNAME AND PASSWORD
-            if $(( "${var,,}" != 0 )); then
-                if $(( "${var,,}" == 1 )) || $(( "${var,,}" == 2 )) || $(( "${var,,}" == 3 )); then
+            if [[ "${var,,}" != "0" ]]; then
+                if [[ "${var,,}" == "1" ]] || [[ "${var,,}" == "2" ]] || [[ "${var,,}" == "3" ]]; then
                     projectDic["s3"]="${var,,}"
                     frontgate=1
                     unset save_S3
