@@ -172,8 +172,8 @@ starter(){ #grabs the arguments
             fi
         elif [[ "${i,,}" == "-i" ]] || [[ ${input_file} == $i ]]; then ##Input file which grabs the input file name, location and complete file path
             # echo -e "IT'S BIG!" 
-            echo -e "${var##*.}"
-            echo -e "${var}"
+            # echo -e "${var##*.}"
+            # echo -e "${var}"
             if [[ "${var##*.}" == "vcf" ]] && [[ -f "$var" ]]; then ##Checks if it's VCF and if file exist
                 projectDic["inputFile"]+="$var"
                 projectDic["inputLoc"]+="${var%/*}"
@@ -1052,27 +1052,52 @@ FASTA_SWEEP
 
 jobCreator(){
     scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" ## Grabs the file path location for script
-    qsub -l "${job_specs}" \
-    -m abe \
-    -o "${projectDic["tempOut"]}" \
-    -e "${projectDic["tempOut"]}"\
-    -M "${input_email}" \
-    -N "${projectDic["projectName"]}" \
+    pbsJob='#!/bin/bash\n'
+    pbsJob+='#PBS -l "${job_specs}"\n'
+    pbsJob+='#PBS -m abe\n'
+    pbsJob+='#PBS -o "${projectDic["tempOut"]}"\n'
+    pbsJob+='#PBS -e "${projectDic["tempOut"]}"\n'
+    pbsJob+='#PBS -M "${input_email}"\n'
+    pbsJob+='#PBS -N "${projectDic["projectName"]}"\n\n'
     # bash scriptPath/SNPcontext \
-    bash "${scriptPath}"/update_SNP \
-    -i "${projectDic["inputFile"]}" \
-    -o "${projectDic["outputLoc"]}" \
-    -w "${projectDic["windowLength"]}" \
-    -f "${projectDic["flanks"]}" \
-    -p "${projectDic["projectName"]}" \
-    -r "${projectDic["referenceGenome"]}" \
-    -ad "${projectDic["allData"]}" \
-    -n "${projectDic["nMax"]}" \
-    -JOB "${projectDic["THIS_IS_A_JOB"]}" \
-    -s3 "${projectDic["s3"]}" \
-    -msi "${projectDic["msi"]}" \
-    -dpb "${projectDic["dropbox"]}" \
-    -dpba "${projectDic["dropboxAuth"]}" \
+    pbsJob+='bash "${scriptPath}"/update_SNP'
+    pbsJob+=' -i "${projectDic["inputFile"]}"'
+    pbsJob+=' -o "${projectDic["outputLoc"]}"'
+    pbsJob+=' -w "${projectDic["windowLength"]}"'
+    pbsJob+=' -f "${projectDic["flanks"]}" '
+    pbsJob+=' -p "${projectDic["projectName"]}" '
+    pbsJob+=' -r "${projectDic["referenceGenome"]}" '
+    pbsJob+=' -ad "${projectDic["allData"]}" '
+    pbsJob+=' -n "${projectDic["nMax"]}" '
+    pbsJob+=' -JOB "${projectDic["THIS_IS_A_JOB"]}" '
+    pbsJob+=' -s3 "${projectDic["s3"]}" '
+    pbsJob+=' -msi "${projectDic["msi"]}" '
+    pbsJob+=' -dpb "${projectDic["dropbox"]}" '
+    pbsJob+=' -dpba "${projectDic["dropboxAuth"]}" '
+
+    echo -e "${pbsJob}"
+
+    # qsub -l "${job_specs}" \
+    # -m abe \
+    # -o "${projectDic["tempOut"]}" \
+    # -e "${projectDic["tempOut"]}"\
+    # -M "${input_email}" \
+    # -N "${projectDic["projectName"]}" \
+    # # bash scriptPath/SNPcontext \
+    # bash "${scriptPath}"/update_SNP \
+    # -i "${projectDic["inputFile"]}" \
+    # -o "${projectDic["outputLoc"]}" \
+    # -w "${projectDic["windowLength"]}" \
+    # -f "${projectDic["flanks"]}" \
+    # -p "${projectDic["projectName"]}" \
+    # -r "${projectDic["referenceGenome"]}" \
+    # -ad "${projectDic["allData"]}" \
+    # -n "${projectDic["nMax"]}" \
+    # -JOB "${projectDic["THIS_IS_A_JOB"]}" \
+    # -s3 "${projectDic["s3"]}" \
+    # -msi "${projectDic["msi"]}" \
+    # -dpb "${projectDic["dropbox"]}" \
+    # -dpba "${projectDic["dropboxAuth"]}" \
 
 }
 
