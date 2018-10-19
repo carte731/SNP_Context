@@ -1143,10 +1143,10 @@ main(){
     ## ADD CHECKER
     # starter "$@" ##ASSIGNS INPUTS TO HASHMAP ##REMOVE
     config_check "$@"
-    if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]] && [[ "${projectDic["msi"]}" == 'true' ]]; then
-        module load python3_ML/3.6.4
-        jobCreator
-    fi
+    # if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]] && [[ "${projectDic["msi"]}" == 'true' ]]; then
+    #     module load python3_ML/3.6.4
+    #     jobCreator
+    # fi
     moduleLoader ##LOADS CORRECT MODULES        
     dirStructure
     vcfSplit
