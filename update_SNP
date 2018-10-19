@@ -1068,12 +1068,12 @@ jobCreator(){
 }
 
 main(){
-    config_check "$@"
-    moduleLoader
-    echo -e
     for u in ${!projectDic[@]}; do
         echo -e "${u} : ${projectDic[$u]}"
     done
+    config_check "$@"
+    moduleLoader
+    echo -e
 }
 
 main2(){
