@@ -173,7 +173,8 @@ starter(){ #grabs the arguments
         elif [[ "${i,,}" == "-i" ]] || [[ ${input_file} == $i ]]; then ##Input file which grabs the input file name, location and complete file path
             # echo -e "IT'S BIG!" 
             echo -e "${var##*.}"
-            if [[ "${var##*.}" == "vcf" ]] && [ -f "$var" ]; then ##Checks if it's VCF and if file exist
+            echo -e "${var}"
+            if [[ "${var##*.}" == "vcf" ]] && [[ -f "$var" ]]; then ##Checks if it's VCF and if file exist
                 projectDic["inputFile"]+="$var"
                 projectDic["inputLoc"]+="${var%/*}"
                 local filename=${var%.*} ##removes files extension
