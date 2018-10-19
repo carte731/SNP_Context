@@ -354,6 +354,7 @@ starter(){ #grabs the arguments
 #    Will need to be changed for use outside UMN/MSI
 moduleLoader(){ #load modules need for operations
     if [[ "${projectDic["msi"],,}" == 'true' ]]; then
+    
         echo -e "\nExporting Morrell lab modules to your MODULEPATH.\n"
         export MODULEPATH=/panfs/roc/groups/9/morrellp/public/Modules:$MODULEPATH
         echo -e $MODULEPATH
@@ -1069,7 +1070,7 @@ main2(){
     ## ADD CHECKER
     # starter "$@" ##ASSIGNS INPUTS TO HASHMAP ##REMOVE
     config_check "$@"
-    if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
+    if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]] || [[ "${projectDic["msi"]}" == 'true' ]]; then
         jobCreator
     fi
     moduleLoader ##LOADS CORRECT MODULES        
