@@ -337,7 +337,7 @@ starter(){ #grabs the arguments
         echo -e "Changing Dropbox mode to false"
         projectDic["dropbox"]="false"
     fi
-    if $(( "${projectDic["s3"]}" == 2 )) || $(( "${projectDic["s3"],,}" == 3 )); then
+    if [[ "${projectDic["s3"]}" == "2" ]] || [[ "${projectDic["s3"],,}" == 3 ]]; then
         if [[ ! -d ~/.aws ]]; then 
             echo -e "AWS isn't set up in your home directory."
             echo -e "Changing S3 mode to false"
