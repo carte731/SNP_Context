@@ -1156,14 +1156,14 @@ exit 0
 
 main(){
     config_check "$@"
-    moduleLoader
+    # moduleLoader
     echo -e
     for u in ${!projectDic[@]}; do
         echo -e "${u} : ${projectDic[$u]}"
     done
 }
 
-main(){
+main2(){
 
     ## ADD CHECKER
     # starter "$@" ##ASSIGNS INPUTS TO HASHMAP ##REMOVE
