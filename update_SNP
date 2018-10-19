@@ -1126,7 +1126,7 @@ def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, ema
     job+= "-ad " + allData + " "
     job+= "-n " + nMax + " "
     job+= "-JOB THIS_IS_A_JOB"
-    print(\n\njob\n\n)
+    print("\n\n" + job + "\n\n")
 
     with open(outputLoc + projectName + ".job", "w") as jobScript:
         jobScript.write(job)
