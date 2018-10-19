@@ -250,13 +250,15 @@ starter(){ #grabs the arguments
             else
                 echo -e "No valid all data entry (true or false), defaulting to false. Only counts tables will be saved."
             fi
-        elif [[ "${i,,}" == "-s3" ]] || [[ ${save_S3} == $i ]]; then ## ADD A CHECK FOR USERNAME AND PASSWORD 
-            if $(( "${var,,}" == 1 )) || $(( "${var,,}" == 2 )) || $(( "${var,,}" == 3 )); then
-                projectDic["s3"]="${var,,}"
-                frontgate=1
-                unset save_S3
-            else
-                echo -e "No valid entry for S3 storage (true or false), defaulting to false."
+        elif [[ "${i,,}" == "-s3" ]] || [[ ${save_S3} == $i ]]; then ## ADD A CHECK FOR USERNAME AND PASSWORD
+            if $(( "${var,,}" != 0 )); then
+                if $(( "${var,,}" == 1 )) || $(( "${var,,}" == 2 )) || $(( "${var,,}" == 3 )); then
+                    projectDic["s3"]="${var,,}"
+                    frontgate=1
+                    unset save_S3
+                else
+                    echo -e "No valid entry for S3 storage (true or false), defaulting to false."
+                fi
             fi
         elif [[ "${i,,}" == "-dpb" ]] || [[ ${dropbox} == $i ]]; then ## ADD A CHECK FOR USERNAME AND PASSWORD 
             if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
@@ -335,7 +337,7 @@ starter(){ #grabs the arguments
         echo -e "Changing Dropbox mode to false"
         projectDic["dropbox"]="false"
     fi
-    if $(( "${projectDic["s3"]}" == 2  ||  "${projectDic["s3"],,}" == 3 )); then
+    if $(( "${projectDic["s3"]}" == 2 )) || $(( "${projectDic["s3"],,}" == 3 )); then
         if [[ ! -d ~/.aws ]]; then 
             echo -e "AWS isn't set up in your home directory."
             echo -e "Changing S3 mode to false"
