@@ -147,7 +147,7 @@ starter(){ #grabs the arguments
         fi
         # echo -e "${window_length}"
         # if [[ "${i,,}" == "-w" ]] || [[ ! -v ${window_length} ]]; then ##Window expansion size
-        if [[ "${i,,}" == "-e" ]] || [[ ${input_email} == $i ]]; then
+        if [[ "${i,,}" == "-em" ]] || [[ ${input_email} == $i ]]; then
             projectDic["email"]="${var}"
             unset input_email
         elif [[ "${i,,}" == "-w" ]] || [[ ${window_length} == $i ]]; then ##Window expansion size
@@ -352,7 +352,7 @@ starter(){ #grabs the arguments
         fi
     fi
     if [[ "${projectDic["github"],,}" == "true" ]]; then 
-        if "${projectDic[[ ["gitUser"]}" == '' ]] || /
+        if [[ "${projectDic[[ ["gitUser"]}" == '' ]] || /
         [[ "${projectDic["gitPass"]}" == '' ]] || /
         [[ "${projectDic["Myrepository"]}" == '' ]]; then
             echo -e "Github input parameters not filled out correctly, defaulting Github to false"
@@ -1154,7 +1154,7 @@ exit 0
 
 }
 
-main2(){
+main(){
     config_check "$@"
     moduleLoader
     echo -e
