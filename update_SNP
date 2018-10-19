@@ -1051,53 +1051,53 @@ FASTA_SWEEP
 }
 
 # jobCreator(){
-#     scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" ## Grabs the file path location for script
-#     pbsJob='#!/bin/bash\n'
-#     pbsJob+='#PBS -l "${job_specs}"\n'
-#     pbsJob+='#PBS -m abe\n'
-#     pbsJob+='#PBS -o "${projectDic["tempOut"]}"\n'
-#     pbsJob+='#PBS -e "${projectDic["tempOut"]}"\n'
-#     pbsJob+='#PBS -M "${input_email}"\n'
-#     pbsJob+='#PBS -N "${projectDic["projectName"]}"\n\n'
-#     # bash scriptPath/SNPcontext \
-#     pbsJob+='bash "${scriptPath}"/update_SNP'
-#     pbsJob+=' -i "${projectDic["inputFile"]}"'
-#     pbsJob+=' -o "${projectDic["outputLoc"]}"'
-#     pbsJob+=' -w "${projectDic["windowLength"]}"'
-#     pbsJob+=' -f "${projectDic["flanks"]}" '
-#     pbsJob+=' -p "${projectDic["projectName"]}" '
-#     pbsJob+=' -r "${projectDic["referenceGenome"]}" '
-#     pbsJob+=' -ad "${projectDic["allData"]}" '
-#     pbsJob+=' -n "${projectDic["nMax"]}" '
-#     pbsJob+=' -JOB "${projectDic["THIS_IS_A_JOB"]}" '
-#     pbsJob+=' -s3 "${projectDic["s3"]}" '
-#     pbsJob+=' -msi "${projectDic["msi"]}" '
-#     pbsJob+=' -dpb "${projectDic["dropbox"]}" '
-#     pbsJob+=' -dpba "${projectDic["dropboxAuth"]}" '
+# #     scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" ## Grabs the file path location for script
+# #     pbsJob='#!/bin/bash\n'
+# #     pbsJob+='#PBS -l "${job_specs}"\n'
+# #     pbsJob+='#PBS -m abe\n'
+# #     pbsJob+='#PBS -o "${projectDic["tempOut"]}"\n'
+# #     pbsJob+='#PBS -e "${projectDic["tempOut"]}"\n'
+# #     pbsJob+='#PBS -M "${input_email}"\n'
+# #     pbsJob+='#PBS -N "${projectDic["projectName"]}"\n\n'
+# #     # bash scriptPath/SNPcontext \
+# #     pbsJob+='bash "${scriptPath}"/update_SNP'
+# #     pbsJob+=' -i "${projectDic["inputFile"]}"'
+# #     pbsJob+=' -o "${projectDic["outputLoc"]}"'
+# #     pbsJob+=' -w "${projectDic["windowLength"]}"'
+# #     pbsJob+=' -f "${projectDic["flanks"]}" '
+# #     pbsJob+=' -p "${projectDic["projectName"]}" '
+# #     pbsJob+=' -r "${projectDic["referenceGenome"]}" '
+# #     pbsJob+=' -ad "${projectDic["allData"]}" '
+# #     pbsJob+=' -n "${projectDic["nMax"]}" '
+# #     pbsJob+=' -JOB "${projectDic["THIS_IS_A_JOB"]}" '
+# #     pbsJob+=' -s3 "${projectDic["s3"]}" '
+# #     pbsJob+=' -msi "${projectDic["msi"]}" '
+# #     pbsJob+=' -dpb "${projectDic["dropbox"]}" '
+# #     pbsJob+=' -dpba "${projectDic["dropboxAuth"]}" '
 
-#     echo -e "${pbsJob}"
+# #     echo -e "${pbsJob}"
 
-    # qsub -l "${job_specs}" \
-    # -m abe \
-    # -o "${projectDic["tempOut"]}" \
-    # -e "${projectDic["tempOut"]}"\
-    # -M "${input_email}" \
-    # -N "${projectDic["projectName"]}" \
-    # # bash scriptPath/SNPcontext \
-    # bash "${scriptPath}"/update_SNP \
-    # -i "${projectDic["inputFile"]}" \
-    # -o "${projectDic["outputLoc"]}" \
-    # -w "${projectDic["windowLength"]}" \
-    # -f "${projectDic["flanks"]}" \
-    # -p "${projectDic["projectName"]}" \
-    # -r "${projectDic["referenceGenome"]}" \
-    # -ad "${projectDic["allData"]}" \
-    # -n "${projectDic["nMax"]}" \
-    # -JOB "${projectDic["THIS_IS_A_JOB"]}" \
-    # -s3 "${projectDic["s3"]}" \
-    # -msi "${projectDic["msi"]}" \
-    # -dpb "${projectDic["dropbox"]}" \
-    # -dpba "${projectDic["dropboxAuth"]}" \
+#     qsub \
+#     #PBS -l "${job_specs}" \
+#     #PBS -m abe \
+#     #PBS -o "${projectDic["tempOut"]}" \
+#     #PBS -e "${projectDic["tempOut"]}"\
+#     #PBS -M "${input_email}" \
+#     #PBS -N "${projectDic["projectName"]}" \
+#     bash "${scriptPath}"/update_SNP \
+#     -i "${projectDic["inputFile"]}" \
+#     -o "${projectDic["outputLoc"]}" \
+#     -w "${projectDic["windowLength"]}" \
+#     -f "${projectDic["flanks"]}" \
+#     -p "${projectDic["projectName"]}" \
+#     -r "${projectDic["referenceGenome"]}" \
+#     -ad "${projectDic["allData"]}" \
+#     -n "${projectDic["nMax"]}" \
+#     -JOB "${projectDic["THIS_IS_A_JOB"]}" \
+#     -s3 "${projectDic["s3"]}" \
+#     -msi "${projectDic["msi"]}" \
+#     -dpb "${projectDic["dropbox"]}" \
+#     -dpba "${projectDic["dropboxAuth"]}" \
 
 # }
 
@@ -1109,6 +1109,7 @@ jobCreator(){
 import os
 
 def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax):
+    print(email)
     job="#!/bin/bash -l\n\n#PBS -l walltime=24:00:00,nodes=2:ppn=10,mem=20gb\n#PBS -m abe\n#PBS -M " + email + "\n"
     job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\n#PBS -q small\nset -e\nset -o pipefail\n\n"
     job+="#PBS -o " + outputLoc + "_" + projectName + "\n#PBS -e " + outputLoc + "_" + projectName + "\n"
