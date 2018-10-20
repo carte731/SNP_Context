@@ -25,7 +25,7 @@ SNP Context can be used with either a **config file** or the **command line**, w
 ### MSI options for config file
 * **MSI Mode (Boolean, true or false)**: If true, then the script will automatically submit your job to PBS job scheduler and allows for the user to save the output text files to MSI S3 tier two storage.
 
-* **PBS parameters (Intergers)**: Allows you to change the time and amount of resources allocated to the PBS job. 
+* **PBS parameters (Integer)**: Allows you to change the time and amount of resources allocated to the PBS job. 
 Follow the link for more info: [MSI PBS job submission](https://www.msi.umn.edu/content/job-submission-and-scheduling-pbs-scripts)
 
 ### Mutation Motif
