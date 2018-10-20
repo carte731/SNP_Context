@@ -12,12 +12,12 @@ scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" ##
 set -eE
 
 error_catch(){
-    "echo -e There has been an error, The error message has been saved to: ${scriptPath} ,as SNP_CONTEXT_ERROR_LOG.txt\n"
-    "\nERROR REPORT FOR "date"\n---------------------------------">>"${scriptPath}"/SNP_CONTEXT_ERROR_LOG.txt
-    exec 2>>"${scriptPath}"/SNP_CONTEXT_ERROR_LOG.txt
+    echo -e "There has been an error, The error message has been saved to: ${1} as SNP_CONTEXT_ERROR_LOG.txt\n"
+    "\nERROR REPORT FOR "date"\n---------------------------------">>"${1}"/SNP_CONTEXT_ERROR_LOG.txt
+    exec 2>>"${1}"/SNP_CONTEXT_ERROR_LOG.txt
 }
 
-trap error_catch ERR
+trap 'error_catch "${scriptPath}""' ERR
 
 
 #     A bash dictionary for input parameters
