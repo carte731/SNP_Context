@@ -20,7 +20,7 @@ SNP Context can be used with either a **config file** or the **command line**, w
 
 * **referenceGenome (String)**: The complete path (pwd -P) of your reference genome.
 
-* **Output location (String)**: The output location of your files, a project dirtory is created at this location. If no locatation is specified, then directory and files will be saved at the same location as the input file.
+* **Output location (String)**: The output location of your files, a project directory is created at this location. If no location is specified, then directory and files will be saved at the same location as the input file.
 
 ### MSI options for config file
 * **MSI Mode (Boolean, true or false)**: If true, then the script will automatically submit your job to PBS job scheduler and allows for the user to save the output text files to MSI S3 tier two storage.
@@ -33,14 +33,14 @@ Follow the link for more info: [MSI PBS job submission](https://www.msi.umn.edu/
 
 * **Flanks (integer, 0-2)**: Choose between 0 to 2 nucleotides around the SNP location for analysis. The window length must be equal or greater than the Flank size - otherwise if the window is smaller than the flanks, the window length expansion (parameter above) will default to the flank size.  
 
-* **Indel maximum amount (Integer, 25-100)**: The maxmimum allowed indels in the .FASTA file, beyond the SNP location and 5 base pairs around it. Any indels found within a 2 base pair flanking of the SNP location will be automatically filtered out. Minimum indel thershold is 25%.
+* **Indel maximum amount (Integer, 25-100)**: The maximum allowed indels in the .FASTA file, beyond the SNP location and 5 base pairs around it. Any indels found within a 2 base pair flanking of the SNP location will be automatically filtered out. Minimum indel threshold is 25%.
 
 ### Saving Options
 * **Save all data (Boolean, true or false)**: There are many intermediate files created during SNP Context. This parameter allows you to save all intermediate files to your output directory. At the bottom of the page there is a complete list of output files if save all data is true: 
 
 #### MSI and Amazon S3
 
-* **Save S3 (Interger, 0 - 3)**: This allows you to save the mutaion motif outputs files (Count Tables) and config files to S3. The user can choose between these values **(0 - 3)**:
+* **Save S3 (Integer, 0 - 3)**: This allows you to save the mutation motif outputs files (Count Tables) and config files to S3. The user can choose between these values **(0 - 3)**:
 
 	0\. **Don't** save to any S3 storage **(default setting)**.
 
@@ -51,10 +51,10 @@ Follow the link for more info: [MSI PBS job submission](https://www.msi.umn.edu/
 	3\. Save to **both** MSI S3 storage and Amazons S3 storage platforms.
 
 #### DropBox
-* **DropBox (Boolean, true or false)**: The user can save the unique output files (counts tables and config file) to their personal dropbox app.
+* **DropBox (Boolean, true or false)**: The user can save the unique output files (counts tables and config file) to their personal DropBox app.
 Follow the link to step up a DropBox app: [Setting up DropBox app](https://www.dropbox.com/developers/reference/getting-started#app%20console)
 
-* **DropBox auth (String)**: The authication code, needed for saving Dropbox files from the script. Follow this link for instructions on setting this up. **NOTE: this data is redacted when uploaded to S3, Dropbox or Github.**
+* **DropBox auth (String)**: The authentication code, needed for saving Dropbox files from the script. Follow this link for instructions on setting this up. **NOTE: this data is redacted when uploaded to S3, Dropbox or Github.**
 
 #### GitHub
 
@@ -116,13 +116,13 @@ If the parameter `all data` is `true`, than all intermediate files are saved in 
 * Parsed .BAM files
 * Parsed .BED files
 * .FASTA files
-* Consolidated rejected nuleotide positions from .BAM file
-* Consolidated rejceted Indels .FASTA file
+* Consolidated rejected nucleotide positions from .BAM file
+* Consolidated rejected Indels .FASTA file
 * Word Counts tables
 * Combined Counts tables
 
 ### If 'all Data' is **FALSE** (default):
-* Consolidated rejected nuleotide positions from .BAM file
+* Consolidated rejected nucleotide positions from .BAM file
 * Consolidated rejected Indels .FASTA file
 * Word Counts tables
 * Combined Counts tables
