@@ -11,6 +11,7 @@ scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" ##
 
 set -eE
 trap "echo -e There has been an error, The error message has been saved to: ${scriptPath} ,as SNP_CONTEXT_ERROR_LOG.txt\n" ERR
+"\nERROR REPORT FOR "date"\n---------------------------------">>"${scriptPath}"/SNP_CONTEXT_ERROR_LOG.txt
 exec 2>>"${scriptPath}"/SNP_CONTEXT_ERROR_LOG.txt
 
 #     A bash dictionary for input parameters
@@ -348,10 +349,10 @@ moduleLoader(){ #load modules need for operations
         # echo -e "\nExporting Morrell lab modules to your MODULEPATH.\n"
         export MODULEPATH=/panfs/roc/groups/9/morrellp/public/Modules:$MODULEPATH
         module load python3_ML/3.6.4
-        module load bedops_ML/2.4.20
+        module load bedops_ML/2.4.35 
         module load bedtools_ML/2.23.0
     else
-        declare -A testlisting=( ["python3"]=3.6.4 ["bedops"]=2.4.20 ["bedtools"]=2.23.0 )
+        declare -A testlisting=( ["python3"]=3.6.4 ["bedops"]=2.4.35 ["bedtools"]=2.23.0 )
         for inProgram in ${!testlisting[@]}; do
             if [[ -x $(command -v "${inProgram}") ]]; then
                 if [[ "${inProgram}" == "python3" ]] && [[ $(python3 -c 'import sys; print(sys.version_info[0:2])') == '(3, 6)' ]]; then
