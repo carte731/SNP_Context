@@ -16,7 +16,7 @@ SNP Context can be used with either a **config file** or the **command line**, w
 
 * **Input email (String)**: Sends user PBS jobs updates. If and only if you're using this script on the University Of Minnesota's supercomputing cluster. 
 
-* **reference genome (String of complete path 'pwd -P')**: The reference genome used for .FASTA file creation.
+* **reference genome (String, complete path with 'pwd -P' terminal command)**: The reference genome used for .FASTA file creation.
 
 * **Input file (String)**: The input .VCF file. 
 
@@ -85,7 +85,7 @@ Follow the link to step up a DropBox app: [Setting up DropBox app](https://www.d
 
 **-f = Flanks (integer, 0-2)**
 
-**-r = referenceGenome (String)**
+**-r = referenceGenome (String, complete path with 'pwd -P' terminal command)**
 
 **-n = Indel maximum amount (Integer, 25-100)**
 
