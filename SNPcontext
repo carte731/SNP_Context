@@ -15,9 +15,10 @@ error_catch(){
     echo -e "There has been an error, The error message has been saved to: ${1} as SNP_CONTEXT_ERROR_LOG.txt\n"
     "\nERROR REPORT FOR "date"\n---------------------------------">>"${1}"/SNP_CONTEXT_ERROR_LOG.txt
     exec 2>>"${1}"/SNP_CONTEXT_ERROR_LOG.txt
+    exit 1
 }
 
-trap 'error_catch "${scriptPath}""' ERR
+trap 'error_catch "${scriptPath}"' ERR
 
 
 #     A bash dictionary for input parameters
