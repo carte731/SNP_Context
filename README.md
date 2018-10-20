@@ -28,6 +28,9 @@ SNP Context can be used with either a **config file** or the **command line**, w
 * **PBS parameters (Integer)**: Allows you to change the time and amount of resources allocated to the PBS job. 
 Follow the link for more info: [MSI PBS job submission](https://www.msi.umn.edu/content/job-submission-and-scheduling-pbs-scripts)
 
+#### Generated PBS job script location
+* A PBS job script is generated in MSI mode, that file is saved in the SNP Context script directory.
+
 ### Mutation Motif
 * **Window Length (Integer, 0-99)**: Controls the window length expansion around the SNP location.
 
@@ -36,6 +39,13 @@ Follow the link for more info: [MSI PBS job submission](https://www.msi.umn.edu/
 * **Indel maximum amount (Integer, 25-100)**: The maximum allowed indels in the .FASTA file, beyond the SNP location and 5 base pairs around it. Any indels found within a 2 base pair flanking of the SNP location will be automatically filtered out. Minimum indel threshold is 25%.
 
 ### Saving Options
+
+#### Section Notes
+
+*When using the various saving options, note that only the individual counts tables, combined counts table and the config are saved to Dropbox, S3 or GitHub.*
+
+*When data is uploaded, any compromising data (username, passwords, etc) are replaced with asterisks "****".*
+
 * **Save all data (Boolean, true or false)**: There are many intermediate files created during SNP Context. This parameter allows you to save all intermediate files to your output directory. At the bottom of the page there is a complete list of output files if save all data is true: 
 
 #### MSI and Amazon S3
@@ -68,6 +78,8 @@ Follow the link to step up a DropBox app: [Setting up DropBox app](https://www.d
 * **owner (String)**: The owner (their username) of the repository, leave blank if you're the owner
 
 ## Command Line equivalents to the config file (can be run in any order).
+
+Command line parameters allow this script to be plugged into a larger pipline or program, but the preferred method is the *context.config* file.
 
 **-w = Window Length (Integer, 0-99)**
 
@@ -129,14 +141,6 @@ If the parameter `all data` is `true`, than all intermediate files are saved in 
 
 ## Misc Info
 
-### Data handling
-* When using the various saving options, note that only the individual counts tables, combined counts table and the config are saved to Dropbox, S3 or GitHub.
-
-### Redaction
-* When data is uploaded, any compromising data (username, passwords, etc) are replaced with asterisks "****".
-
 ### Error Handling
 * SNP Context catches any errors that may occur during runtime and saves it to a file called the **SNP_CONTEXT_ERROR_LOG.txt** and is located in the SNP Context script directory.
 
-### Generated PBS job script location
-* A PBS job script is generated in MSI mode, that file is saved in the SNP Context script directory.
