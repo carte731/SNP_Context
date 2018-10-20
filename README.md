@@ -14,9 +14,7 @@ SNP Context can be used with either a **config file** or the **command line**, w
 ### General input for config file
 * **Project name (String)**: The name of your project, the working directory will hold this name.
 
-* **Input email (String)**: Sends user PBS jobs updates. If and only if you're using this script on the University Of Minnesota's supercomputing cluster (MSI). 
-
-* **reference genome (String, complete path with 'pwd -P' terminal command)**: The reference genome used for .FASTA file creation.
+* **Input email (String)**: Sends user PBS jobs updates. If and only if you're using this script on the University Of Minnesota's supercomputing cluster (MSI).
 
 * **Input file (String)**: The input .VCF file. 
 
@@ -38,7 +36,7 @@ Follow the link for more info: [MSI PBS job submission](https://www.msi.umn.edu/
 * **Indel maximum amount (Integer, 25-100)**: The maxmimum allowed indels in the .FASTA file, beyond the SNP location and 5 base pairs around it. Any indels found within a 2 base pair flanking of the SNP location will be automatically filtered out. Minimum indel thershold is 25%.
 
 ### Saving Options
-* **Save all data (Boolean, true or false)**: There are many intermediate files created during SNP Context. This parameter allows you to save all intermediate files to your output directory; At the bottom of the page there is a complete list of output files if save all data is true: 
+* **Save all data (Boolean, true or false)**: There are many intermediate files created during SNP Context. This parameter allows you to save all intermediate files to your output directory. At the bottom of the page there is a complete list of output files if save all data is true: 
 
 #### MSI and Amazon S3
 
@@ -111,7 +109,7 @@ Follow the link to step up a DropBox app: [Setting up DropBox app](https://www.d
 
 ## Outputs
 
-If the parameter `all data` is `true`, than all intermediate files are saved in the output directory. If `all data` is `false` than only the Word, Combined Counts Tables and rejected files (.VCF, .BAM, .FASTA) are saved in the output directory.
+If the parameter `all data` is `true`, than all intermediate files are saved in the output directory. If `all data` is `false` than only the individual counts tables, combined countst table and rejected files (.VCF, .BAM, .FASTA) are saved in the output directory.
 
 ### If 'all Data' is **TRUE**:
 * Parsed .VCF files
@@ -130,6 +128,12 @@ If the parameter `all data` is `true`, than all intermediate files are saved in 
 * Combined Counts tables
 
 ## Misc Info
+
+### Data handling
+* When using the various saving options, note that only the individual counts tables, combined counts table and the config are saved to Dropbox, S3 or GitHub.
+
+### Redaction
+* When data is uploaded, any compromising data (username, passwords, etc) are replaced with asterisks "****".
 
 ### Error Handling
 * SNP Context catches any errors that may occur during runtime and saves it to a file called the **SNP_CONTEXT_ERROR_LOG.txt** and is located in the SNP Context script directory.
