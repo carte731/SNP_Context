@@ -25,7 +25,8 @@ SNP Context can be used from either the command line or through a config file, w
 ### MSI options for config file
 * **MSI Mode (Boolean, true or false)**: If true, then the script will automatically submit your job to PBS job scheduler and allows for the user to save the output text files to MSI S3 tier two storage.
 
-* **PBS parameters (Intergers)**: Allows you to change the time and amount of resources allocated to the PBS job. See [MSI PBS job submission](https://www.msi.umn.edu/content/job-submission-and-scheduling-pbs-scripts)
+* **PBS parameters (Intergers)**: Allows you to change the time and amount of resources allocated to the PBS job. 
+Follow the link for more info: [MSI PBS job submission](https://www.msi.umn.edu/content/job-submission-and-scheduling-pbs-scripts)
 
 ### Mutation Motif
 * **Window Length (Integer, 0-99)**: Controls the window length expansion around the SNP location.
@@ -41,14 +42,15 @@ SNP Context can be used from either the command line or through a config file, w
 
 * **Save S3 (Interger, 0 - 3)**: This allows you to save the mutaion motif outputs files (Count Tables) and config files to S3. The user can choose between these values **(0 - 3)**:
 	0. Don't save to any S3 storage.
-	1. Save to MSI's S3 tier two storage 
-	2. Save to Amazons external S3 service (Needs .aws set up)
+	1. Save to MSI's S3 tier two storage
+	2. Save to Amazons external S3 service (Needs .aws set up: [Setting up amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/dev/setup-aws-cli.html))
 	3. Save to **both** MSI S3 storage and Amazons S3 storage platforms.
 
 #### DropBox
 * **DropBox (Boolean, true or false)**: The user can save the unique output file (counts tables and config file) to their personal dropbox app. 
 
 * **DropBox auth (String)**: The authication code, needed for saving Dropbox files from the script. Follow this link for instructions on setting this up. **NOTE: this data is redacted when uploaded to S3, Dropbox or Github.**
+Follow the link to step up a DropBox app: [Setting up DropBox app](https://www.dropbox.com/developers/reference/getting-started#app%20console)
 
 #### GitHub
 
@@ -61,19 +63,17 @@ SNP Context can be used from either the command line or through a config file, w
 
 * **owner (String)**: The owner (their username) of the repository, leave blank if you're the owner
 
-## Command Line equivalents to the config file (can be run in any other).
+## Command Line equivalents to the config file (can be run in any order).
 
 **-w = Window Length (Integer, 0-99)**
 
-**NEED EMAIL (String)**
+**-em = Input email (String)**
 
 **-i = Input file (String)**
 
 **-o = Output location (String)**
 
-**NEED MSI MODE**
-
-**NEED PBS PARAMETERS (Intergers)**
+**-msi = MSI Mode (Boolean, true or false)**
 
 **-p = Project name (String)**
 
@@ -122,3 +122,11 @@ If the parameter `all data` is `true`, than all intermediate files are save in t
 * Consolidated rejceted Indels .FASTA files
 * Word Counts tables
 * Combined Counts tables
+
+## Misc Info
+
+### Error Handling
+* SNP Context catches any errors that may occur during runtime and saves it to a file **SNP_CONTEXT_ERROR_LOG.txt** called in the SNP Context script directory location.
+
+### Generated PBS job script location
+* A PBS job script is generated in MSI mode, that file is saved in the SNP Context script directory location.
