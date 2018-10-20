@@ -7,9 +7,11 @@
 
 #    SNP_CONTEXT Version: 2.0.0
 
+scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" ## Location of the script
+
 set -eE
-trap "echo -e There has been an error on $LINEON, please check SNP Context error log for detailed traceback\n" ERR
-exec 2>>~/SNP_CONTEXT_ERROR_LOG.txt
+trap "echo -e There has been an error on $LINENO, The error message has been saved to:\n${scriptPath}\nas SNP_CONTEXT_ERROR_LOG.txt\n" ERR
+exec 2>>"${scriptPath}"/SNP_CONTEXT_ERROR_LOG.txt
 
 #     A bash dictionary for input parameters
 
@@ -1016,18 +1018,15 @@ FASTA_SWEEP
 
 }
 
-# jobCreator(){
-#     scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" ## Grabs the file path location for script
-#     qsub -l "${job_specs}" -m abe -M "${input_email}" -N "${projectDic["projectName"]}" "${scriptPath}"/SNPcontext -i "${projectDic["inputFile"]}" -o "${projectDic["outputLoc"]}" -w "${projectDic["windowLength"]}" -f "${projectDic["flanks"]}" -p "${projectDic["projectName"]}" -r "${projectDic["referenceGenome"]}" -ad "${projectDic["allData"]}" -n "${projectDic["nMax"]}" -JOB "${projectDic["THIS_IS_A_JOB"]}" -s3 "${projectDic["s3"]}" -msi "${projectDic["msi"]}" -dpb "${projectDic["dropbox"]}" -dpba "${projectDic["dropboxAuth"]}"
-
-# }
-
 jobCreator(){
-    myEmail="${projectDic["email"]}" job_specs="${job_specs}" scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" python3.6 - <<JOB_CREATED
+    myEmail="${projectDic["email"]}" job_specs="${job_specs}" scriptPath="${scriptPath}" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" /
+    outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" /
+    s3="${projectDic["s3"]}" msi="${projectDic["msi"]}" dpb="${projectDic["dropbox"]}" dpba="${projectDic["dropboxAuth"]}" gh="${projectDic["github"]}" ghu="${projectDic["gitUser"]}" ghp="${projectDic["gitPass"]}" /
+    gho="${projectDic["owner"]}" ghr="${projectDic["Myrepository"]}" python3.6 - <<JOB_CREATED
 
 import os
 
-def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs):
+def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr):
     job="#!/bin/bash -l\n\n#PBS -l " + job_specs + "\n#PBS -m abe\n#PBS -M " + email + "\n"
     job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\nset -e\nset -o pipefail\n\n"
     job+="#PBS -o " + outputLoc + "_" + projectName + "\n#PBS -e " + outputLoc + "_" + projectName + "\n"
@@ -1041,6 +1040,17 @@ def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, ema
     job+= "-r " + referenceGenome + " "
     job+= "-ad " + allData + " "
     job+= "-n " + nMax + " "
+
+    job+= "-s3 " + s3 + " "
+    job+= "-msi " + msi + " "
+    job+= "-dpb " + dpb + " "
+    job+= "-dpba " + dpba + " "
+    job+= "-gh " + gh + " "
+    job+= "-ghu " + ghu + " "
+    job+= "-ghp " + ghp + " "
+    job+= "-gho " + gho + " "
+    job+= "-ghr " + ghr + " "
+
     job+= "-JOB THIS_IS_A_JOB"
 
     with open(outputLoc + projectName + ".job", "w") as jobScript:
@@ -1058,11 +1068,22 @@ def bashImport():
     projectName=str(os.environ['projectName'])
     allData=str(os.environ['allData'])
     nMax=str(os.environ['nMax'])
-    return(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs)
+
+    s3=str(os.environ['s3'])
+    msi=str(os.environ['msi'])
+    dpb=str(os.environ['dpb'])
+    dpba=str(os.environ['dpba'])
+    gh=str(os.environ['gh'])
+    ghu=str(os.environ['ghu'])
+    ghp=str(os.environ['ghp'])
+    gho=str(os.environ['gho'])
+    ghr=str(os.environ['ghr'])
+
+    return(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr)
 
 def main():
-    projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs = bashImport()
-    jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs)
+    projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr = bashImport()
+    jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr)
 
 main()
     
