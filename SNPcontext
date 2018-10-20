@@ -1018,7 +1018,7 @@ FASTA_SWEEP
 
 jobCreator(){
     scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" ## Grabs the file path location for script
-    qsub -l "${job_specs}" -m abe -o "${projectDic["tempOut"]}" -e "${projectDic["tempOut"]}" -M "${input_email}" -N "${projectDic["projectName"]}" "${scriptPath}"/update_SNP \
+    qsub -l "${job_specs}" -m abe -o "${projectDic["tempOut"]}" -e "${projectDic["tempOut"]}" -M "${input_email}" -N "${projectDic["projectName"]}" "${scriptPath}"/SNPcontext \
     -i "${projectDic["inputFile"]}" \
     -o "${projectDic["outputLoc"]}" \
     -w "${projectDic["windowLength"]}" \
