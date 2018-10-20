@@ -61,7 +61,7 @@ help_display(){ ## UPDATE TO INCLUDE ALL CMDS AND MENTION THE CONFIG FILE IS THE
     helpPrintOut+=$'\n\t-n [(number)(The percentage of accepted indels in the FASTA file)]'
     helpPrintOut+=$'\n\t-ad [(true or false) (Which stands for “all data”, this allows you to keep all intermediate files (split VCFs, BED, new interval BEDs, FASTA files)\n\t    that are normally deleted after processing. Defaults to false, which deletes intermedidate files.)]\n'
     echo "$helpPrintOut"
-    exit -0
+    exit 0
 }
 
 config_check(){
@@ -1091,7 +1091,7 @@ JOB_CREATED
 
 qsub "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
 echo -e "\njob submited.\nEXITING...\n"
-exit 0
+exit 2
 
 }
 
@@ -1143,7 +1143,7 @@ main(){
         gitHubSaver "$@"
     fi
     echo -e "operations completed...\n"
-        
+    exit 0
 }
 
 main "$@"
