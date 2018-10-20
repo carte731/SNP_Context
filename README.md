@@ -45,8 +45,11 @@ Follow the link for more info: [MSI PBS job submission](https://www.msi.umn.edu/
 * **Save S3 (Interger, 0 - 3)**: This allows you to save the mutaion motif outputs files (Count Tables) and config files to S3. The user can choose between these values **(0 - 3)**:
 
 	0\. **Don't** save to any S3 storage **(default setting)**.
+
 	1\. Save to **MSI's** S3 tier two storage.
+
 	2\. Save to **Amazons** external S3 service. (Needs .aws set up: [Setting up amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/dev/setup-aws-cli.html))
+
 	3\. Save to **both** MSI S3 storage and Amazons S3 storage platforms.
 
 #### DropBox
