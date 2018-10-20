@@ -9,12 +9,14 @@
     The program checks for the presence of more than one variant within user specified windows.
 
 ## Config file
-SNP Context can be used from either the command line or through a config file, with the config file being the perferred method. Listed below are the script input parameters:
+SNP Context can be used with either a **config file** or the **command line**, with the config file being the *perferred* method. Listed below are the script input parameters:
 
 ### General input for config file
-* **Project name (String)**: The name of your project, the working directory will share this name.
+* **Project name (String)**: The name of your project, the working directory will hold this name.
 
-* **Input email (String)**: Sends user PBS jobs updates. If and only if you're using this script on the University Of Minnesota's supercomputing cluster. *reference genome: The reference genome for used for .VCF transformation into .FASTA files.
+* **Input email (String)**: Sends user PBS jobs updates. If and only if you're using this script on the University Of Minnesota's supercomputing cluster. 
+
+* **reference genome (String of complete path 'pwd -P')**: The reference genome used for .FASTA file creation.
 
 * **Input file (String)**: The input .VCF file. 
 
@@ -36,28 +38,29 @@ Follow the link for more info: [MSI PBS job submission](https://www.msi.umn.edu/
 * **Indel maximum amount (Integer, 25-100)**: The maxmimum allowed indels in the .FASTA file, beyond the SNP location and 5 base pairs around it. Any indels found within a 2 base pair flanking of the SNP location will be automatically filtered out. Minimum indel thershold is 25%.
 
 ### Saving Options
-* **Save all data (Boolean, true or false)**: There are many intermediate files created during SNP Context. This parameter allows you to save all intermediate files to your output directory; below is a complete list of output files if save all data is true: 
+* **Save all data (Boolean, true or false)**: There are many intermediate files created during SNP Context. This parameter allows you to save all intermediate files to your output directory; At the bottom of the page there is a complete list of output files if save all data is true: 
 
 #### MSI and Amazon S3
 
 * **Save S3 (Interger, 0 - 3)**: This allows you to save the mutaion motif outputs files (Count Tables) and config files to S3. The user can choose between these values **(0 - 3)**:
-	0. Don't save to any S3 storage.
-	1. Save to MSI's S3 tier two storage
+
+	0. Don't save to any S3 storage **(Default setting)**.
+	1. Save **ONLY** to MSI's S3 tier two storage
 	2. Save to Amazons external S3 service (Needs .aws set up: [Setting up amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/dev/setup-aws-cli.html))
 	3. Save to **both** MSI S3 storage and Amazons S3 storage platforms.
 
 #### DropBox
-* **DropBox (Boolean, true or false)**: The user can save the unique output file (counts tables and config file) to their personal dropbox app. 
+* **DropBox (Boolean, true or false)**: The user can save the unique output files (counts tables and config file) to their personal dropbox app.
+Follow the link to step up a DropBox app: [Setting up DropBox app](https://www.dropbox.com/developers/reference/getting-started#app%20console)
 
 * **DropBox auth (String)**: The authication code, needed for saving Dropbox files from the script. Follow this link for instructions on setting this up. **NOTE: this data is redacted when uploaded to S3, Dropbox or Github.**
-Follow the link to step up a DropBox app: [Setting up DropBox app](https://www.dropbox.com/developers/reference/getting-started#app%20console)
 
 #### GitHub
 
 * **Github (Boolean, true or false)**: Do you want to save the output files (counts tables and config file) to a Github repository
 
 * **gitUser (String)** : Your GitHub username. **NOTE: this data is redacted when uploaded to S3, Dropbox or Github.**
-* **gitPass (String)** : You GitHub password: **NOTE: this data is redacted when uploaded to S3, Dropbox or Github.**
+* **gitPass (String)** : Your GitHub password: **NOTE: this data is redacted when uploaded to S3, Dropbox or Github.**
 
 * **Myrepository (String)**: The name of the repository you will be saving the output files to.
 
@@ -105,7 +108,7 @@ Follow the link to step up a DropBox app: [Setting up DropBox app](https://www.d
 
 ## Outputs
 
-If the parameter `all data` is `true`, than all intermediate files are save in the output directory, if `all data` is `false` than only the Word and Combined Counts Tables and rejected files (.VCF, .BAM, .FASTA) are saved in the output drictory.
+If the parameter `all data` is `true`, than all intermediate files are saved in the output directory. If `all data` is `false` than only the Word, Combined Counts Tables and rejected files (.VCF, .BAM, .FASTA) are saved in the output directory.
 
 ### If 'all Data' is **TRUE**:
 * Parsed .VCF files
@@ -113,20 +116,20 @@ If the parameter `all data` is `true`, than all intermediate files are save in t
 * Parsed .BED files
 * .FASTA files
 * Consolidated rejected nuleotide positions from .BAM file
-* Consolidated rejceted Indels .FASTA files
+* Consolidated rejceted Indels .FASTA file
 * Word Counts tables
 * Combined Counts tables
 
 ### If 'all Data' is **FALSE** (default):
 * Consolidated rejected nuleotide positions from .BAM file
-* Consolidated rejceted Indels .FASTA files
+* Consolidated rejected Indels .FASTA file
 * Word Counts tables
 * Combined Counts tables
 
 ## Misc Info
 
 ### Error Handling
-* SNP Context catches any errors that may occur during runtime and saves it to a file **SNP_CONTEXT_ERROR_LOG.txt** called in the SNP Context script directory location.
+* SNP Context catches any errors that may occur during runtime and saves it to a file called **SNP_CONTEXT_ERROR_LOG.txt** located in the SNP Context script directory.
 
 ### Generated PBS job script location
-* A PBS job script is generated in MSI mode, that file is saved in the SNP Context script directory location.
+* A PBS job script is generated in MSI mode, that file is saved in the SNP Context script directory.
