@@ -9,7 +9,7 @@
     The program checks for the presence of more than one variant within user specified windows.
 
 ## Config file
-SNP Context can be used with either a **config file** or the **command line**, with the config file being the *perferred* method. Listed below are the script input parameters:
+SNP Context can be used with either a **config file** or the **command line**, with the config file being the *perferred* method. Listed below are the config file input parameters:
 
 ### General input for config file
 * **Project name (String)**: The name of your project, the working directory will hold this name.
