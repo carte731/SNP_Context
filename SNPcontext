@@ -5,187 +5,156 @@
 #    The window size for contextual sequence can be user specificed.
 #    The program checks for the presence of more than one variant within user specified windows.
 
+#    SNP_CONTEXT Version: 2.0.0
+
+set -eE
+trap "echo -e There has been an error on $LINEON, please check SNP Context error log for detailed traceback\n" ERR
+exec 2>>~/SNP_CONTEXT_ERROR_LOG.txt
+
 #     A bash dictionary for input parameters
 
-# XXXX
 declare -A projectDic=(
+    ["email"]='' #-em
     ["windowLength"]=1 #-w
-    ["inputFile"]='' #-i0
+    ["inputFile"]='' #-i
     ["inputLoc"]=''
     ["outputLoc"]='' #-o
     ["filename"]=''
     ["projectName"]='out' #-p
     ["flanks"]=0 #-f
-    ["referenceGenomeChar"]=''
     ["referenceGenome"]='' #-r
     ["OperationalStage"]='vcfTObed'
     ["nMax"]=25 ##-n
-    ["JOB"]='NO_JOB_NOW'
     ["TempLoc"]=''
     ["tempOut"]=''
     ["allData"]='false' #-ad
-    ["S3"]='false' #####
+    ["msi"]='true' #-msi
+    ["s3"]=0 #-s3
+    ["dropbox"]='false' #-dpb
+    ["dropboxAuth"]='' #-dpba
+    ["github"]='false' #-gh
+    ["gitUser"]='' #-ghu
+    ["gitPass"]='' #-ghp
+    ["owner"]='' #-gho
+    ["Myrepository"]='' #-ghr
+    ["JOB"]='NO_JOB_NOW'
     
 )
-# XXXX
+
 #     A bash list of all possible nucleotide state transitions
 declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
 
-# XXXX
 declare -a active=()
 
-# XXXX
+help_display(){ ## UPDATE TO INCLUDE ALL CMDS AND MENTION THE CONFIG FILE IS THE PREFERED WAY OF OPERATING
+    local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
+    helpPrintOut+=$'\n\tSNPcontext -i <input VCF> -o <output> -r <reference genome> -w <expansion size> -f <flank size> -p <project name> -n <acceptable Indel %> -ad <saved all data>\n'
+    helpPrintOut+=$'\n\t------------------------\n'
+    helpPrintOut+=$'\n\t**Input arguments can be in ANY order.**\n'
+    helpPrintOut+=$'\n\t-i [(complete path to VCF file) (the VCF input file)]\n\t-o [(complete path to location) (The output location, if not entered it will default to the same location as your input file.)]'
+    helpPrintOut+=$'\n\t-r [(barley or b, soy bean or s )(Selects the reference genome, defaults to Barley if not specified.)]\n\t-w [(Expansion window size)(The expandable window size around the SNP location, 8 on both ends is the deafult.)]'
+    helpPrintOut+=$'\n\t-p [project name]\n\t-n [max percentage of indels allowed in fasta files]'
+    helpPrintOut+=$'\n\t-a [(true/false) Do you want all temp files (vcf,bed and fasta) to be saved in your output directory]'
+    helpPrintOut+=$'\n\t-f [(number between 0 and 2) (flank size for aln_to_counts)]'
+    helpPrintOut+=$'\n\t-n [(number)(The percentage of accepted indels in the FASTA file)]'
+    helpPrintOut+=$'\n\t-ad [(true or false) (Which stands for “all data”, this allows you to keep all intermediate files (split VCFs, BED, new interval BEDs, FASTA files)\n\t    that are normally deleted after processing. Defaults to false, which deletes intermedidate files.)]\n'
+    echo "$helpPrintOut"
+    exit -0
+}
+
 config_check(){
-    local configCheck=("$@")
-    if (( "$#" == 1 )); then
-        if [[ ${configCheck[0],,} == "--help" ]] || [[ ${configCheck[0],,} == "-h" ]] || (( "$#" == 0 )); then
-            local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
-            helpPrintOut+=$'\nSNPcontext -i <input VCF> -o <output> -r <reference genome> -w <expansion size> -f <flank size> -p <project name> -n <acceptable Indel %> -ad <saved all data>\n'
-            helpPrintOut+=$'\n\t------------------------\n'
-            helpPrintOut+=$'\n\t**Input arguments can be in ANY order.**\n'
-            helpPrintOut+=$'\n\t-i [(complete path to VCF file) (the VCF input file)]\n\t-o [(complete path to location) (The output location, if not entered it will default to the same location as your input file.)]'
-            helpPrintOut+=$'\n\t-r [(barley or b, soy bean or s )(Selects the reference genome, defaults to Barley if not specified.)]\n\t-w [(Expansion window size)(The expandable window size around the SNP location, 8 on both ends is the deafult.)]'
-            helpPrintOut+=$'\n\t-p [project name]\n\t-n [max percentage of indels allowed in fasta files]'
-            helpPrintOut+=$'\n\t-a [(true/false) Do you want all temp files (vcf,bed and fasta) to be saved in your output directory]'
-            helpPrintOut+=$'\n\t-f [(number between 0 and 2) (flank size for aln_to_counts)]'
-            helpPrintOut+=$'\n\t-n [(number)(The percentage of accepted indels in the FASTA file)]'
-            helpPrintOut+=$'\n\t-ad [(true or false) (Which stands for “all data”, this allows you to keep all intermediate files (split VCFs, BED, new interval BEDs, FASTA files)\n\t    that are normally deleted after processing. Defaults to false, which deletes intermedidate files.)]\n'
-            echo "$helpPrintOut"
-            exit -0
-        elif [[ -f ${configCheck[0]} ]] && [[ ${configCheck[0]##*/} == "context.config" ]]; then
-            echo -e "CONFIG LOADER"
-            config_starter "${configCheck}"
-            return 0 ##CHECK
-        fi
-    fi
-    echo -e "STARTER"
-    starter "$@"
-}
-
-# REMOVING IT!!!
-config_starter(){
-    source "${configCheck}" ##CHECK IF IT'S RIGHT
-    if [[ "${window_length}" =~ ^[0-9]+$ ]]; then ##Checks if it's a number, max expansion of 1000.
-        if (( "${window_length}" >= 1)); then ##Changed from 2 to 1
-            ((projectDic["windowLength"]+="${window_length}"))
-        fi
-    else
-        echo -e "\nPlease enter a valid integer for window expansion size, defaulting to 1 bases or flank size.. TEST TEST..\n"
-        exit 1
-    fi
-    # projectDic["windowLength"]=window_length.
-    if [[ "${input_file}" != '' ]] && [[ "${input_file##*.}" == "vcf" ]] && [ -f "${input_file}" ]; then
-        projectDic["inputFile"]+="${input_file}"
-        projectDic["inputLoc"]+="${input_file%/*}"
-        local filename=${input_file%.*} ##removes files extension
-        filename="${filename##*/}" ##removes file path
-        projectDic["filename"]+="${filename}"
-    else
-        echo -e "\nERROR. Incorrect file input. Check file is valid or directory path. (Input (.vcf) only)\nEXITING...\n"
-        exit 1
-    fi
-    # projectDic["inputFile"]=input_file
-    if [[ -z "${output_location}" ]]; then
-        echo -e "\nNot a valid output location. Re-routing to input file location.\n"
-        projectDic["outputLoc"]+="${projectDic["inputLoc"]}"
-    fi
-    if [ -d "$output_location" ]; then ##Checks if directory exist, if not it will save to input file location
-        if [[ "${output_location: -1}" == "/" ]]; then
-            projectDic["outputLoc"]+="${output_location}"
-        else
-            projectDic["outputLoc"]+="${output_location}"/
-        fi
-    fi
-    # projectDic["outputLoc"]=output_location
-    projectDic["projectName"]="${project_name}"
-    if [[ "${flanks}" =~ ^[0-2]+$ ]]; then ##Checks if it's a number and if it's between 0 and 2
-        ((projectDic["flanks"]+="${flanks}"))
-        if (( ${projectDic["flanks"]} > ${projectDic["windowLength"]} )); then
-            ${projectDic["windowLength"]}=${projectDic["flanks"]}
+    local args=($@)
+    if (( "$#" >= 1 )); then
+        if (( "$#" == 1 )); then
+            if [[ ${args[0],,} == "--help" ]] || [[ ${args[0],,} == "-h" ]]; then
+                help_display
+            elif [[ -f "${args[0]}" ]] || [[ ! -z "${args[0]}" ]]; then
+                local var=${args##*.} ## Grabs only the extension
+                if [[ ${var,,} == "config" ]]; then ## Checks if it's a .config file
+                    isCmd="false"
+                    source "${args[0]}"
+                    declare -a startList=(
+                        ${window_length}
+                        ${input_file} # Declares unset variables (NULL), uses -v to check if NULL
+                        ${output_location}
+                        ${project_name}
+                        ${flanks}
+                        ${referenceGenome}
+                        ${indel_max_amount}
+                        ${save_all_data}
+                        ${save_S3}
+                        ${s3_login}
+                        ${s3_password}
+                        ${input_email}
+                    )
+                    starter ${startList}
+                else   
+                    echo -e "Invalid '.Config' file extension. Exiting..."
+                    exit 1
+                fi
+            else   
+                echo -e "Invalid single entry, either enter config file with correct path or --help/-h. Exiting..."
+                exit 1
+            fi
+        elif (( "$#" > 1 )); then
+            isCmd="true"
+            startList=("$@")
+            starter ${startList}
+        else 
+            echo -e "Invalid entries. Exiting..."
+            exit 1
         fi
     else
-        echo -e "\nFlanks have to be between: 0 - 2. Defaulting to 0.\n"
-    fi
-    # projectDic["flanks"]=flanks CHECK if im doing this right.
-    # if [[ -e "${referenceGenome}" ]]; then
-    #     if [[ "${referenceGenome##*.}" == "fasfa" ]] || [[ "${referenceGenome##*.}" == "fa" ]]; then
-    #         projectDic["referenceGenome"]="${referenceGenome}"
-    #     else
-    #         referenceAssignment ${referenceGenome}
-    #     fi            
-    # else
-    #     referenceAssignment ${referenceGenome}
-    # fi
-    echo -e "\n${referenceGenome}\n"
-    if [[ -f "${referenceGenome}" ]]; then
-    echo -e "INTO THE BREACH\n"
-        if [[ "${referenceGenome##*.}" == "fasfa" ]] || [[ "${referenceGenome##*.}" == "fa" ]]; then
-            echo -e "IF ONE\n"
-            projectDic["referenceGenome"]="${referenceGenome}"
-        else
-            echo -e "ELSE ONE\n"
-            referenceAssignment ${referenceGenome}
-        fi            
-    else
-        echo -e "ELSE BREACH\n"
-        referenceAssignment ${referenceGenome}
-    fi
-    if [[ "${indel_max_amount}" =~ ^[0-9]+$ ]]; then
-        if (( "${indel_max_amount}" >= 0  && "${indel_max_amount}" <= 100 )); then
-            ((projectDic["nMax"]+="$indel_max_amount"))
-        elif (( "${indel_max_amount}" < 0 )); then
-            echo -e "\nMinimum N threshold is 1. Defaulting to 1% threshold."
-            ((projectDic["nMax"]+=1))
-        elif (( "${indel_max_amount}" > 100 )); then
-            echo -e "\nMaximum N threshold is 75. Defaulting to 100% threshold."
-            ((projectDic["nMax"]+=100))
-        fi            
-    fi
-    # projectDic["nMax"]=indel_max_amount
-    projectDic["allData"]=${save_all_data,,}
-    # projectDic["dropBox"]=dropbox
-    # projectDic["oneDrive"]=onedrive
-    if [[ "${msi_S3}" == "" ]]; then
-        echo -e "Null space, defaulting to false...\n"
-        projectDic["S3"]='false'
-    else ##ADD SOMETHING TO CHECK IF IT'S ONLY true OR false
-        echo -e "MSI S3 SPLIT!\n"
-        projectDic["S3"]="${msi_S3,,}"
+        help_display
     fi
 }
 
-# XXXX
 #     Takes user arguments from command line and assigns values to dictionary keys in 'projectDic'
 starter(){ #grabs the arguments
-    # local args=("$@")
     local frontgate=0
     local indexPos=0
-    for i in $@; do
-        if [[ "${i,,}" == "-w" ]]; then ##Window expansion size
-            local var=${args[${indexPos}+1]}
-            if [[ "$var" =~ ^[0-9]+$ ]]; then ##Checks if it's a number, max expansion of 1000.
-                if (( "$var" >= 1)); then ##Changed from 2 to 1
-                    ((projectDic["windowLength"]+="$var"))
+    for i in ${startList[@]}; do
+        if [[ "${isCmd}" == "true" ]] && [[ ${#startList[@]} != ${indexPos} ]]; then
+            local var="${startList[${indexPos}+1]}"
+        elif [[ "${isCmd}" == "false" ]]; then
+            local var="${i}"
+        fi
+        # if [[ "${i,,}" == "-w" ]] || [[ ! -v ${window_length} ]]; then ##Window expansion size
+        if [[ "${i,,}" == "-em" ]] || [[ ${input_email} == $i ]]; then
+            projectDic["email"]="${var}"
+            unset input_email
+        elif [[ "${i,,}" == "-w" ]] || [[ ${window_length} == $i ]]; then ##Window expansion size
+            if [[ "$var" =~ ^[0-9]$ ]] && (( "$var" >= 0 )); then ##Checks if it's a number, max expansion of 10
+                if (( "$var" > 10 )); then ##Changed from 2 to 1
+                    echo -e "\nwindow size is too large, defaulting to 10."
+                    ((projectDic["windowLength"]=10))
                     frontgate=1 
+                    unset window_length
+                else
+                    ((projectDic["windowLength"]="${var}"))
+                    frontgate=1 
+                    unset window_length
                 fi
             else
-                echo -e "\nPlease enter a valid integer for window expansion size, defaulting to 1 bases or flank size.\n"
+                echo -e "\nPlease enter a valid integer for window expansion size - defaulting to 1.\n"
+                projectDic["windowLength"]=1
+                frontgate=1 
+                unset window_length
             fi
-        elif [[ "${i,,}" == "-i" ]]; then ##Input file which grabs the input file name, location and complete file path 
-            local var=${args[${indexPos}+1]}
-            if [[ "${var##*.}" == "vcf" ]] && [ -f "$var" ]; then ##Checks if it's VCF and if file exist
+        elif [[ "${i,,}" == "-i" ]] || [[ ${input_file} == $i ]]; then ##Input file which grabs the input file name, location and complete file path
+            if [[ "${var##*.}" == "vcf" ]] && [[ -f "$var" ]]; then ##Checks if it's VCF and if file exist
                 projectDic["inputFile"]+="$var"
                 projectDic["inputLoc"]+="${var%/*}"
                 local filename=${var%.*} ##removes files extension
                 filename=${filename##*/} ##removes file path
                 projectDic["filename"]+="$filename"
                 frontgate=1
+                unset input_file
             else
                 echo -e "\nERROR. Incorrect file input. Check file or directory path. (Input (.vcf) only)\nEXITING...\n"
                 exit 1
             fi
-        elif [[ "${i,,}" == "-o" ]]; then ##output location info
-            local var=${args[${indexPos}+1]}
+        elif [[ "${i,,}" == "-o" ]] || [[ ${output_location} == $i ]]; then ##output location info
             if [ -d "$var" ]; then ##Checks if directory exist, if not it will save to input file location
                 if [[ "${var: -1}" == "/" ]]; then
                     projectDic["outputLoc"]+="$var"
@@ -193,61 +162,137 @@ starter(){ #grabs the arguments
                     projectDic["outputLoc"]+="$var"/
                 fi
                 frontgate=1
+                unset output_location
             fi
-        elif [[ "${i,,}" == "-p" ]]; then ##Project name
-            local var=${args[${indexPos}+1]}
+        elif [[ "${i,,}" == "-p" ]] || [[ ${project_name} == $i ]]; then ##Project name
             projectDic["projectName"]="$var"
             frontgate=1
-        elif [[ "${i,,}" == "-f" ]]; then ##Flank sizes for mutation motif's aln_to_counts func
-            local var=${args[${indexPos}+1]}
-            frontgate=1
-            if [[ "$var" =~ ^[0-2]+$ ]]; then ##Checks if it's a number and if it's between 0 and 2
-                ((projectDic["flanks"]+="$var"))
+            unset project_name
+        elif [[ "${i,,}" == "-f" ]] || [[ "${flanks}" == $i ]]; then ##Flank sizes for mutation motif's aln_to_counts func
+            if [[ "$var" =~ ^[0-2]$ ]]; then ##Checks if it's a number and if it's between 0 and 2, Regex search
+                ((projectDic["flanks"]="$var"))
             else
                 echo -e "\nFlanks have to be between: 0 - 2. Defaulting to 0.\n"
+                projectDic["flanks"]=0
             fi
-        elif [[ "${i,,}" == "-r" ]]; then ##Which reference genome needed for FASTA file creation
-            local var=${args[${indexPos}+1]}
-            referenceAssignment ${var}
             frontgate=1
+            unset flanks
+        elif [[ "${i,,}" == "-r" ]] || [[ ${referenceGenome} == $i ]]; then ##Which reference genome needed for FASTA file creation
+            if [[ -f "${var}" ]]; then
+                projectDic["referenceGenome"]="${var}"
+                frontgate=1
+                unset referenceGenome
+            else
+                echo -e "\nEnter a valid reference genome. Exiting...\n"
+                exit 1
+            fi
         elif [[ "${i}" == "-JOB" ]]; then
             local var=${args[${indexPos}+1]}
             projectDic["JOB"]="${var}"
-        elif [[ "${i,,}" == "-n"  ]]; then
-            local var=${args[${indexPos}+1]}
-            # if [[ "$var" =~ ^[0-9]+$ ]]; then ##CHECK WITH PETER!!!
-            #     if (( "${var}" >= 25  && "$var" <= 100 )); then
+        elif [[ "${i,,}" == "-n"  ]] || [[ "${indel_max_amount}" == $i ]]; then
+            # echo -e "ATTACK_ONE"
+            if [[ "${var}" =~ [0-9] ]]; then ##CHECK WITH PETER!!!
+                # echo -e "ATTACK"
+                if (( "$var" >= 25  && "$var" <= 100 )); then
+                    ((projectDic["nMax"]="$var"))
+                elif (( "$var" < 25 )); then
+                    echo -e "\nMinimum indel threshold is 25. Defaulting to 25% threshold."
+                    ((projectDic["nMax"]=25))
+                elif (( "$var" > 100 )); then
+                    echo -e "\nMaximum indel threshold is 100. Defaulting to 100% threshold."
+                    ((projectDic["nMax"]=100))
+                fi
+                frontgate=1
+                unset indel_max_amount     
+            else
+                echo -e "\nNot a valid indel threshold entry. Defaulting to 25%.\n"
+                unset indel_max_amount         
+            fi
+            # if [[ "$var" =~ ^[0-9]+$ ]]; then
+            #     if (( "${var}" >= 0  && "$var" <= 100 )); then
             #         ((projectDic["nMax"]+="$var"))
-            #     elif (( "${var}" < 25 )); then
-            #         echo -e "\nMinimum N threshold is 25. Defaulting to 25% threshold."
-            #         ((projectDic["nMax"]+=25))
+            #     elif (( "${var}" < 0 )); then
+            #         echo -e "\nMinimum N threshold is 1. Defaulting to 1% threshold."
+            #         ((projectDic["nMax"]+=1))
             #     elif (( "${var}" > 100 )); then
-            #         echo -e "\nMaximum N threshold is 100. Defaulting to 100% threshold."
+            #         echo -e "\nMaximum N threshold is 75. Defaulting to 100% threshold."
             #         ((projectDic["nMax"]+=100))
             #     fi
             #     frontgate=1                    
             # fi
-            if [[ "$var" =~ ^[0-9]+$ ]]; then
-                if (( "${var}" >= 0  && "$var" <= 100 )); then
-                    ((projectDic["nMax"]+="$var"))
-                elif (( "${var}" < 0 )); then
-                    echo -e "\nMinimum N threshold is 1. Defaulting to 1% threshold."
-                    ((projectDic["nMax"]+=1))
-                elif (( "${var}" > 100 )); then
-                    echo -e "\nMaximum N threshold is 75. Defaulting to 100% threshold."
-                    ((projectDic["nMax"]+=100))
-                fi
-                frontgate=1                    
+        elif [[ "${i,,}" == "-ad"  ]] || [[ ${save_all_data} == $i ]]; then
+            if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
+                projectDic["allData"]="${var,,}"
+                frontgate=1
+                unset save_all_data
+            else
+                echo -e "No valid all data entry (true or false), defaulting to false. Only counts tables will be saved."
             fi
-        elif [[ "${i,,}" == "-ad"  ]]; then
-            local var=${args[${indexPos}+1]}
-            projectDic["allData"]="${var,,}"
+        elif [[ "${i,,}" == "-s3" ]] || [[ ${save_S3} == $i ]]; then ## ADD A CHECK FOR USERNAME AND PASSWORD
+            if [[ "${var,,}" != "0" ]]; then
+                if [[ "${var,,}" == "1" ]] || [[ "${var,,}" == "2" ]] || [[ "${var,,}" == "3" ]]; then
+                    projectDic["s3"]="${var,,}"
+                    frontgate=1
+                    unset save_S3
+                else
+                    echo -e "No valid entry for S3 storage (true or false), defaulting to false."
+                fi
+            fi
+        elif [[ "${i,,}" == "-dpb" ]] || [[ ${dropbox} == $i ]]; then ## ADD A CHECK FOR USERNAME AND PASSWORD 
+            if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
+                projectDic["dropbox"]="${var,,}"
+                frontgate=1
+                unset dropbox
+
+            else
+                echo -e "No valid entry for Dropbox uploading (true or false), defaulting to false."
+            fi
+        elif [[ "${i,,}" == "-gh" ]] || [[ ${save_github} == $i ]]; then ## ADD A CHECK FOR USERNAME AND PASSWORD 
+            if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
+                projectDic["github"]="${var,,}"
+                frontgate=1
+                unset save_github
+
+            else
+                echo -e "No valid entry for github uploading (true or false), defaulting to false."
+            fi
+        elif [[ "${i,,}" == "-msi" ]] || [[ ${MSI_Mode} == $i ]]; then
+            if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
+                projectDic["msi"]="${var,,}"
+                frontgate=1
+                unset MSI_Mode
+            else
+                echo -e "No valid entry for MSI mode (true or false), defaulting to false."
+                projectDic["msi"]='false'
+                frontgate=1
+                unset MSI_Mode                
+            fi
+        elif [[ "${i,,}" == "-dpba" ]] || [[ ${dropbox_auth} == $i ]]; then
+            projectDic["dropboxAuth"]="${var,,}"
             frontgate=1
+            unset dropbox_auth
+        elif [[ "${i,,}" == "-ghu" ]] || [[ ${gitUser} == $i ]]; then
+            projectDic["gitUser"]="${var,,}"
+            frontgate=1
+            unset gitUser
+        elif [[ "${i,,}" == "-ghp" ]] || [[ ${gitPass} == $i ]]; then
+            projectDic["gitPass"]="${var,,}"
+            frontgate=1
+            unset gitPass
+        elif [[ "${i,,}" == "-gho" ]] || [[ ${owner} == $i ]]; then
+            projectDic["owner"]="${var,,}"
+            frontgate=1
+            unset owner
+        elif [[ "${i,,}" == "-ghr" ]] || [[ ${Myrepository} == $i ]]; then
+            projectDic["Myrepository"]="${var,,}"
+            frontgate=1
+            unset Myrepository           
         fi
         ((indexPos+=1))
     done
     if ((${frontgate} <= 0)); then
         echo -e "\nPlease enter valid arguments. None were valid.\n"
+        exit 1
     fi
     if [[ ${projectDic["inputFile"]} == '' ]]; then
         echo -e "\nNo input file or working directory specified.\nEXITING...\n"
@@ -258,48 +303,78 @@ starter(){ #grabs the arguments
         projectDic["outputLoc"]+=${projectDic["inputLoc"]}
     fi
     if [[ ${projectDic["referenceGenome"]} == "" ]]; then
-        referenceAssignment ##Function call
+        echo -e "No reference genome enetered. Exiting..."
+        exit 1
     fi
     if (( ${projectDic["flanks"]} > ${projectDic["windowLength"]} )); then
-        # ((projectDic["nMax"]+=25))
-        ${projectDic["windowLength"]}=${projectDic["flanks"]}
+        echo -e "Flank larger than window expansion, defaulting to flank size of ${projectDic["flanks"]}"
+        projectDic["windowLength"]=${projectDic["flanks"]}
     fi
+    if [[ "${projectDic["dropbox"],,}" == "true" ]] && [[ "${projectDic["dropboxAuth"]}" == '' ]]; then 
+        echo -e "Dropbox mode is set to true but there is no Generated access token was proved."
+        echo -e "Changing Dropbox mode to false"
+        projectDic["dropbox"]="false"
+    fi
+    if [[ "${projectDic["s3"]}" == "2" ]] || [[ "${projectDic["s3"],,}" == 3 ]]; then
+        if [[ ! -d ~/.aws ]]; then 
+            echo -e "AWS isn't set up in your home directory."
+            echo -e "Changing S3 mode to false"
+            projectDic["s3"]=0
+        fi
+    fi
+    if [[ "${projectDic["github"],,}" == "true" ]]; then 
+        if [[ "${projectDic[[ ["gitUser"]}" == '' ]] || /
+        [[ "${projectDic["gitPass"]}" == '' ]] || /
+        [[ "${projectDic["Myrepository"]}" == '' ]]; then
+            echo -e "Github input parameters not filled out correctly, defaulting Github to false"
+            echo -e "Changing Github mode to false"
+            projectDic["github"]="false"
+        fi
+        if [[ "${projectDic["owner"]}" == "" ]]; then
+            echo -e "Owner of Giithub repo not specified, defaulting to your username."
+            projectDic["owner"]="${projectDic["gitUser"]}"
+        fi
+    fi
+
+    unset startList
 }
 
-### REMOVED
-#     Current reference genomes for barley and soybean are hard coded here. For other species or reference updates,
-#     this will need to be changed.
-referenceAssignment(){
-    echo -e "\nMUSATFAR, ${1}\n"
-    # if [[ ${var,,} == "barley" ]] || [[ ${var,,} == "b" ]]; then ##forced lowercase with ,,
-    if [[ ${1,,} == "barley" ]] || [[ ${1,,} == "b" ]]; then ##forced lowercase with ,,
-        projectDic["referenceGenomeChar"]+='b'
-        projectDic["referenceGenome"]+='/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
-    elif [[ ${1,,} == "soybean" ]] || [[ ${1,,} == "s" ]] || [[ ${1,,} == "soy" ]]; then
-        projectDic["referenceGenomeChar"]+='s'
-        # projectDic["referenceGenome"]+='/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Soybean/PhytozomeV11/Gmax/assembly/Gmax_275_v2.0.fa'
-        projectDic["referenceGenome"]+='/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Soybean/Wm82_V1/Gmax_189.fa'
-    else
-        # echo -e "\nPlease enter a valid reference genome. Defaulting to Barley reference.\n"
-        # projectDic["referenceGenomeChar"]+='b'
-        # projectDic["referenceGenome"]+='/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
-        referenceChecker "${1}"
-        projectDic["referenceGenomeChar"]+=${1}
-    fi
-}
-
-# XXXX UPDATED
 #    Loading modules on UMN MSI system. Three of the four are maintained by Morrell Lab (Corey Carter).
-#    Will need to be changed for use outside UMN/MSI
 moduleLoader(){ #load modules need for operations
-
-    module load python3_ML/3.6.4
-    module load bedops_ML/2.4.20
-    module load bedtools_ML/2.23.0
+    if [[ "${projectDic["msi"],,}" == 'true' ]]; then
+    
+        # echo -e "\nExporting Morrell lab modules to your MODULEPATH.\n"
+        export MODULEPATH=/panfs/roc/groups/9/morrellp/public/Modules:$MODULEPATH
+        module load python3_ML/3.6.4
+        module load bedops_ML/2.4.20
+        module load bedtools_ML/2.23.0
+    else
+        declare -A testlisting=( ["python3"]=3.6.4 ["bedops"]=2.4.20 ["bedtools"]=2.23.0 )
+        for inProgram in ${!testlisting[@]}; do
+            if [[ -x $(command -v "${inProgram}") ]]; then
+                if [[ "${inProgram}" == "python3" ]] && [[ $(python3 -c 'import sys; print(sys.version_info[0:2])') == '(3, 6)' ]]; then
+                    if [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import mutation_motif') ]]; then
+                        echo -e "Python module Mutation Motif is not installed. Please follow the link for instrutions: (https://bitbucket.org/pycogent3/mutationmotif).\n"
+                    fi
+                    if $(( "${projectDic["s3"]}" > 0 ]] && [[ "${projectDic["s3"]}" <= 3 )); then
+                        if [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import boto3') ]]; then
+                            echo -e "Python module boto3 (S3) is not installed. Please pip install boto3 for Amazon save S3 support. Use command: pip3 install boto3\n"
+                        fi
+                    fi
+                    if [[ "${projectDic["dropbox"]}" == "true" ]] && [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import dropbox') ]]; then
+                        echo -e "Python module for dropbox is not installed. Please pip install dropbox for dropbox save support. Use command: pip3 install dropbox\n"
+                    fi
+                elif [[ ! "${inProgram}" == "python3" ]] && [[ ! $(python3 -c 'import sys; print(sys.version_info[0:2])') == '(3, 6)' ]]; then
+                    echo -e "Python version out of date. Please install Python 3.6.x.\n"
+                fi
+            else
+                echo -e "${inProgram} is not installed, please install ${inProgram} version: ${testlisting[$inProgram]}.\n"
+            fi
+        done
+    fi
 
 }
 
-# XXXX
 #    Performing vcf to bed conversion using bedops 'vcf2bed' function
 fileConverter(){
     if [ "${projectDic[OperationalStage]}" == "vcfTObed" ]; then ##Key and new input LOCATION
@@ -355,7 +430,6 @@ fileConverter(){
 
 }
 
-# XXXX
 #    Creates output directories
 dirStructure(){
     DATE=`date +"%m%d%Y-%H%M"`
@@ -376,183 +450,226 @@ dirStructure(){
     fi
 }
 
-# XXXX UPDATED
 s3Saver(){
-    s3cmd mb s3://${projectDic["projectName"],,} > /dev/null
-    echo -e "\nS3 bucket created..."
-    echo -e "\ntransfering files..."
-    if $(( s3cmd put --recursive "${projectDic[outputLoc]}"COUNTS_TABLES/ s3://${projectDic["projectName"],,} > /dev/null )); then
-        echo -e "\n Files transfered...\n"
+    if [[ ${projectDic["iscmd"]} == "true" ]]; then
+        config=("$@")
     else
-        echo -e "File transfer failed...\n"
+        config="none"
     fi
-    # local s3Base=$(s3info keys --machine-output) 
-#     s3Base="${s3Base}" procDir="${projectDic["tempOut"]}" projectName="${projectDic["projectName"],,}" python3.6 - <<S3_save
+    if [[ "${projectDic["s3"]}" != "0" ]]; then
+        if [[ "${projectDic["s3"]}" == "1" ]] || [[ "${projectDic["mss3i"]}" == "3" ]]; then
+            s3cmd mb s3://${projectDic["projectName"],,} > /dev/null
+            echo -e "\nS3 bucket created..."
+            echo -e "\ntransfering files..."
+            if $(( s3cmd put --recursive "${projectDic["outputLoc"]}"COUNTS_TABLES/ s3://${projectDic["projectName"],,} > /dev/null )); then
+                echo -e "\n Files transfered to S3...\n"
+            else
+                echo -e "S3 file transfer failed...\n"
+            fi
+        fi
+        if [[ "${projectDic["msi"]}" == "2" ]] || [[ "${projectDic["msi"]}" == "3" ]]; then
 
-# import boto
-# from boto.s3.connection import S3Connection
-# from boto.s3.key import Key
-# import os
+            iscmd=${projectDic["iscmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" python3.6 - << END_OF_TRANSFER
 
-# def s3_access_secret(s3Base):
-#     access=''
-#     secret=''
-#     stage=0
-#     for i in s3Base:
-#         if(i == ' '):
-#             stage+=1
-#         if(i != '\n') and (stage == 0):
-#             access+=i
-#         if(i != '\n') and (stage == 1):
-#             secret+=i
-#     return(access, secret)
-    
-# def s3_save(project, procDir, access, secret):
-#     # geneDir = ['AtoC', 'AtoG', 'AtoT', 'CtoA', 'CtoG', 'CtoT', 'GtoA', 'GtoC', 'GtoT', 'TtoA', 'TtoC','TtoG']
-#     # geneDir2 = ['AtoC']
-#     # TierTwoConn = S3Connection(access, secret, host='s3.msi.umn.edu')
-#     TierTwoConn = boto.connect_s3(access, secret, host='s3.msi.umn.edu')
-#     # newBucket = TierTwoConn.create_bucket(project)
-#     TierTwoConn.create_bucket(project)
-#     # with open(procDir + "/COUNTS_TABLES", 'r')
-#     loc = procDir + "/COUNTS_TABLES"
-#     file = open(loc)
-#     bucketKey = Key(newBucket)
-#     bucketKey.key = project
-#     result = bucketKey.set_contents_from_file(file)
-#     # for u in geneDir2:
-#     #     for t in geneDir:
+import boto3
+import os
+import io
+import datetime
 
+def s3sentit(inputLoc, project, iscmd, config):
+    date = datetime.datetime.now() 
+    allFiles={}
+    currentDir = inputLoc
+    s3 = boto3.resource('s3')
+    my_session = boto3.session.Session()
+    userRegion = my_session.region_name
+    newFolder = project + "-countfiles" + "-" + date.strftime("%Y%m%d") + "-" + date.strftime("%H%M")
+    s3.create_bucket(Bucket=newFolder, CreateBucketConfiguration={'LocationConstraint': userRegion})
+    countsDirs = next(os.walk(currentDir + "COUNTS_TABLES/"))[1]
+    for files in countsDirs:
+        bottomDirs = currentDir + "COUNTS_TABLES/" + files + "/"
+        [ allFiles.update({f: [bottomDirs + f, files]}) for f in os.listdir(bottomDirs) if os.path.isfile(bottomDirs + f) ]
+        
+    for file, path in allFiles.items():
+        with open(path[0], "rb") as fileIO:
+            myPath = path[1] + "/" + file
+            s3.Object(newFolder, myPath).upload_fileobj(fileIO)                     
+    if( iscmd == "true"):
+        out=''
+        with open(config, "r") as configScanner:
+            out_buffer = io.BytesIO()
+            line_counter = 0  
+            for i in configScanner.readlines():
+                if(i.startswith("dropbox_auth")):
+                    out="dropbox_auth=***REDACTED*** removed to maintain account security.\n"
+                elif(i.startswith("gitPass")):
+                    out="gitPass=***REDACTED*** removed to maintain account security.\n"
+                elif(i.startswith("input_email")):
+                    out="input_email=***REDACTED*** removed to maintain account security.\n"
+                else:
+                    out=i
+                out_buffer.write(out.encode())
+                line_counter += 1
+            out_buffer.seek(0)
+            s3.Object(newFolder, "context.config").upload_fileobj(out_buffer)
+            out_buffer.close()    
 
-# def bashInputs():
-#     s3Base=str(os.environ['s3Base'])
-#     project=str(os.environ['projectName'])
-#     procDir=str(os.environ['procDir'])
-#     return(s3Base, project, procDir)
+def bashimports():
+    project = str(os.environ['project'])
+    inputLoc = str(os.environ['output'])
+    iscmd = str(os.environ['iscmd'])
+    config = str(os.environ['config'])
+    return(inputLoc, project, iscmd, config)
 
-# def main():
-#     s3Base, project, procDir = bashInputs()
-#     access, secret = s3_access_secret(s3Base)
-#     s3_save(project, procDir, access, secret)
+def main():
+    output, project, iscmd, config=bashimports()
+    s3sentit(output, project, iscmd, config)
 
-# main()
+main()
 
-# S3_save
+END_OF_TRANSFER
+
+        fi
+
+    fi
+
+    echo -e "S3 transfer complete.\n"
+
 }
 
-# REMOVED
-referenceChecker(){
-    homeRef=$HOME/".reference_config.csv"
-    if [[ -e "${homeRef}" ]]; then ##If there search
-        if grep "${var}" ${homeRef} > /dev/null; then ## Checks if var is in file
-            export refID=${var}
-            projectDic["referenceGenome"]+=$(python3.6 - <<REF_END
-
-import os
-import csv
-import sys
-
-def referenceScanner(ref):
-    baseDir = os.environ["HOME"]
-    with open(baseDir + "/" + ".reference_config.csv", newline='') as refScan:
-        refDic = csv.DictReader(refScan, delimiter=";")
-        for row in refDic:
-            if(row["Reference_Name"] == ref):      
-                return(row.get("Path"))
-    
-def bashInputs():
-    ref=str(os.environ['refID'])
-    return(ref)
-
-def main():
-    ref = bashInputs()
-    refPath = referenceScanner(ref)
-    print(refPath)
-
-main()
-
-REF_END
-)
-        else ##make this its own IF statement
-            export refID=${var}        
-            echo -e "\nReference not found, please enter full path: "
-            read newRefPath
-            ## ADD A IF STATEMENT TO CHECK IF VALID
-            # if [[ -d  ]]
-            projectDic["referenceGenome"]+="${newRefPath}"
-            projectDic["referenceGenomeChar"]+="${var}"
-            export newRefPath
-            python3.6 - <<REF_END
-
-import os
-import csv
-import sys
-
-def newRef(ref, path):      
-    baseDir = os.environ["HOME"] 
-    with open(baseDir + "/" + ".reference_config.csv", 'a+', newline='') as refScan:
-        written = csv.writer(refScan, delimiter=";")
-        written.writerow([ref,path])
-
-def bashInputs():
-    ref=str(os.environ['refID'])
-    path=str(os.environ['newRefPath'])
-    return(ref, path)
-
-def main():
-    ref, path = bashInputs()
-    newRef(ref, path)
-
-main()
-
-REF_END
-        echo -e "\nPath added and loaded.."
-        fi
-    else ##If not then create .ref file
-        export refID=${var}        
-        echo -e "\nReference not found, please enter full path: "
-        read newRefPath
-        if [[ ! -f newRefPath ]]; then
-            echo -e "\nPlease try again and enter a valid path...\n"
-            # echo -e "Would you like to try again?"
-            # read choice
-            ## Finish this IF statement
-            exit 1
-        fi
-        projectDic["referenceGenome"]+="${newRefPath}"
-        projectDic["referenceGenomeChar"]+="${var}"
-        export newRefPath
-        python3.6 - <<REF_END
-
-import os
-import csv
-import sys
-
-def absNew(ref, path):
-    baseDir = os.environ["HOME"]    
-    with open(baseDir + "/" + ".reference_config.csv", "a+", newline='') as newRef:
-        written = csv.writer(newRef, delimiter=";")     
-        written.writerow(["Reference_Name", "Path"])
-        written.writerow([ref,path])
-    return(0)
-
-def bashInputs():
-    ref=str(os.environ['refID'])
-    path=str(os.environ['newRefPath'])
-    return(ref, path)
-
-def main():
-    ref, path = bashInputs()
-    absNew(ref, path)
-
-main()
-
-REF_END
-        echo -e "\nReference file created and path loaded..."
+dropboxSaver(){
+    if [[ ${projectDic["iscmd"]} == "true" ]]; then
+        config=("$@")
+    else
+        config="none"
     fi
+    iscmd=${projectDic["iscmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" dbAuth="${projectDic["dropboxAuth"]}" python3.6 - << END_OF_TRANSFER
+
+import dropbox
+import os
+import datetime
+
+def dpsentit(inputLoc, project, dbAuth, iscmd, config):
+    date = datetime.datetime.now()
+    allFiles={}
+    currentDir = inputLoc  
+    dbx = dropbox.Dropbox(dbAuth)
+    newFolder = "/" + project + "-countfiles" + "-" + date.strftime("%Y%m%d") + "-" + date.strftime("%H%M")
+    countsDirs = next(os.walk(inputLoc + "COUNTS_TABLES/"))[1]
+    for files in countsDirs:
+        bottomDirs = currentDir + "COUNTS_TABLES/" + files + "/"        
+        [ allFiles.update({f: [bottomDirs + f, files]}) for f in os.listdir(bottomDirs) if os.path.isfile(bottomDirs + f) ]
+    for file, path in allFiles.items():
+        with open(path[0], 'rb') as sendDP:
+            myPath= newFolder + "/" + path[1] + "/" + file
+            dbx.files_upload(sendDP.read(), myPath, mode=dropbox.files.WriteMode.overwrite)
+
+    if( iscmd == "true"):
+        out=''
+        with open(config, "r") as configScanner:
+            for i in configScanner.readlines():
+                if(i.startswith("dropbox_auth")):
+                    out+="dropbox_auth=***REDACTED*** removed to maintain account security.\n"
+                elif(i.startswith("gitPass")):
+                    out+="gitPass=***REDACTED*** removed to maintain account security.\n"
+                elif(i.startswith("input_email")):
+                    out+="input_email=***REDACTED*** removed to maintain account security.\n"
+                else:
+                    out+=i            
+        outBytes = out.encode()
+        dbx.files_upload(outBytes, newFolder + "/context.config", mode=dropbox.files.WriteMode.overwrite)
+
+def bashimports():
+    dbAuth = str(os.environ['dbAuth'])    
+    project = str(os.environ['project'])
+    inputLoc = str(os.environ['output'])
+    iscmd = str(os.environ['iscmd'])
+    config = str(os.environ['config'])
+    return(inputLoc, project, dbAuth, iscmd, config)
+
+def main():
+    inputLoc, project, dbAuth, iscmd, config=bashimports()
+    dpsentit(inputLoc, project, dbAuth, iscmd, config)
+    
+main()
+
+END_OF_TRANSFER
+
+    echo -e "Dropbox transfer complete.\n"
+
 }
 
-# XXXX
+gitHubSendIt() {
+    if [[ ${projectDic["iscmd"]} == "true" ]]; then
+        config=("$@")
+    else
+        config="none"
+    fi
+           iscmd=${projectDic["iscmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" gitUser="${projectDic["gitUser"]}" gitPass="${projectDic["gitPass"]}" repo="${projectDic["repo"]}" gitowner="${projectDic["gitowner"]}" python3.6 - << END_OF_TRANSFER
+
+import os
+import github3
+import datetime
+
+def githubSend(inputLoc, project, gitUser, gitPass, Myrepository, owner, iscmd, config):
+    date = datetime.datetime.now() 
+    allFiles={}
+    currentDir = inputLoc
+
+    gh = github3.login(username=gitUser, password=gitPass)
+    repo = gh.repository(owner=owner, repository=Myrepository)
+
+    newFolder = project + "-countfiles" + "-" + date.strftime("%Y%m%d") + "-" + date.strftime("%H%M")
+    countsDirs = next(os.walk(currentDir + "COUNTS_TABLES/"))[1]
+
+    for files in countsDirs:
+        bottomDirs = currentDir + "COUNTS_TABLES/" + files + "/"   
+        [ allFiles.update({f: [bottomDirs + f, files]}) for f in os.listdir(bottomDirs) if os.path.isfile(bottomDirs + f) ]
+    
+    for file, path in allFiles.items():
+        with open(path[0], "rb") as fileIO:
+            direction = fileIO.read()
+        myPath= newFolder + "/" + path[1] + "/" + file
+        repo.create_file(path=myPath, message="Uploading " + file, content=direction)
+    
+    if( iscmd == "true"):
+        out=''
+        with open(config, "r") as configScanner:
+            for i in configScanner.readlines():
+                if(i.startswith("dropbox_auth")):
+                    out+="dropbox_auth=***REDACTED*** removed to maintain account security.\n"
+                elif(i.startswith("gitPass")):
+                    out+="gitPass=***REDACTED*** removed to maintain account security.\n"
+                elif(i.startswith("input_email")):
+                    out+="input_email=***REDACTED*** removed to maintain account security.\n"
+                else:
+                    out+=i
+        outBytes = out.encode()
+        repo.create_file(path=newFolder + "/context.config", message="Uploading Config file", content=outBytes)
+
+def bashimports():
+    project = str(os.environ['project'])
+    inputLoc = str(os.environ['output'])
+    gitUser = str(os.environ['gitUser'])
+    gitPass = str(os.environ['gitPass'])
+    Myrepository = str(os.environ['repo'])
+    owner = str(os.environ['gitowner'])
+    iscmd = str(os.environ['iscmd'])
+    config = str(os.environ['config'])  
+    return(inputLoc, project, gitUser, gitPass, Myrepository, owner, iscmd, config)
+
+def main():
+    inputLoc, project, gitUser, gitPass, Myrepository, owner, iscmd, config = bashimports()
+    githubSend(inputLoc, project, gitUser, gitPass, Myrepository, owner, iscmd, config)
+
+main()
+
+END_OF_TRANSFER
+
+    echo -e "Counts table data and config file sent to your github"
+
+}
+
 #    This is Python 3 code embedded in the bash script
 #    Expands coverage windows based on user-specified intervals
 #    Also checks for "Type One" and "Type Two" overlaps
@@ -687,60 +804,6 @@ END_OF_PYTHON
 
 }
 
-jobCreator(){
-    echo -e "Enter email for PBS job updates: "
-    read userEmail
-    email="${userEmail}" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenomeChar"]}" python3.6 - <<JOB_CREATED
-
-import os
-
-def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax):
-    job="#!/bin/bash -l\n\n#PBS -l walltime=24:00:00,nodes=2:ppn=10,mem=20gb\n#PBS -m abe\n#PBS -M " + email + "\n"
-    job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\n#PBS -q small\nset -e\nset -o pipefail\n\n"
-    job+="#PBS -o " + outputLoc + "_" + projectName + "\n#PBS -e " + outputLoc + "_" + projectName + "\n"
-    job+="\nmodule load snpContext/1.0.0\n\n"
-    # job+="snpcontext "
-    job+="/panfs/roc/groups/9/morrellp/public/Software/SNP_Context/SNPcontext "
-    job+= "-i " + inputFile + " "
-    job+= "-o " + outputLoc + " "
-    job+= "-w " + windowLength + " "
-    job+= "-f " + flanks + " "
-    job+= "-p " + projectName + " "
-    job+= "-r " + referenceGenome + " "
-    job+= "-ad " + allData + " "
-    job+= "-n " + nMax + " "
-    job+= "-JOB THIS_IS_A_JOB"
-
-    with open(outputLoc + projectName + ".job", "w") as jobScript:
-        jobScript.write(job)
-
-def bashImport():
-    outputLoc=str(os.environ['outputLoc'])
-    email=str(os.environ['email'])
-    flanks=str(os.environ['flanks'])
-    referenceGenome=str(os.environ['referenceGenome'])
-    windowLength=str(os.environ['windowLength'])
-    inputFile=str(os.environ['inputFile'])
-    projectName=str(os.environ['projectName'])
-    allData=str(os.environ['allData'])
-    nMax=str(os.environ['nMax'])
-    return(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax)
-
-def main():
-    projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax = bashImport()
-    jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax)
-
-main()
-    
-JOB_CREATED
-
-qsub "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
-echo -e "\njob submited.\nEXITING...\n"
-exit 0
-
-}
-
-# XXXX
 vcfSplit(){
     inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" python3.6 - <<VCF_SPLIT_END
 
@@ -837,7 +900,6 @@ VCF_SPLIT_END
 
 }
 
-# XXXX
 fastaScanner(){
 
     inputFile="${projectDic["inputFile"]}" flank="${projectDic["flanks"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" geneTwo=${geneTwo} geneDirTwo="${geneDirTwo}" nMax="${projectDic["nMax"]}" windowLength="${projectDic["windowLength"]}" python3.6 - <<FASTA_SWEEP
@@ -954,18 +1016,88 @@ FASTA_SWEEP
 
 }
 
+# jobCreator(){
+#     qsub \
+#     #PBS -l "${job_specs}" \
+#     #PBS -m abe \
+#     #PBS -o "${projectDic["tempOut"]}" \
+#     #PBS -e "${projectDic["tempOut"]}"\
+#     #PBS -M "${input_email}" \
+#     #PBS -N "${projectDic["projectName"]}" \
+#     bash "${scriptPath}"/update_SNP \
+#     -i "${projectDic["inputFile"]}" \
+#     -o "${projectDic["outputLoc"]}" \
+#     -w "${projectDic["windowLength"]}" \
+#     -f "${projectDic["flanks"]}" \
+#     -p "${projectDic["projectName"]}" \
+#     -r "${projectDic["referenceGenome"]}" \
+#     -ad "${projectDic["allData"]}" \
+#     -n "${projectDic["nMax"]}" \
+#     -JOB "${projectDic["THIS_IS_A_JOB"]}" \
+#     -s3 "${projectDic["s3"]}" \
+#     -msi "${projectDic["msi"]}" \
+#     -dpb "${projectDic["dropbox"]}" \
+#     -dpba "${projectDic["dropboxAuth"]}" \
+
+# }
+
+jobCreator(){
+    myEmail="${projectDic["email"]}" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" python3.6 - <<JOB_CREATED
+
+import os
+
+def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax):
+    job="#!/bin/bash -l\n\n#PBS -l walltime=24:00:00,nodes=2:ppn=10,mem=20gb\n#PBS -m abe\n#PBS -M " + email + "\n"
+    job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\n#PBS -q small\nset -e\nset -o pipefail\n\n"
+    job+="#PBS -o " + outputLoc + "_" + projectName + "\n#PBS -e " + outputLoc + "_" + projectName + "\n"
+    job+="\nmodule load snpcontext/1.0.0\n\n"
+    job+="/panfs/roc/groups/9/morrellp/public/Software/SNP_Context/SNPcontext "
+    job+= "-i " + inputFile + " "
+    job+= "-o " + outputLoc + " "
+    job+= "-w " + windowLength + " "
+    job+= "-f " + flanks + " "
+    job+= "-p " + projectName + " "
+    job+= "-r " + referenceGenome + " "
+    job+= "-ad " + allData + " "
+    job+= "-n " + nMax + " "
+    job+= "-JOB THIS_IS_A_JOB"
+
+    with open(outputLoc + projectName + ".job", "w") as jobScript:
+        jobScript.write(job)
+
+def bashImport():
+    outputLoc=str(os.environ['outputLoc'])
+    email=str(os.environ['myEmail'])
+    flanks=str(os.environ['flanks'])
+    referenceGenome=str(os.environ['referenceGenome'])
+    windowLength=str(os.environ['windowLength'])
+    inputFile=str(os.environ['inputFile'])
+    projectName=str(os.environ['projectName'])
+    allData=str(os.environ['allData'])
+    nMax=str(os.environ['nMax'])
+    return(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax)
+
+def main():
+    projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax = bashImport()
+    jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax)
+
+main()
+    
+JOB_CREATED
+
+qsub "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
+echo -e "\njob submited.\nEXITING...\n"
+exit 0
+
+}
+
 main(){
-    moduleLoader ##LOADS CORRECT MODULES    
-    ## ADD CHECKER
-    # starter "$@" ##ASSIGNS INPUTS TO HASHMAP ##REMOVE
     config_check "$@"
-    if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
-        inputSize=$( stat -c%s "${projectDic["inputFile"]}")
-        if (( "${inputSize}" >= 479000000 )); then ##479MB (in decimal) and 456MB (in binary)
-            echo -e "\n(.VCF) over 456Mb, generating job script and submitting operations to MSI."
-            jobCreator
-        fi
+    if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]] && [[ "${projectDic["msi"]}" == 'true' ]]; then
+        module load python3_ML/3.6.4
+        jobCreator
     fi
+    moduleLoader ##LOADS CORRECT MODULES        
     dirStructure
     vcfSplit
     fileConverter ##MAKES BED FILE
@@ -997,9 +1129,14 @@ main(){
         rm -rf "${templocation}"
     fi
     ##Add dropbox intergration
-    if [[ "${projectDic["S3"]}" == 'true' ]]; then
-        echo -e "\nTEST\n"
-        s3Saver
+    if [[ "${projectDic["s3"]}" != "0" ]]; then
+        s3Saver "$@"
+    fi
+    if [[ "${projectDic["dropbox"]}" == 'true' ]]; then
+        dropboxSaver "$@"
+    fi
+    if [[ "${projectDic["github"]}" == 'true' ]]; then
+        gitHubSaver "$@"
     fi
     echo -e "operations completed...\n"
         
