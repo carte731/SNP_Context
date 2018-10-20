@@ -5,22 +5,13 @@
 #    The window size for contextual sequence can be user specificed.
 #    The program checks for the presence of more than one variant within user specified windows.
 
-#     A bash dictionary for input parameters
 #    SNP_CONTEXT Version: 2.0.0
 
-# function error_trap(){
-#     echo -e "There has been an error on line $1"
-#     echo -e "Saving error to your home directory as SNP_CONTEXT_ERROR_LOG.txt\n"
-#     exit 0
-#     # exec 2>>~/SNP_CONTEXT_ERROR_LOG.txt
-# }
-
-# set -o errtrace
 set -eE
 trap "echo -e There has been an error on $LINEON, please check SNP Context error log for detailed traceback\n" ERR
 exec 2>>~/SNP_CONTEXT_ERROR_LOG.txt
 
-# trap error_trap ERR
+#     A bash dictionary for input parameters
 
 declare -A projectDic=(
     ["email"]='' #-em
@@ -31,7 +22,6 @@ declare -A projectDic=(
     ["filename"]=''
     ["projectName"]='out' #-p
     ["flanks"]=0 #-f
-    # ["referenceGenomeChar"]=''
     ["referenceGenome"]='' #-r
     ["OperationalStage"]='vcfTObed'
     ["nMax"]=25 ##-n
@@ -75,19 +65,12 @@ help_display(){ ## UPDATE TO INCLUDE ALL CMDS AND MENTION THE CONFIG FILE IS THE
 config_check(){
     local args=($@)
     if (( "$#" >= 1 )); then
-        # echo -e "LauraOne"
-        # echo "$#"
         if (( "$#" == 1 )); then
-            # echo -e "LauraTWO-PRIME"
-            # echo -e "${args[0],,}"
             if [[ ${args[0],,} == "--help" ]] || [[ ${args[0],,} == "-h" ]]; then
-                # echo -e "LauraTwo"
                 help_display
             elif [[ -f "${args[0]}" ]] || [[ ! -z "${args[0]}" ]]; then
-                # echo -e "LauraThree"
                 local var=${args##*.} ## Grabs only the extension
                 if [[ ${var,,} == "config" ]]; then ## Checks if it's a .config file
-                    # echo -e "LauraBases"
                     isCmd="false"
                     source "${args[0]}"
                     declare -a startList=(
@@ -114,7 +97,6 @@ config_check(){
                 exit 1
             fi
         elif (( "$#" > 1 )); then
-            # echo -e "LAURA-MEGA"
             isCmd="true"
             startList=("$@")
             starter ${startList}
@@ -123,36 +105,25 @@ config_check(){
             exit 1
         fi
     else
-        # echo -e "LauraBottom"
         help_display
     fi
 }
 
 #     Takes user arguments from command line and assigns values to dictionary keys in 'projectDic'
 starter(){ #grabs the arguments
-    # echo -e ${startList[@]}
-    # echo -e "STARTTT"
     local frontgate=0
     local indexPos=0
-    # echo -e ${startList[@]}
     for i in ${startList[@]}; do
-        # echo -e "${i}"
         if [[ "${isCmd}" == "true" ]] && [[ ${#startList[@]} != ${indexPos} ]]; then
-            # echo -e "start_top"
             local var="${startList[${indexPos}+1]}"
         elif [[ "${isCmd}" == "false" ]]; then
-            # echo -e "start_bottom"
-            # echo -e $i
             local var="${i}"
         fi
-        # echo -e "${window_length}"
         # if [[ "${i,,}" == "-w" ]] || [[ ! -v ${window_length} ]]; then ##Window expansion size
         if [[ "${i,,}" == "-em" ]] || [[ ${input_email} == $i ]]; then
             projectDic["email"]="${var}"
             unset input_email
         elif [[ "${i,,}" == "-w" ]] || [[ ${window_length} == $i ]]; then ##Window expansion size
-            # echo -e "ISN'T EMPTY"
-            # echo $i
             if [[ "$var" =~ ^[0-9]$ ]] && (( "$var" >= 0 )); then ##Checks if it's a number, max expansion of 10
                 if (( "$var" > 10 )); then ##Changed from 2 to 1
                     echo -e "\nwindow size is too large, defaulting to 10."
@@ -171,9 +142,6 @@ starter(){ #grabs the arguments
                 unset window_length
             fi
         elif [[ "${i,,}" == "-i" ]] || [[ ${input_file} == $i ]]; then ##Input file which grabs the input file name, location and complete file path
-            # echo -e "IT'S BIG!" 
-            # echo -e "${var##*.}"
-            # echo -e "${var}"
             if [[ "${var##*.}" == "vcf" ]] && [[ -f "$var" ]]; then ##Checks if it's VCF and if file exist
                 projectDic["inputFile"]+="$var"
                 projectDic["inputLoc"]+="${var%/*}"
@@ -371,9 +339,7 @@ starter(){ #grabs the arguments
     unset startList
 }
 
-### CHECK AND DO TESTING ON MSI AND LOCAL MACHINES
 #    Loading modules on UMN MSI system. Three of the four are maintained by Morrell Lab (Corey Carter).
-#    Will need to be changed for use outside UMN/MSI
 moduleLoader(){ #load modules need for operations
     if [[ "${projectDic["msi"],,}" == 'true' ]]; then
     
@@ -386,10 +352,8 @@ moduleLoader(){ #load modules need for operations
     else
         declare -A testlisting=( ["python3"]=3.6.4 ["bedops"]=2.4.20 ["bedtools"]=2.23.0 )
         for inProgram in ${!testlisting[@]}; do
-            # echo -e "${inProgram}"
             if [[ -x $(command -v "${inProgram}") ]]; then
                 if [[ "${inProgram}" == "python3" ]] && [[ $(python3 -c 'import sys; print(sys.version_info[0:2])') == '(3, 6)' ]]; then
-                    # echo -e "WHAT'S UP"
                     if [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import mutation_motif') ]]; then
                         echo -e "Python module Mutation Motif is not installed. Please follow the link for instrutions: (https://bitbucket.org/pycogent3/mutationmotif).\n"
                     fi
@@ -1054,32 +1018,6 @@ FASTA_SWEEP
 }
 
 # jobCreator(){
-# #     scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" ## Grabs the file path location for script
-# #     pbsJob='#!/bin/bash\n'
-# #     pbsJob+='#PBS -l "${job_specs}"\n'
-# #     pbsJob+='#PBS -m abe\n'
-# #     pbsJob+='#PBS -o "${projectDic["tempOut"]}"\n'
-# #     pbsJob+='#PBS -e "${projectDic["tempOut"]}"\n'
-# #     pbsJob+='#PBS -M "${input_email}"\n'
-# #     pbsJob+='#PBS -N "${projectDic["projectName"]}"\n\n'
-# #     # bash scriptPath/SNPcontext \
-# #     pbsJob+='bash "${scriptPath}"/update_SNP'
-# #     pbsJob+=' -i "${projectDic["inputFile"]}"'
-# #     pbsJob+=' -o "${projectDic["outputLoc"]}"'
-# #     pbsJob+=' -w "${projectDic["windowLength"]}"'
-# #     pbsJob+=' -f "${projectDic["flanks"]}" '
-# #     pbsJob+=' -p "${projectDic["projectName"]}" '
-# #     pbsJob+=' -r "${projectDic["referenceGenome"]}" '
-# #     pbsJob+=' -ad "${projectDic["allData"]}" '
-# #     pbsJob+=' -n "${projectDic["nMax"]}" '
-# #     pbsJob+=' -JOB "${projectDic["THIS_IS_A_JOB"]}" '
-# #     pbsJob+=' -s3 "${projectDic["s3"]}" '
-# #     pbsJob+=' -msi "${projectDic["msi"]}" '
-# #     pbsJob+=' -dpb "${projectDic["dropbox"]}" '
-# #     pbsJob+=' -dpba "${projectDic["dropboxAuth"]}" '
-
-# #     echo -e "${pbsJob}"
-
 #     qsub \
 #     #PBS -l "${job_specs}" \
 #     #PBS -m abe \
@@ -1105,20 +1043,15 @@ FASTA_SWEEP
 # }
 
 jobCreator(){
-    echo -e "${projectDic["email"]}"
-    # echo -e "Enter email for PBS job updates: "
-    # read userEmail
     myEmail="${projectDic["email"]}" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" python3.6 - <<JOB_CREATED
 
 import os
 
 def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax):
-    print("\n\nThis is my email: " + email + "\n\n")
     job="#!/bin/bash -l\n\n#PBS -l walltime=24:00:00,nodes=2:ppn=10,mem=20gb\n#PBS -m abe\n#PBS -M " + email + "\n"
     job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\n#PBS -q small\nset -e\nset -o pipefail\n\n"
     job+="#PBS -o " + outputLoc + "_" + projectName + "\n#PBS -e " + outputLoc + "_" + projectName + "\n"
     job+="\nmodule load snpcontext/1.0.0\n\n"
-    # job+="snpcontext "
     job+="/panfs/roc/groups/9/morrellp/public/Software/SNP_Context/update_SNP "
     job+= "-i " + inputFile + " "
     job+= "-o " + outputLoc + " "
@@ -1129,7 +1062,6 @@ def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, ema
     job+= "-ad " + allData + " "
     job+= "-n " + nMax + " "
     job+= "-JOB THIS_IS_A_JOB"
-    print("\n\n" + job + "\n\n")
 
     with open(outputLoc + projectName + ".job", "w") as jobScript:
         jobScript.write(job)
@@ -1160,19 +1092,7 @@ exit 0
 
 }
 
-main2(){
-    config_check "$@"
-    # moduleLoader
-    echo -e
-    for u in ${!projectDic[@]}; do
-        echo -e "${u} : ${projectDic[$u]}"
-    done
-}
-
 main(){
-
-    ## ADD CHECKER
-    # starter "$@" ##ASSIGNS INPUTS TO HASHMAP ##REMOVE
     config_check "$@"
     if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]] && [[ "${projectDic["msi"]}" == 'true' ]]; then
         
