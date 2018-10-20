@@ -1028,7 +1028,6 @@ jobCreator(){
 import os
 
 def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath):
-    print("\n\n" + scriptPath + "\n\n")
     job="#!/bin/bash -l\n\n#PBS -l walltime=24:00:00,nodes=2:ppn=10,mem=20gb\n#PBS -m abe\n#PBS -M " + email + "\n"
     job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\nset -e\nset -o pipefail\n\n"
     job+="#PBS -o " + outputLoc + "_" + projectName + "\n#PBS -e " + outputLoc + "_" + projectName + "\n"
