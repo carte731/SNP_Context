@@ -218,6 +218,9 @@ starter(){ #grabs the arguments
                 echo -e "\nEnter a valid reference genome. Exiting...\n"
                 exit 1
             fi
+        elif [[ "${i}" == "-JOB" ]]; then
+            local var=${args[${indexPos}+1]}
+            projectDic["JOB"]="${var}"
         elif [[ "${i,,}" == "-n"  ]] || [[ "${indel_max_amount}" == $i ]]; then
             # echo -e "ATTACK_ONE"
             if [[ "${var}" =~ [0-9] ]]; then ##CHECK WITH PETER!!!
@@ -1172,6 +1175,7 @@ main(){
     # starter "$@" ##ASSIGNS INPUTS TO HASHMAP ##REMOVE
     config_check "$@"
     if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]] && [[ "${projectDic["msi"]}" == 'true' ]]; then
+        
         module load python3_ML/3.6.4
         jobCreator
     fi
