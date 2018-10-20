@@ -10,7 +10,7 @@
 scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" ## Location of the script
 
 set -eE
-trap "echo -e There has been an error on $LINENO, The error message has been saved to:\n${scriptPath}\nas SNP_CONTEXT_ERROR_LOG.txt\n" ERR
+trap "echo -e There has been an error on line: $LINENO, The error message has been saved to: ${scriptPath} ,as SNP_CONTEXT_ERROR_LOG.txt\n" ERR
 exec 2>>"${scriptPath}"/SNP_CONTEXT_ERROR_LOG.txt
 
 #     A bash dictionary for input parameters
@@ -1019,9 +1019,9 @@ FASTA_SWEEP
 }
 
 jobCreator(){
-    myEmail="${projectDic["email"]}" job_specs="${job_specs}" scriptPath="${scriptPath}" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" /
-    outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" /
-    s3="${projectDic["s3"]}" msi="${projectDic["msi"]}" dpb="${projectDic["dropbox"]}" dpba="${projectDic["dropboxAuth"]}" gh="${projectDic["github"]}" ghu="${projectDic["gitUser"]}" ghp="${projectDic["gitPass"]}" /
+    myEmail="${projectDic["email"]}" job_specs="${job_specs}" scriptPath="${scriptPath}" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" \
+    outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" \
+    s3="${projectDic["s3"]}" msi="${projectDic["msi"]}" dpb="${projectDic["dropbox"]}" dpba="${projectDic["dropboxAuth"]}" gh="${projectDic["github"]}" ghu="${projectDic["gitUser"]}" ghp="${projectDic["gitPass"]}" \
     gho="${projectDic["owner"]}" ghr="${projectDic["Myrepository"]}" python3.6 - <<JOB_CREATED
 
 import os
