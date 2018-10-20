@@ -1018,20 +1018,7 @@ FASTA_SWEEP
 
 jobCreator(){
     scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" ## Grabs the file path location for script
-    qsub -l "${job_specs}" -m abe -o "${projectDic["tempOut"]}" -e "${projectDic["tempOut"]}" -M "${input_email}" -N "${projectDic["projectName"]}" "${scriptPath}"/SNPcontext \
-    -i "${projectDic["inputFile"]}" \
-    -o "${projectDic["outputLoc"]}" \
-    -w "${projectDic["windowLength"]}" \
-    -f "${projectDic["flanks"]}" \
-    -p "${projectDic["projectName"]}" \
-    -r "${projectDic["referenceGenome"]}" \
-    -ad "${projectDic["allData"]}" \
-    -n "${projectDic["nMax"]}" \
-    -JOB "${projectDic["THIS_IS_A_JOB"]}" \
-    -s3 "${projectDic["s3"]}" \
-    -msi "${projectDic["msi"]}" \
-    -dpb "${projectDic["dropbox"]}" \
-    -dpba "${projectDic["dropboxAuth"]}" \
+    qsub -l "${job_specs}" -m abe -o "${projectDic["tempOut"]}" -e "${projectDic["tempOut"]}" -M "${input_email}" -N "${projectDic["projectName"]}" "${scriptPath}"/SNPcontext -i "${projectDic["inputFile"]}" -o "${projectDic["outputLoc"]}" -w "${projectDic["windowLength"]}" -f "${projectDic["flanks"]}" -p "${projectDic["projectName"]}" -r "${projectDic["referenceGenome"]}" -ad "${projectDic["allData"]}" -n "${projectDic["nMax"]}" -JOB "${projectDic["THIS_IS_A_JOB"]}" -s3 "${projectDic["s3"]}" -msi "${projectDic["msi"]}" -dpb "${projectDic["dropbox"]}" -dpba "${projectDic["dropboxAuth"]}"
 
 }
 
