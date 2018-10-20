@@ -14,7 +14,7 @@ SNP Context can be used with either a **config file** or the **command line**, w
 ### General input for config file
 * **Project name (String)**: The name of your project, the working directory will hold this name.
 
-* **Input email (String)**: Sends user PBS jobs updates. If and only if you're using this script on the University Of Minnesota's supercomputing cluster (MSI).
+* **Input email (String)**: Sends user PBS jobs updates. If and only if you're using this script on the University Of Minnesota's supercomputing cluster **(MSI)**.
 
 * **Input file (String)**: The input .VCF file. 
 
