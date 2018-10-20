@@ -1023,12 +1023,12 @@ FASTA_SWEEP
 # }
 
 jobCreator(){
-    myEmail="${projectDic["email"]}" scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" python3.6 - <<JOB_CREATED
+    myEmail="${projectDic["email"]}" job_specs="${job_specs}" scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" python3.6 - <<JOB_CREATED
 
 import os
 
-def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath):
-    job="#!/bin/bash -l\n\n#PBS -l walltime=24:00:00,nodes=2:ppn=10,mem=20gb\n#PBS -m abe\n#PBS -M " + email + "\n"
+def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs):
+    job="#!/bin/bash -l\n\n#PBS -l " + job_specs + "\n#PBS -m abe\n#PBS -M " + email + "\n"
     job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\nset -e\nset -o pipefail\n\n"
     job+="#PBS -o " + outputLoc + "_" + projectName + "\n#PBS -e " + outputLoc + "_" + projectName + "\n"
     
@@ -1048,6 +1048,7 @@ def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, ema
 
 def bashImport():
     outputLoc=str(os.environ['outputLoc'])
+    job_specs=str(os.environ['job_specs'])
     email=str(os.environ['myEmail'])
     flanks=str(os.environ['flanks'])
     scriptPath=str(os.environ['scriptPath'])
@@ -1057,11 +1058,11 @@ def bashImport():
     projectName=str(os.environ['projectName'])
     allData=str(os.environ['allData'])
     nMax=str(os.environ['nMax'])
-    return(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath)
+    return(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs)
 
 def main():
-    projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath = bashImport()
-    jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath)
+    projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs = bashImport()
+    jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs)
 
 main()
     
