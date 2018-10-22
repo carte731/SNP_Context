@@ -119,6 +119,16 @@ Command line parameters allow this script to be plugged into a larger pipline or
 
 **-ghr = Myrepository (String)**
 
+### Exit Codes
+
+If you're using SNP Context in a larger pipeline or program, the exit codes can provide the larger program need information:
+
+* exit code **0**: SNP Context operations have been successfully executed.
+
+* exit code **1**: An general error has occurred; check error logs in script execution directory.
+
+* exit code **2**: A PBS job was submitted, MSI mode only.
+
 ## Outputs
 
 If the parameter `all data` is `true`, than all intermediate files are saved in the output directory. If `all data` is `false` than only the individual counts tables, combined countst table and rejected files (.VCF, .BAM, .FASTA) are saved in the output directory.
