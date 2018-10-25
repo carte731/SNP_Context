@@ -2,7 +2,7 @@
 
 #    Corey Carter, St. Paul, MN - 09 January 2018
 #    This bash script is designed to pull contextual sequence flanking a SNP (variants) from a reference genome.
-#    The window size for contextual sequence can be user specificed.
+#    The window size for contextual sequence can be user specified.
 #    The program checks for the presence of more than one variant within user specified windows.
 
 #    SNP_CONTEXT Version: 2.0.0
@@ -56,7 +56,7 @@ declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 
 
 declare -a active=()
 
-help_display(){ ## UPDATE TO INCLUDE ALL CMDS AND MENTION THE CONFIG FILE IS THE PREFERED WAY OF OPERATING
+help_display(){ ## UPDATE TO INCLUDE ALL CMDS AND MENTION THE CONFIG FILE IS THE PREFERRED WAY OF OPERATING
     local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
     helpPrintOut+=$'\n\tSNPcontext -i <input VCF> -o <output> -r <reference genome> -w <expansion size> -f <flank size> -p <project name> -n <acceptable Indel %> -ad <saved all data>\n'
     helpPrintOut+=$'\n\t------------------------\n'
@@ -364,7 +364,7 @@ moduleLoader(){ #load modules need for operations
             if [[ -x $(command -v "${inProgram}") ]]; then
                 if [[ "${inProgram}" == "python3" ]] && [[ $(python3 -c 'import sys; print(sys.version_info[0:2])') == '(3, 6)' ]]; then
                     if [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import mutation_motif') ]]; then
-                        echo -e "Python module Mutation Motif is not installed. Please follow the link for instrutions: (https://bitbucket.org/pycogent3/mutationmotif).\n"
+                        echo -e "Python module Mutation Motif is not installed. Please follow the link for instructions: (https://bitbucket.org/pycogent3/mutationmotif).\n"
                     fi
                     if $(( "${projectDic["s3"]}" > 0 ]] && [[ "${projectDic["s3"]}" <= 3 )); then
                         if [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import boto3') ]]; then
@@ -1140,7 +1140,6 @@ main(){
         local templocation="${projectDic["TempLoc"]}"
         rm -rf "${templocation}"
     fi
-    ##Add dropbox intergration
     if [[ "${projectDic["s3"]}" != "0" ]]; then
         s3Saver "$@"
     fi
