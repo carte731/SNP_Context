@@ -2,10 +2,15 @@
 
 #    Corey Carter, St. Paul, MN - 09 January 2018
 #    This bash script is designed to pull contextual sequence flanking a SNP (variants) from a reference genome.
-#    The window size for contextual sequence can be user specified.
-#    The program checks for the presence of more than one variant within user specified windows.
+#    Inputs include: a VCF file, a reference genome, and a user-specified window size for flanking sequence.
+#    Example usage ./SNPcontext -i <input VCF> -r <reference genome fasta file> -w <window size>
+ 
 
-#    SNP_CONTEXT Version: 2.0.0
+#    The window size for contextual sequence must specified by user.
+#    The window is centered on a SNP position read from a VCF file.
+#    The program checks for the presence of indels and other variants within the windows flanking each SNP.
+
+#    SNPcontext Version: 2.0.0
 
 scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" ## Location of the script
 
@@ -51,16 +56,17 @@ declare -A projectDic=(
     
 )
 
-#     A bash list of all possible nucleotide state transitions
+#     A bash list of all possible nucleotide state changes
+#     List will be use for iteration and to create output directories and files
 declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
 
 declare -a active=()
 
 help_display(){ ## UPDATE TO INCLUDE ALL CMDS AND MENTION THE CONFIG FILE IS THE PREFERRED WAY OF OPERATING
     local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
-    helpPrintOut+=$'\n\tSNPcontext -i <input VCF> -o <output> -r <reference genome> -w <expansion size> -f <flank size> -p <project name> -n <acceptable Indel %> -ad <saved all data>\n'
+    helpPrintOut+=$'\n\tSNPcontext -i <input VCF> -o <output> -r <reference genome> -w <window size> -f <flank size> -p <project name> -n <acceptable indel %> -ad <save all data>\n'
     helpPrintOut+=$'\n\t------------------------\n'
-    helpPrintOut+=$'\n\t**Input arguments can be in ANY order.**\n'
+    helpPrintOut+=$'\n\t**Input arguments can be in any order.**\n'
     helpPrintOut+=$'\n\t-i [(complete path to VCF file) (the VCF input file)]\n\t-o [(complete path to location) (The output location, if not entered it will default to the same location as your input file.)]'
     helpPrintOut+=$'\n\t-r [(barley or b, soy bean or s )(Selects the reference genome, defaults to Barley if not specified.)]\n\t-w [(Expansion window size)(The expandable window size around the SNP location, 8 on both ends is the deafult.)]'
     helpPrintOut+=$'\n\t-p [project name]\n\t-n [max percentage of indels allowed in fasta files]'
@@ -72,6 +78,8 @@ help_display(){ ## UPDATE TO INCLUDE ALL CMDS AND MENTION THE CONFIG FILE IS THE
     exit 0
 }
 
+#     Checks for the use of config file
+#     The other option is specify all arguments on the command line
 config_check(){
     local args=($@)
     if (( "$#" >= 1 )); then
@@ -155,8 +163,8 @@ starter(){ #grabs the arguments
             if [[ "${var##*.}" == "vcf" ]] && [[ -f "$var" ]]; then ##Checks if it's VCF and if file exist
                 projectDic["inputFile"]+="$var"
                 projectDic["inputLoc"]+="${var%/*}"
-                local filename=${var%.*} ##removes files extension
-                filename=${filename##*/} ##removes file path
+                local filename=${var%.*} ##Removes files extension
+                filename=${filename##*/} ##Removes file path
                 projectDic["filename"]+="$filename"
                 frontgate=1
                 unset input_file
@@ -164,7 +172,7 @@ starter(){ #grabs the arguments
                 echo -e "\nERROR. Incorrect file input. Check file or directory path. (Input (.vcf) only)\nEXITING...\n"
                 exit 1
             fi
-        elif [[ "${i,,}" == "-o" ]] || [[ ${output_location} == $i ]]; then ##output location info
+        elif [[ "${i,,}" == "-o" ]] || [[ ${output_location} == $i ]]; then ##Output location info
             if [ -d "$var" ]; then ##Checks if directory exist, if not it will save to input file location
                 if [[ "${var: -1}" == "/" ]]; then
                     projectDic["outputLoc"]+="$var"
@@ -238,7 +246,7 @@ starter(){ #grabs the arguments
             else
                 echo -e "No valid all data entry (true or false), defaulting to false. Only counts tables will be saved."
             fi
-        elif [[ "${i,,}" == "-s3" ]] || [[ ${save_S3} == $i ]]; then ## ADD A CHECK FOR USERNAME AND PASSWORD
+        elif [[ "${i,,}" == "-s3" ]] || [[ ${save_S3} == $i ]]; then
             if [[ "${var,,}" != "0" ]]; then
                 if [[ "${var,,}" == "1" ]] || [[ "${var,,}" == "2" ]] || [[ "${var,,}" == "3" ]]; then
                     projectDic["s3"]="${var,,}"
@@ -248,7 +256,7 @@ starter(){ #grabs the arguments
                     echo -e "No valid entry for S3 storage (true or false), defaulting to false."
                 fi
             fi
-        elif [[ "${i,,}" == "-dpb" ]] || [[ ${dropbox} == $i ]]; then ## ADD A CHECK FOR USERNAME AND PASSWORD 
+        elif [[ "${i,,}" == "-dpb" ]] || [[ ${dropbox} == $i ]]; then 
             if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
                 projectDic["dropbox"]="${var,,}"
                 frontgate=1
@@ -257,7 +265,7 @@ starter(){ #grabs the arguments
             else
                 echo -e "No valid entry for Dropbox uploading (true or false), defaulting to false."
             fi
-        elif [[ "${i,,}" == "-gh" ]] || [[ ${save_github} == $i ]]; then ## ADD A CHECK FOR USERNAME AND PASSWORD 
+        elif [[ "${i,,}" == "-gh" ]] || [[ ${save_github} == $i ]]; then 
             if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
                 projectDic["github"]="${var,,}"
                 frontgate=1
@@ -350,7 +358,7 @@ starter(){ #grabs the arguments
 }
 
 #    Loading modules on UMN MSI system. Three of the four are maintained by Morrell Lab (Corey Carter).
-moduleLoader(){ #load modules need for operations
+moduleLoader(){ #Load modules needed for operations
     if [[ "${projectDic["msi"],,}" == 'true' ]]; then
     
         # echo -e "\nExporting Morrell lab modules to your MODULEPATH.\n"
@@ -459,7 +467,7 @@ dirStructure(){
         projectDic["tempOut"]="${projectDic["TempLoc"]}"/
     fi
 }
-
+#    Checks for UMN or Amazon S3, 1=UMN S3, 2=Amazon S3, 3=Amazon & UMN S3
 s3Saver(){
     if [[ ${projectDic["iscmd"]} == "true" ]]; then
         config=("$@")
@@ -480,7 +488,9 @@ s3Saver(){
         if [[ "${projectDic["msi"]}" == "2" ]] || [[ "${projectDic["msi"]}" == "3" ]]; then
 
             iscmd=${projectDic["iscmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" python3.6 - << END_OF_TRANSFER
-
+#    Here we go in Python 3
+#    Start by loading a bunch of required libraries
+#    Only necessary to upload output to Amazon S3
 import boto3
 import os
 import io
@@ -546,7 +556,7 @@ END_OF_TRANSFER
     echo -e "S3 transfer complete.\n"
 
 }
-
+#    Module to upload output to Dropbox
 dropboxSaver(){
     if [[ ${projectDic["iscmd"]} == "true" ]]; then
         config=("$@")
@@ -608,7 +618,7 @@ END_OF_TRANSFER
     echo -e "Dropbox transfer complete.\n"
 
 }
-
+#    Upload output to GitHub
 gitHubSendIt() {
     if [[ ${projectDic["iscmd"]} == "true" ]]; then
         config=("$@")
@@ -617,6 +627,7 @@ gitHubSendIt() {
     fi
            iscmd=${projectDic["iscmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" gitUser="${projectDic["gitUser"]}" gitPass="${projectDic["gitPass"]}" repo="${projectDic["repo"]}" gitowner="${projectDic["gitowner"]}" python3.6 - << END_OF_TRANSFER
 
+#    Python 3 for GitHub upload
 import os
 import github3
 import datetime
@@ -813,7 +824,7 @@ main()
 END_OF_PYTHON
 
 }
-
+#    Split up file based on mutation direction
 vcfSplit(){
     inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" python3.6 - <<VCF_SPLIT_END
 
@@ -909,7 +920,8 @@ main()
 VCF_SPLIT_END
 
 }
-
+#    Looks for indel percentage in fasta output windows
+#    If indel percentage is greater than desired, fasta entry is removed
 fastaScanner(){
 
     inputFile="${projectDic["inputFile"]}" flank="${projectDic["flanks"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" geneTwo=${geneTwo} geneDirTwo="${geneDirTwo}" nMax="${projectDic["nMax"]}" windowLength="${projectDic["windowLength"]}" python3.6 - <<FASTA_SWEEP
@@ -1025,7 +1037,8 @@ main()
 FASTA_SWEEP
 
 }
-
+#    Creates the job on UMN MSI
+#    Demonstrates that Corey can write more verbose code than Paul! Quite a victory!
 jobCreator(){
     myEmail="${projectDic["email"]}" job_specs="${job_specs}" scriptPath="${scriptPath}" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" \
     outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" \
@@ -1103,6 +1116,7 @@ exit 2
 
 }
 
+#    This is the primary function
 main(){
     config_check "$@"
     if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]] && [[ "${projectDic["msi"]}" == 'true' ]]; then
