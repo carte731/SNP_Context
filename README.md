@@ -4,7 +4,7 @@
 ## Summary
 
     Corey Carter, St. Paul, MN - 09 January 2018 for Morrell Lab at the University of Minnesota - Twin Cities
-    This bash script is designed to pull contextual sequence flanking a SNP (variants) from a reference genome.
+    This bash script is designed to pull contextual sequence flanking a SNP (variant) from a reference genome.
     The window size for contextual sequence can be user specificed.
     The program checks for the presence of more than one variant within user specified windows.
 
@@ -12,15 +12,15 @@
 SNP Context can be used with either a **config file** or the **command line**, with the config file being the *perferred* method. Listed below are the config file input parameters:
 
 ### General input for config file
-* **Project name (String)**: The name of your project, the working directory will hold this name.
+* **Project name (String)**: The name of your project. The working directory will hold this name.
 
-* **Input email (String)**: Sends user PBS jobs updates. If and only if you're using this script on the University Of Minnesota's supercomputing cluster **(MSI)**.
+* **Input email (String)**: If and only if you're using this script on the University Of Minnesota's supercomputing cluster **(MSI)**, PBS job updates will be sent to this address.
 
 * **Input file (String)**: The input .VCF file. 
 
-* **referenceGenome (String)**: The complete path (pwd -P) of your reference genome.
+* **referenceGenome (String)**: The complete path `(pwd -P)` of your reference genome.
 
-* **Output location (String)**: The output location of your files, a project directory is created at this location. If no location is specified, then directory and files will be saved at the same location as the input file.
+* **Output location (String)**: The output location of your files. A project directory is created at this location. If no location is specified, then the directory and files will be saved at the same location as the input file.
 
 ### MSI options for config file
 * **MSI Mode (Boolean, true or false)**: If true, then the script will automatically submit your job to PBS job scheduler and allows for the user to save the output text files to MSI S3 tier two storage.
@@ -50,7 +50,7 @@ Follow the link for more info: [MSI PBS job submission](https://www.msi.umn.edu/
 
 #### MSI and Amazon S3
 
-* **Save S3 (Integer, 0 - 3)**: This allows you to save the mutation motif outputs files (Count Tables) and config files to S3. The user can choose between these values **(0 - 3)**:
+* **Save S3 (Integer, 0 - 3)**: This allows you to save the mutation motif outputs files (counts tables) and config files to S3. The user can choose between these values **(0 - 3)**:
 
 	0\. **Don't** save to any S3 storage **(default setting)**.
 
@@ -68,18 +68,18 @@ Follow the link to step up a DropBox app: [Setting up DropBox app](https://www.d
 
 #### GitHub
 
-* **Github (Boolean, true or false)**: Do you want to save the output files (counts tables and config file) to a Github repository
+* **Github (Boolean, true or false)**: Do you want to save the output files (counts tables and config file) to a Github repository?
 
 * **gitUser (String)** : Your GitHub username. **NOTE: this data is redacted when uploaded to S3, Dropbox or Github.**
 * **gitPass (String)** : Your GitHub password: **NOTE: this data is redacted when uploaded to S3, Dropbox or Github.**
 
 * **Myrepository (String)**: The name of the repository you will be saving the output files to.
 
-* **owner (String)**: The owner (their username) of the repository, leave blank if you're the owner
+* **owner (String)**: The owner (their username) of the repository. Leave blank if you are the owner.
 
-## Command Line equivalents to the config file (can be run in any order).
+## Command Line equivalents to the config file (can be run in any order)
 
-Command line parameters allow this script to be plugged into a larger pipline or program, but the preferred method is the *context.config* file.
+Command line parameters allow this script to be plugged into a larger pipeline or program, but the preferred method is the *context.config* file.
 
 **-w = Window Length (Integer, 0-99)**
 
@@ -121,7 +121,7 @@ Command line parameters allow this script to be plugged into a larger pipline or
 
 ### Exit Codes
 
-If you're using SNP Context in a larger pipeline or program, the exit codes can provide the larger program need information:
+If you're using SNP Context in a larger pipeline or program, the exit codes can provide the larger program needed information:
 
 * exit code **0**: SNP Context operations have been successfully executed.
 
@@ -131,7 +131,7 @@ If you're using SNP Context in a larger pipeline or program, the exit codes can 
 
 ## Outputs
 
-If the parameter `all data` is `true`, than all intermediate files are saved in the output directory. If `all data` is `false` than only the individual counts tables, combined countst table and rejected files (.VCF, .BAM, .FASTA) are saved in the output directory.
+If the parameter `all data` is `true`, than all intermediate files are saved in the output directory. If `all data` is `false` than only the individual counts tables, combined counts table and rejected files (.VCF, .BAM, .FASTA) are saved in the output directory.
 
 ### If 'all Data' is **TRUE**:
 * Parsed .VCF files
@@ -139,15 +139,15 @@ If the parameter `all data` is `true`, than all intermediate files are saved in 
 * Parsed .BED files
 * .FASTA files
 * Consolidated rejected nucleotide positions from .BAM file
-* Consolidated rejected Indels .FASTA file
-* Word Counts tables
-* Combined Counts tables
+* Consolidated rejected indels .FASTA file
+* Word counts tables
+* Combined counts tables
 
 ### If 'all Data' is **FALSE** (default):
 * Consolidated rejected nucleotide positions from .BAM file
-* Consolidated rejected Indels .FASTA file
-* Word Counts tables
-* Combined Counts tables
+* Consolidated rejected indels .FASTA file
+* Word counts tables
+* Combined counts tables
 
 ## Misc Info
 
@@ -166,5 +166,5 @@ If the parameter `all data` is `true`, than all intermediate files are saved in 
 	3. [DropBox](https://www.dropbox.com/developers/documentation/python) (For DropBox)
 
 ### Error Handling
-* SNP Context catches any errors that may occur during runtime and saves it to a file called the **SNP_CONTEXT_ERROR_LOG.txt** and is located in the SNP Context script directory.
+* SNP Context catches any errors that may occur during runtime and saves them to a file called the **SNP_CONTEXT_ERROR_LOG.txt**. It is located in the SNP Context script directory.
 

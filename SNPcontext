@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #    Corey Carter, St. Paul, MN - 09 January 2018
-#    This bash script is designed to pull contextual sequence flanking a SNP (variants) from a reference genome.
+#    This bash script is designed to pull contextual sequence flanking a SNP (variant) from a reference genome.
 #    Inputs include: a VCF file, a reference genome, and a user-specified window size for flanking sequence.
 #    Example usage ./SNPcontext -i <input VCF> -r <reference genome fasta file> -w <window size>
  
@@ -57,7 +57,7 @@ declare -A projectDic=(
 )
 
 #     A bash list of all possible nucleotide state changes
-#     List will be use for iteration and to create output directories and files
+#     List will be used for iteration and to create output directories and files
 declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
 
 declare -a active=()
@@ -68,9 +68,9 @@ help_display(){ ## UPDATE TO INCLUDE ALL CMDS AND MENTION THE CONFIG FILE IS THE
     helpPrintOut+=$'\n\t------------------------\n'
     helpPrintOut+=$'\n\t**Input arguments can be in any order.**\n'
     helpPrintOut+=$'\n\t-i [(complete path to VCF file) (the VCF input file)]\n\t-o [(complete path to location) (The output location, if not entered it will default to the same location as your input file.)]'
-    helpPrintOut+=$'\n\t-r [(barley or b, soy bean or s )(Selects the reference genome, defaults to Barley if not specified.)]\n\t-w [(Expansion window size)(The expandable window size around the SNP location, 8 on both ends is the deafult.)]'
+    helpPrintOut+=$'\n\t-r [(barley or b, soybean or s )(Selects the reference genome, defaults to barley if not specified.)]\n\t-w [(Expansion window size)(The expandable window size around the SNP location, 8 on both ends is the default.)]'
     helpPrintOut+=$'\n\t-p [project name]\n\t-n [max percentage of indels allowed in fasta files]'
-    helpPrintOut+=$'\n\t-a [(true/false) Do you want all temp files (vcf,bed and fasta) to be saved in your output directory]'
+    helpPrintOut+=$'\n\t-a [(true/false) Do you want all temp files (vcf, bed and fasta) to be saved in your output directory]'
     helpPrintOut+=$'\n\t-f [(number between 0 and 2) (flank size for aln_to_counts)]'
     helpPrintOut+=$'\n\t-n [(number)(The percentage of accepted indels in the FASTA file)]'
     helpPrintOut+=$'\n\t-ad [(true or false) (Which stands for “all data”, this allows you to keep all intermediate files (split VCFs, BED, new interval BEDs, FASTA files)\n\t    that are normally deleted after processing. Defaults to false, which deletes intermedidate files.)]\n'
@@ -82,11 +82,11 @@ help_display(){ ## UPDATE TO INCLUDE ALL CMDS AND MENTION THE CONFIG FILE IS THE
 #     The other option is specify all arguments on the command line
 config_check(){
     local args=($@)
-    if (( "$#" >= 1 )); then
-        if (( "$#" == 1 )); then
-            if [[ ${args[0],,} == "--help" ]] || [[ ${args[0],,} == "-h" ]]; then
-                help_display
-            elif [[ -f "${args[0]}" ]] || [[ ! -z "${args[0]}" ]]; then
+    if (( "$#" >= 1 )); then # If there is at least one argument
+        if (( "$#" == 1 )); then # If there is exactly one argument
+            if [[ ${args[0],,} == "--help" ]] || [[ ${args[0],,} == "-h" ]]; then # And that argument is --help or -h
+                help_display # Print a usage message
+            elif [[ -f "${args[0]}" ]] || [[ ! -z "${args[0]}" ]]; then # And that argument is a file path
                 local var=${args##*.} ## Grabs only the extension
                 if [[ ${var,,} == "config" ]]; then ## Checks if it's a .config file
                     isCmd="false"
@@ -105,7 +105,7 @@ config_check(){
                         ${s3_password}
                         ${input_email}
                     )
-                    starter ${startList}
+                    starter ${startList} # Calls program to assign variables
                 else   
                     echo -e "Invalid '.Config' file extension. Exiting..."
                     exit 1
@@ -114,15 +114,16 @@ config_check(){
                 echo -e "Invalid single entry, either enter config file with correct path or --help/-h. Exiting..."
                 exit 1
             fi
-        elif (( "$#" > 1 )); then
+        elif (( "$#" > 1 )); then # If there's more than one argument, assume command-line mode
             isCmd="true"
             startList=("$@")
-            starter ${startList}
+            
+            starter ${startList} # Calls program to assign variables
         else 
             echo -e "Invalid entries. Exiting..."
             exit 1
         fi
-    else
+    else # If there are no arguments at all, show the usage message
         help_display
     fi
 }
@@ -131,19 +132,18 @@ config_check(){
 starter(){ #grabs the arguments
     local frontgate=0
     local indexPos=0
-    for i in ${startList[@]}; do
-        if [[ "${isCmd}" == "true" ]] && [[ ${#startList[@]} != ${indexPos} ]]; then
+    for i in ${startList[@]}; do # Loop over every argument
+        if [[ "${isCmd}" == "true" ]] && [[ ${#startList[@]} != ${indexPos} ]]; then # If parameters were entered via command-line mode and we haven't reached the end of the parameters
             local var="${startList[${indexPos}+1]}"
-        elif [[ "${isCmd}" == "false" ]]; then
+        elif [[ "${isCmd}" == "false" ]]; then # If parameters were entered via config file, life is easy
             local var="${i}"
         fi
-        # if [[ "${i,,}" == "-w" ]] || [[ ! -v ${window_length} ]]; then ##Window expansion size
-        if [[ "${i,,}" == "-em" ]] || [[ ${input_email} == $i ]]; then
+        if [[ "${i,,}" == "-em" ]] || [[ ${input_email} == $i ]]; then # Set the email
             projectDic["email"]="${var}"
             unset input_email
         elif [[ "${i,,}" == "-w" ]] || [[ ${window_length} == $i ]]; then ##Window expansion size
             if [[ "$var" =~ ^[0-9]$ ]] && (( "$var" >= 0 )); then ##Checks if it's a number, max expansion of 10
-                if (( "$var" > 10 )); then ##Changed from 2 to 1
+                if (( "$var" > 10 )); then # Make sure it's under 10 (100?)
                     echo -e "\nwindow size is too large, defaulting to 10."
                     ((projectDic["windowLength"]=10))
                     frontgate=1 
@@ -152,8 +152,8 @@ starter(){ #grabs the arguments
                     ((projectDic["windowLength"]="${var}"))
                     frontgate=1 
                     unset window_length
-                fi
-            else
+                fi     
+            else # If it's not an integer number, default to 1 (???)
                 echo -e "\nPlease enter a valid integer for window expansion size - defaulting to 1.\n"
                 projectDic["windowLength"]=1
                 frontgate=1 
@@ -238,7 +238,7 @@ starter(){ #grabs the arguments
             #     fi
             #     frontgate=1                    
             # fi
-        elif [[ "${i,,}" == "-ad"  ]] || [[ ${save_all_data} == $i ]]; then
+        elif [[ "${i,,}" == "-ad"  ]] || [[ ${save_all_data} == $i ]]; then # Set flag for saving intermediate data
             if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
                 projectDic["allData"]="${var,,}"
                 frontgate=1
@@ -246,7 +246,7 @@ starter(){ #grabs the arguments
             else
                 echo -e "No valid all data entry (true or false), defaulting to false. Only counts tables will be saved."
             fi
-        elif [[ "${i,,}" == "-s3" ]] || [[ ${save_S3} == $i ]]; then
+        elif [[ "${i,,}" == "-s3" ]] || [[ ${save_S3} == $i ]]; then # Set flag for saving to S3
             if [[ "${var,,}" != "0" ]]; then
                 if [[ "${var,,}" == "1" ]] || [[ "${var,,}" == "2" ]] || [[ "${var,,}" == "3" ]]; then
                     projectDic["s3"]="${var,,}"
@@ -256,7 +256,7 @@ starter(){ #grabs the arguments
                     echo -e "No valid entry for S3 storage (true or false), defaulting to false."
                 fi
             fi
-        elif [[ "${i,,}" == "-dpb" ]] || [[ ${dropbox} == $i ]]; then 
+        elif [[ "${i,,}" == "-dpb" ]] || [[ ${dropbox} == $i ]]; then # Set flag for saving to Dropbox
             if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
                 projectDic["dropbox"]="${var,,}"
                 frontgate=1
@@ -265,7 +265,7 @@ starter(){ #grabs the arguments
             else
                 echo -e "No valid entry for Dropbox uploading (true or false), defaulting to false."
             fi
-        elif [[ "${i,,}" == "-gh" ]] || [[ ${save_github} == $i ]]; then 
+        elif [[ "${i,,}" == "-gh" ]] || [[ ${save_github} == $i ]]; then # Set flag for saving to Github
             if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
                 projectDic["github"]="${var,,}"
                 frontgate=1
@@ -274,7 +274,7 @@ starter(){ #grabs the arguments
             else
                 echo -e "No valid entry for github uploading (true or false), defaulting to false."
             fi
-        elif [[ "${i,,}" == "-msi" ]] || [[ ${MSI_Mode} == $i ]]; then
+        elif [[ "${i,,}" == "-msi" ]] || [[ ${MSI_Mode} == $i ]]; then # Set flag for MSI-specific operations
             if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
                 projectDic["msi"]="${var,,}"
                 frontgate=1
@@ -285,62 +285,62 @@ starter(){ #grabs the arguments
                 frontgate=1
                 unset MSI_Mode                
             fi
-        elif [[ "${i,,}" == "-dpba" ]] || [[ ${dropbox_auth} == $i ]]; then
+        elif [[ "${i,,}" == "-dpba" ]] || [[ ${dropbox_auth} == $i ]]; then # Set variable for Dropbox authorization
             projectDic["dropboxAuth"]="${var,,}"
             frontgate=1
             unset dropbox_auth
-        elif [[ "${i,,}" == "-ghu" ]] || [[ ${gitUser} == $i ]]; then
+        elif [[ "${i,,}" == "-ghu" ]] || [[ ${gitUser} == $i ]]; then # Set variable for Git username
             projectDic["gitUser"]="${var,,}"
             frontgate=1
             unset gitUser
-        elif [[ "${i,,}" == "-ghp" ]] || [[ ${gitPass} == $i ]]; then
+        elif [[ "${i,,}" == "-ghp" ]] || [[ ${gitPass} == $i ]]; then # Set variable for Github password
             projectDic["gitPass"]="${var,,}"
             frontgate=1
             unset gitPass
-        elif [[ "${i,,}" == "-gho" ]] || [[ ${owner} == $i ]]; then
+        elif [[ "${i,,}" == "-gho" ]] || [[ ${owner} == $i ]]; then # Set variable for Git repository owner
             projectDic["owner"]="${var,,}"
             frontgate=1
             unset owner
-        elif [[ "${i,,}" == "-ghr" ]] || [[ ${Myrepository} == $i ]]; then
+        elif [[ "${i,,}" == "-ghr" ]] || [[ ${Myrepository} == $i ]]; then # Set variable for Git repository
             projectDic["Myrepository"]="${var,,}"
             frontgate=1
             unset Myrepository           
         fi
         ((indexPos+=1))
     done
-    if ((${frontgate} <= 0)); then
+    if ((${frontgate} <= 0)); then # If none of the above if statements were true, then something was invalid
         echo -e "\nPlease enter valid arguments. None were valid.\n"
         exit 1
     fi
-    if [[ ${projectDic["inputFile"]} == '' ]]; then
+    if [[ ${projectDic["inputFile"]} == '' ]]; then # If after setting all the parameters, we don't have a project directory, exit
         echo -e "\nNo input file or working directory specified.\nEXITING...\n"
         exit 1
     fi
-    if [[ -z ${projectDic["outputLoc"]} ]] && [[ ${projectDic["inputFile"]} != '' ]]; then
+    if [[ -z ${projectDic["outputLoc"]} ]] && [[ ${projectDic["inputFile"]} != '' ]]; then # If the output location is invalid, use the input location
         echo -e "\nNot a valid output location. Re-routing to input file location.\n"
         projectDic["outputLoc"]+=${projectDic["inputLoc"]}
     fi
-    if [[ ${projectDic["referenceGenome"]} == "" ]]; then
-        echo -e "No reference genome enetered. Exiting..."
+    if [[ ${projectDic["referenceGenome"]} == "" ]]; then # If we don't have a reference genome, that's a problem
+        echo -e "No reference genome entered. Exiting..."
         exit 1
     fi
-    if (( ${projectDic["flanks"]} > ${projectDic["windowLength"]} )); then
-        echo -e "Flank larger than window expansion, defaulting to flank size of ${projectDic["flanks"]}"
+    if (( ${projectDic["flanks"]} > ${projectDic["windowLength"]} )); then # If the flank size is larger than the window size, expand the window size
+        echo -e "Flank larger than window expansion, expanding window size to flank size of ${projectDic["flanks"]}"
         projectDic["windowLength"]=${projectDic["flanks"]}
     fi
-    if [[ "${projectDic["dropbox"],,}" == "true" ]] && [[ "${projectDic["dropboxAuth"]}" == '' ]]; then 
-        echo -e "Dropbox mode is set to true but there is no Generated access token was proved."
+    if [[ "${projectDic["dropbox"],,}" == "true" ]] && [[ "${projectDic["dropboxAuth"]}" == '' ]]; then # If you want to Dropbox, but don't give an auth code, that's a problem
+        echo -e "Dropbox mode is set to true but there is no generated access token provided."
         echo -e "Changing Dropbox mode to false"
         projectDic["dropbox"]="false"
     fi
-    if [[ "${projectDic["s3"]}" == "2" ]] || [[ "${projectDic["s3"],,}" == 3 ]]; then
+    if [[ "${projectDic["s3"]}" == "2" ]] || [[ "${projectDic["s3"],,}" == 3 ]]; then # If you want to S3, but we can't, that's a problem
         if [[ ! -d ~/.aws ]]; then 
             echo -e "AWS isn't set up in your home directory."
             echo -e "Changing S3 mode to false"
             projectDic["s3"]=0
         fi
     fi
-    if [[ "${projectDic["github"],,}" == "true" ]]; then 
+    if [[ "${projectDic["github"],,}" == "true" ]]; then # Make sure we have all the things to do Github properly
         if [[ "${projectDic[[ ["gitUser"]}" == '' ]] || /
         [[ "${projectDic["gitPass"]}" == '' ]] || /
         [[ "${projectDic["Myrepository"]}" == '' ]]; then
@@ -349,7 +349,7 @@ starter(){ #grabs the arguments
             projectDic["github"]="false"
         fi
         if [[ "${projectDic["owner"]}" == "" ]]; then
-            echo -e "Owner of Giithub repo not specified, defaulting to your username."
+            echo -e "Owner of the Github repository was not specified, defaulting to your username."
             projectDic["owner"]="${projectDic["gitUser"]}"
         fi
     fi
@@ -368,7 +368,7 @@ moduleLoader(){ #Load modules needed for operations
         module load bedtools_ML/2.23.0
     else
         declare -A testlisting=( ["python3"]=3.6.4 ["bedops"]=2.4.35 ["bedtools"]=2.23.0 )
-        for inProgram in ${!testlisting[@]}; do
+        for inProgram in ${!testlisting[@]}; do # Make sure that all dependencies are functional
             if [[ -x $(command -v "${inProgram}") ]]; then
                 if [[ "${inProgram}" == "python3" ]] && [[ $(python3 -c 'import sys; print(sys.version_info[0:2])') == '(3, 6)' ]]; then
                     if [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import mutation_motif') ]]; then
@@ -420,7 +420,7 @@ fileConverter(){
     elif [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
         local temp="${projectDic["tempOut"]}"FASTA_SPLIT/
         local splitDir=("${temp}"*_"${projectDic[filename]}".fasta*)
-        echo -e "creating counts tables..."
+        echo -e "Creating counts tables..."
         for gene in "${splitDir[@]}"; do
             local countfile="${gene%.*}"
             countfile="${countfile##*/}"
@@ -436,7 +436,7 @@ fileConverter(){
         done
         projectDic["OperationalStage"]="allCounts"
     elif [ "${projectDic[OperationalStage]}" == "allCounts" ]; then
-        echo -e "creating combined tables..."
+        echo -e "Creating combined tables..."
         mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS
         for loopGene in "${active[@]}"; do
             cd "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/
@@ -478,7 +478,7 @@ s3Saver(){
         if [[ "${projectDic["s3"]}" == "1" ]] || [[ "${projectDic["mss3i"]}" == "3" ]]; then
             s3cmd mb s3://${projectDic["projectName"],,} > /dev/null
             echo -e "\nS3 bucket created..."
-            echo -e "\ntransfering files..."
+            echo -e "\nTransfering files..."
             if $(( s3cmd put --recursive "${projectDic["outputLoc"]}"COUNTS_TABLES/ s3://${projectDic["projectName"],,} > /dev/null )); then
                 echo -e "\n Files transfered to S3...\n"
             else
@@ -1111,7 +1111,7 @@ main()
 JOB_CREATED
 
 qsub "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
-echo -e "\njob submited.\nEXITING...\n"
+echo -e "\nJob submited.\nEXITING...\n"
 exit 2
 
 }
@@ -1137,7 +1137,7 @@ main(){
     done
     wait
     echo -e "\nOverlap checks completed..."
-    echo -e "See Overlap results located in 'WindowOverlap.txt' in your main output directory.\n"
+    echo -e "See overlap results located in 'WindowOverlap.txt' in your main output directory.\n"
     fileConverter ##CREATES FASTA FILE
     local tempTwo="${projectDic["tempOut"]}"FASTA_SPLIT/
     local fastalisting=("${tempTwo}"*_"${projectDic[filename]}".fasta*)
@@ -1163,7 +1163,7 @@ main(){
     if [[ "${projectDic["github"]}" == 'true' ]]; then
         gitHubSaver "$@"
     fi
-    echo -e "operations completed...\n"
+    echo -e "Operations completed...\n"
     exit 0
 }
 
