@@ -18,36 +18,34 @@ set -eE
 
 error_catch(){
     echo -e "There has been an error, The error message has been saved to: ${1} as SNP_CONTEXT_ERROR_LOG.txt\n"
-    "\nERROR REPORT FOR "date"\n---------------------------------">>"${1}"/SNP_CONTEXT_ERROR_LOG.txt
     exec 2>>"${1}"/SNP_CONTEXT_ERROR_LOG.txt
     exit 1
 }
 
 trap 'error_catch "${scriptPath}"' ERR
 
-
 #     A bash dictionary for input parameters
 
 declare -A projectDic=(
     ["email"]='' #-em
-    ["windowLength"]=1 #-w
+    ["windowLength"]=-9091 #-w
     ["inputFile"]='' #-i
     ["inputLoc"]=''
     ["outputLoc"]='' #-o
     ["filename"]=''
-    ["projectName"]='out' #-p
-    ["flanks"]=0 #-f
+    ["projectName"]='DefaultProjectName' #-p
+    ["flanks"]=-9091 #-f
     ["referenceGenome"]='' #-r
     ["OperationalStage"]='vcfTObed'
-    ["nMax"]=25 ##-n
+    ["nMax"]=-9091 ##-n
     ["TempLoc"]=''
     ["tempOut"]=''
-    ["allData"]='false' #-ad
-    ["msi"]='true' #-msi
-    ["s3"]=0 #-s3
-    ["dropbox"]='false' #-dpb
+    ["allData"]='' #-ad
+    ["msi"]='' #-msi
+    ["s3"]=-9091 #-s3
+    ["dropbox"]='' #-dpb
     ["dropboxAuth"]='' #-dpba
-    ["github"]='false' #-gh
+    ["github"]='' #-gh
     ["gitUser"]='' #-ghu
     ["gitPass"]='' #-ghp
     ["owner"]='' #-gho
@@ -104,7 +102,18 @@ config_check(){
                         ${s3_login}
                         ${s3_password}
                         ${input_email}
+                        ${MSI_Mode}
+                        ${job_specs}
+                        ${save_all_data}
+                        ${dropbox}
+                        ${dropbox_auth}
+                        ${github}
+                        ${gitUser}
+                        ${gitPass}
+                        ${Myrepository}
+                        ${owner}
                     )
+                    # echo -e "${MSI_Mode}"
                     starter ${startList} # Calls program to assign variables
                 else   
                     echo -e "Invalid '.Config' file extension. Exiting..."
@@ -133,20 +142,22 @@ starter(){ #grabs the arguments
     local frontgate=0
     local indexPos=0
     for i in ${startList[@]}; do # Loop over every argument
+        # echo -e "${i}"
         if [[ "${isCmd}" == "true" ]] && [[ ${#startList[@]} != ${indexPos} ]]; then # If parameters were entered via command-line mode and we haven't reached the end of the parameters
             local var="${startList[${indexPos}+1]}"
         elif [[ "${isCmd}" == "false" ]]; then # If parameters were entered via config file, life is easy
             local var="${i}"
         fi
-        if [[ "${i,,}" == "-em" ]] || [[ ${input_email} == $i ]]; then # Set the email
+        if [[ "${i,,}" == "-em" ]] || [[ ${input_email} == $i ]] && [[ ${projectDic["email"]} == "" ]]; then # Set the email
             projectDic["email"]="${var}"
             unset input_email
-        elif [[ "${i,,}" == "-w" ]] || [[ ${window_length} == $i ]]; then ##Window expansion size
-            if [[ "$var" =~ ^[0-9]$ ]] && (( "$var" >= 0 )); then ##Checks if it's a number, max expansion of 10
-                if (( "$var" > 10 )); then # Make sure it's under 10 (100?)
+        elif [[ "${i,,}" == "-w" ]] || [[ ${window_length} == $i ]] && ((projectDic["windowLength"] == -9091)); then ##Window expansion size
+            # if [[ "$var" =~ ^[0-1000]$ ]] && (( "$var" >= 0 )); then ##Checks if it's a number, max expansion of 10
+            if (( "$var" >= 0 )); then ##Checks if it's a number, max expansion of 10
+                if (( "$var" > 1000 )); then # Make sure it's under 10 (100?)
                     echo -e "\nwindow size is too large, defaulting to 10."
                     ((projectDic["windowLength"]=10))
-                    frontgate=1 
+                    frontgate=1
                     unset window_length
                 else
                     ((projectDic["windowLength"]="${var}"))
@@ -159,8 +170,10 @@ starter(){ #grabs the arguments
                 frontgate=1 
                 unset window_length
             fi
-        elif [[ "${i,,}" == "-i" ]] || [[ ${input_file} == $i ]]; then ##Input file which grabs the input file name, location and complete file path
-            if [[ "${var##*.}" == "vcf" ]] && [[ -f "$var" ]]; then ##Checks if it's VCF and if file exist
+        elif [[ "${i,,}" == "-i" ]] || [[ ${input_file} == $i ]] && [[ ${projectDic["filename"]} == "" ]]; then ##Input file which grabs the input file name, location and complete file path
+            if [[ "${var##*.}" == "vcf" ]]; then ##Checks if it's VCF and if file exist
+            # if [[ "${var##*.}" == "vcf" ]] && [[ -f "$var" ]]; then ##Checks if it's VCF and if file exist
+                # echo -e "${var##*.}"
                 projectDic["inputFile"]+="$var"
                 projectDic["inputLoc"]+="${var%/*}"
                 local filename=${var%.*} ##Removes files extension
@@ -172,7 +185,7 @@ starter(){ #grabs the arguments
                 echo -e "\nERROR. Incorrect file input. Check file or directory path. (Input (.vcf) only)\nEXITING...\n"
                 exit 1
             fi
-        elif [[ "${i,,}" == "-o" ]] || [[ ${output_location} == $i ]]; then ##Output location info
+        elif [[ "${i,,}" == "-o" ]] || [[ ${output_location} == $i ]] && [[ ${projectDic["outputLoc"]} == "" ]]; then ##Output location info
             if [ -d "$var" ]; then ##Checks if directory exist, if not it will save to input file location
                 if [[ "${var: -1}" == "/" ]]; then
                     projectDic["outputLoc"]+="$var"
@@ -182,7 +195,7 @@ starter(){ #grabs the arguments
                 frontgate=1
                 unset output_location
             fi
-        elif [[ "${i,,}" == "-p" ]] || [[ ${project_name} == $i ]]; then ##Project name
+        elif [[ "${i,,}" == "-p" ]] || [[ ${project_name} == $i ]] && [[ ${projectDic["projectName"]} == "" ]]; then ##Project name
             projectDic["projectName"]="$var"
             frontgate=1
             unset project_name
@@ -195,7 +208,7 @@ starter(){ #grabs the arguments
             fi
             frontgate=1
             unset flanks
-        elif [[ "${i,,}" == "-r" ]] || [[ ${referenceGenome} == $i ]]; then ##Which reference genome needed for FASTA file creation
+        elif [[ "${i,,}" == "-r" ]] || [[ ${referenceGenome} == $i ]] && [[ ${projectDic["referenceGenome"]} == "" ]]; then ##Which reference genome needed for FASTA file creation
             if [[ -f "${var}" ]]; then
                 projectDic["referenceGenome"]="${var}"
                 frontgate=1
@@ -207,7 +220,7 @@ starter(){ #grabs the arguments
         elif [[ "${i}" == "-JOB" ]]; then
             local var=${args[${indexPos}+1]}
             projectDic["JOB"]="${var}"
-        elif [[ "${i,,}" == "-n"  ]] || [[ "${indel_max_amount}" == $i ]]; then
+        elif [[ "${i,,}" == "-n"  ]] || [[ "${indel_max_amount}" == $i ]] && ((projectDic["nMax"] == -9091)); then
             # echo -e "ATTACK_ONE"
             if [[ "${var}" =~ [0-9] ]]; then ##CHECK WITH PETER!!!
                 # echo -e "ATTACK"
@@ -238,7 +251,7 @@ starter(){ #grabs the arguments
             #     fi
             #     frontgate=1                    
             # fi
-        elif [[ "${i,,}" == "-ad"  ]] || [[ ${save_all_data} == $i ]]; then # Set flag for saving intermediate data
+        elif [[ "${i,,}" == "-ad"  ]] || [[ ${save_all_data} == $i ]] && [[ ${projectDic["allData"]} == "" ]]; then # Set flag for saving intermediate data
             if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
                 projectDic["allData"]="${var,,}"
                 frontgate=1
@@ -246,17 +259,18 @@ starter(){ #grabs the arguments
             else
                 echo -e "No valid all data entry (true or false), defaulting to false. Only counts tables will be saved."
             fi
-        elif [[ "${i,,}" == "-s3" ]] || [[ ${save_S3} == $i ]]; then # Set flag for saving to S3
+        elif [[ "${i,,}" == "-s3" ]] || [[ ${save_S3} == $i ]] && (( ${projectDic["s3"]} == -9091 )); then # Set flag for saving to S3
             if [[ "${var,,}" != "0" ]]; then
-                if [[ "${var,,}" == "1" ]] || [[ "${var,,}" == "2" ]] || [[ "${var,,}" == "3" ]]; then
+                if (( "${var,,}" == 1 )) || (( "${var,,}" == 2 )) || (( "${var,,}" == 3 )); then
                     projectDic["s3"]="${var,,}"
                     frontgate=1
                     unset save_S3
                 else
                     echo -e "No valid entry for S3 storage (true or false), defaulting to false."
+                    projectDic["s3"]=0
                 fi
             fi
-        elif [[ "${i,,}" == "-dpb" ]] || [[ ${dropbox} == $i ]]; then # Set flag for saving to Dropbox
+        elif [[ "${i,,}" == "-dpb" ]] || [[ ${dropbox} == $i ]] && [[ ${projectDic["dropbox"]} == "" ]]; then # Set flag for saving to Dropbox
             if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
                 projectDic["dropbox"]="${var,,}"
                 frontgate=1
@@ -265,7 +279,7 @@ starter(){ #grabs the arguments
             else
                 echo -e "No valid entry for Dropbox uploading (true or false), defaulting to false."
             fi
-        elif [[ "${i,,}" == "-gh" ]] || [[ ${save_github} == $i ]]; then # Set flag for saving to Github
+        elif [[ "${i,,}" == "-gh" ]] || [[ ${save_github} == $i ]] && [[ ${projectDic["github"]} == "" ]]; then # Set flag for saving to Github
             if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
                 projectDic["github"]="${var,,}"
                 frontgate=1
@@ -274,8 +288,12 @@ starter(){ #grabs the arguments
             else
                 echo -e "No valid entry for github uploading (true or false), defaulting to false."
             fi
-        elif [[ "${i,,}" == "-msi" ]] || [[ ${MSI_Mode} == $i ]]; then # Set flag for MSI-specific operations
+        elif [[ "${i,,}" == "-msi" ]] || [[ ${MSI_Mode} == $i ]] && [[ ${projectDic["msi"]} == "" ]]; then # Set flag for MSI-specific operations
+            # echo -e "MSI MODE:\n"
+            # echo -e "${var}"
             if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
+                # echo -e "${i}"
+                
                 projectDic["msi"]="${var,,}"
                 frontgate=1
                 unset MSI_Mode
@@ -285,23 +303,23 @@ starter(){ #grabs the arguments
                 frontgate=1
                 unset MSI_Mode                
             fi
-        elif [[ "${i,,}" == "-dpba" ]] || [[ ${dropbox_auth} == $i ]]; then # Set variable for Dropbox authorization
+        elif [[ "${i,,}" == "-dpba" ]] || [[ ${dropbox_auth} == $i ]] && [[ ${projectDic["dropboxAuth"]} == "" ]]; then # Set variable for Dropbox authorization
             projectDic["dropboxAuth"]="${var,,}"
             frontgate=1
             unset dropbox_auth
-        elif [[ "${i,,}" == "-ghu" ]] || [[ ${gitUser} == $i ]]; then # Set variable for Git username
+        elif [[ "${i,,}" == "-ghu" ]] || [[ ${gitUser} == $i ]] && [[ ${projectDic["gitUser"]} == "" ]]; then # Set variable for Git username
             projectDic["gitUser"]="${var,,}"
             frontgate=1
             unset gitUser
-        elif [[ "${i,,}" == "-ghp" ]] || [[ ${gitPass} == $i ]]; then # Set variable for Github password
+        elif [[ "${i,,}" == "-ghp" ]] || [[ ${gitPass} == $i ]] && [[ ${projectDic["gitPass"]} == "" ]]; then # Set variable for Github password
             projectDic["gitPass"]="${var,,}"
             frontgate=1
             unset gitPass
-        elif [[ "${i,,}" == "-gho" ]] || [[ ${owner} == $i ]]; then # Set variable for Git repository owner
+        elif [[ "${i,,}" == "-gho" ]] || [[ ${owner} == $i ]] && [[ ${projectDic["owner"]} == "" ]]; then # Set variable for Git repository owner
             projectDic["owner"]="${var,,}"
             frontgate=1
             unset owner
-        elif [[ "${i,,}" == "-ghr" ]] || [[ ${Myrepository} == $i ]]; then # Set variable for Git repository
+        elif [[ "${i,,}" == "-ghr" ]] || [[ ${Myrepository} == $i ]] && [[ ${projectDic["Myrepository"]} == "" ]]; then # Set variable for Git repository
             projectDic["Myrepository"]="${var,,}"
             frontgate=1
             unset Myrepository           
@@ -371,18 +389,18 @@ moduleLoader(){ #Load modules needed for operations
         for inProgram in ${!testlisting[@]}; do # Make sure that all dependencies are functional
             if [[ -x $(command -v "${inProgram}") ]]; then
                 if [[ "${inProgram}" == "python3" ]] && [[ $(python3 -c 'import sys; print(sys.version_info[0:2])') == '(3, 6)' ]]; then
-                    if [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import mutation_motif') ]]; then
+                    if [[ $(python3 -c 'import sys; sys.tracebacklimit=0; import mutation_motif') == "ModuleNotFoundError: No module named mutation_motif" ]]; then
                         echo -e "Python module Mutation Motif is not installed. Please follow the link for instructions: (https://bitbucket.org/pycogent3/mutationmotif).\n"
                     fi
-                    if $(( "${projectDic["s3"]}" > 0 ]] && [[ "${projectDic["s3"]}" <= 3 )); then
-                        if [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import boto3') ]]; then
+                    if (( "${projectDic["s3"]}" > 0 )) && (( "${projectDic["s3"]}" <= 3 )); then
+                        if [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import boto3') == "ModuleNotFoundError: No module named boto3" ]]; then
                             echo -e "Python module boto3 (S3) is not installed. Please pip install boto3 for Amazon save S3 support. Use command: pip3 install boto3\n"
                         fi
                     fi
-                    if [[ "${projectDic["dropbox"]}" == "true" ]] && [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import dropbox') ]]; then
+                    if [[ "${projectDic["dropbox"]}" == "true" ]] && [[ ! $(python3 -c 'import sys; sys.tracebacklimit=0; import dropbox') == "ModuleNotFoundError: No module named dropbox" ]]; then
                         echo -e "Python module for dropbox is not installed. Please pip install dropbox for dropbox save support. Use command: pip3 install dropbox\n"
                     fi
-                elif [[ ! "${inProgram}" == "python3" ]] && [[ ! $(python3 -c 'import sys; print(sys.version_info[0:2])') == '(3, 6)' ]]; then
+                elif [[ ! "${inProgram}" == "python3" ]] && [[ $(python3 -c 'import sys; print(sys.version_info[0:2])') != '(3, 6)' ]]; then
                     echo -e "Python version out of date. Please install Python 3.6.x.\n"
                 fi
             else
@@ -474,8 +492,8 @@ s3Saver(){
     else
         config="none"
     fi
-    if [[ "${projectDic["s3"]}" != "0" ]]; then
-        if [[ "${projectDic["s3"]}" == "1" ]] || [[ "${projectDic["mss3i"]}" == "3" ]]; then
+    if (( "${projectDic["s3"]}" != "0" )); then
+        if (( "${projectDic["s3"]}" == 1 )) || (( "${projectDic["mss3i"]}" == 3 )); then
             s3cmd mb s3://${projectDic["projectName"],,} > /dev/null
             echo -e "\nS3 bucket created..."
             echo -e "\nTransfering files..."
@@ -485,7 +503,7 @@ s3Saver(){
                 echo -e "S3 file transfer failed...\n"
             fi
         fi
-        if [[ "${projectDic["msi"]}" == "2" ]] || [[ "${projectDic["msi"]}" == "3" ]]; then
+        if (( "${projectDic["msi"]}" == "2" )) || (( "${projectDic["msi"]}" == "3" )); then
 
             iscmd=${projectDic["iscmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" python3.6 - << END_OF_TRANSFER
 #    Here we go in Python 3
@@ -551,9 +569,11 @@ END_OF_TRANSFER
 
         fi
 
+        echo -e "S3 transfer complete.\n"
+
     fi
 
-    echo -e "S3 transfer complete.\n"
+    
 
 }
 #    Module to upload output to Dropbox
@@ -1120,6 +1140,8 @@ exit 2
 main(){
     config_check "$@"
     if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]] && [[ "${projectDic["msi"]}" == 'true' ]]; then
+        # echo -e "${projectDic["JOB"]}"
+        # echo -e "${projectDic["msi"]}"
         module load python3_ML/3.6.4
         jobCreator
     fi
@@ -1154,7 +1176,9 @@ main(){
         local templocation="${projectDic["TempLoc"]}"
         rm -rf "${templocation}"
     fi
-    if [[ "${projectDic["s3"]}" != "0" ]]; then
+    if (( "${projectDic["s3"]}" > 0 )); then
+        # echo -e "TEST"
+        # echo -e "${projectDic["s3"]}\n"
         s3Saver "$@"
     fi
     if [[ "${projectDic["dropbox"]}" == 'true' ]]; then
