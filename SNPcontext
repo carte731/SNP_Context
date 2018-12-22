@@ -195,7 +195,7 @@ starter(){ #grabs the arguments
                 frontgate=1
                 unset output_location
             fi
-        elif [[ "${i,,}" == "-p" ]] || [[ ${project_name} == $i ]] && [[ ${projectDic["projectName"]} == "" ]]; then ##Project name
+        elif [[ "${i,,}" == "-p" ]] || [[ ${project_name} == $i ]] && [[ ${projectDic["projectName"]} == "DefaultProjectName" ]]; then ##Project name
             projectDic["projectName"]="$var"
             frontgate=1
             unset project_name
@@ -260,13 +260,13 @@ starter(){ #grabs the arguments
                 echo -e "No valid all data entry (true or false), defaulting to false. Only counts tables will be saved."
             fi
         elif [[ "${i,,}" == "-s3" ]] || [[ ${save_S3} == $i ]] && (( ${projectDic["s3"]} == -9091 )); then # Set flag for saving to S3
-            if [[ "${var,,}" != "0" ]]; then
+            if (( "${var,,}" != "0" )); then
                 if (( "${var,,}" == 1 )) || (( "${var,,}" == 2 )) || (( "${var,,}" == 3 )); then
                     projectDic["s3"]="${var,,}"
                     frontgate=1
                     unset save_S3
                 else
-                    echo -e "No valid entry for S3 storage (true or false), defaulting to false."
+                    echo -e "No valid entry for S3 storage (0 to 3), defaulting to false."
                     projectDic["s3"]=0
                 fi
             fi
@@ -279,11 +279,12 @@ starter(){ #grabs the arguments
             else
                 echo -e "No valid entry for Dropbox uploading (true or false), defaulting to false."
             fi
-        elif [[ "${i,,}" == "-gh" ]] || [[ ${save_github} == $i ]] && [[ ${projectDic["github"]} == "" ]]; then # Set flag for saving to Github
+        elif [[ "${i,,}" == "-gh" ]] || [[ ${github} == $i ]] && [[ ${projectDic["github"]} == "" ]]; then # Set flag for saving to Github
             if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
+                echo -e "${var,,}"
                 projectDic["github"]="${var,,}"
                 frontgate=1
-                unset save_github
+                unset github
 
             else
                 echo -e "No valid entry for github uploading (true or false), defaulting to false."
