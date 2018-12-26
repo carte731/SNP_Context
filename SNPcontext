@@ -498,7 +498,7 @@ s3Saver(){
             s3cmd mb s3://${projectDic["projectName"],,} > /dev/null
             echo -e "\nS3 bucket created..."
             echo -e "\nTransfering files..."
-            if $(( s3cmd put --recursive "${projectDic["outputLoc"]}"COUNTS_TABLES/ s3://${projectDic["projectName"],,} > /dev/null )); then
+            if s3cmd put --recursive "${projectDic["outputLoc"]}"COUNTS_TABLES/ s3://${projectDic["projectName"],,} 2>/dev/null; then
                 echo -e "\n Files transfered to S3...\n"
             else
                 echo -e "S3 file transfer failed...\n"
