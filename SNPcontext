@@ -495,13 +495,16 @@ s3Saver(){
     fi
     if (( "${projectDic["s3"]}" != "0" )); then
         if (( "${projectDic["s3"]}" == 1 )) || (( "${projectDic["mss3i"]}" == 3 )); then
-            s3cmd mb s3://${projectDic["projectName"],,} > /dev/null
-            echo -e "\nS3 bucket created..."
-            echo -e "\nTransfering files..."
-            if s3cmd put --recursive "${projectDic["outputLoc"]}"COUNTS_TABLES/ s3://${projectDic["projectName"],,} 2>/dev/null; then
-                echo -e "\n Files transfered to S3...\n"
+            if s3cmd mb s3://${projectDic["projectName"],,} > /dev/null; then
+                echo -e "\nS3 bucket created..."
+                echo -e "\nTransfering files..."
+                if s3cmd put --recursive "${projectDic["outputLoc"]}"COUNTS_TABLES/ s3://${projectDic["projectName"],,} 2>/dev/null; then
+                    echo -e "\n Files transfered to MSI S3...\n"
+                else
+                    echo -e "MSI S3 file transfer failed...\n"
+                fi
             else
-                echo -e "S3 file transfer failed...\n"
+                echo "S3 bucket creation failed."
             fi
         fi
         if (( "${projectDic["msi"]}" == "2" )) || (( "${projectDic["msi"]}" == "3" )); then
@@ -568,9 +571,9 @@ main()
 
 END_OF_TRANSFER
 
-        fi
+        echo -e "Amazon S3 transfer complete.\n"
 
-        echo -e "S3 transfer complete.\n"
+        fi
 
     fi
 
