@@ -493,7 +493,7 @@ s3Saver(){
     else
         config="none"
     fi
-    if (( "${projectDic["s3"]}" != "0" )); then
+    if (( "${projectDic["s3"]}" != 0 )); then
         if (( "${projectDic["s3"]}" == 1 )) || (( "${projectDic["mss3i"]}" == 3 )); then
             if s3cmd mb s3://${projectDic["projectName"],,} > /dev/null; then
                 echo -e "\nS3 bucket created..."
@@ -507,7 +507,7 @@ s3Saver(){
                 echo "S3 bucket creation failed."
             fi
         fi
-        if (( "${projectDic["msi"]}" == "2" )) || (( "${projectDic["msi"]}" == "3" )); then
+        if (( "${projectDic["msi"]}" == 2 )) || (( "${projectDic["msi"]}" == 3 )); then
 
             iscmd=${projectDic["iscmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" python3.6 - << END_OF_TRANSFER
 #    Here we go in Python 3
