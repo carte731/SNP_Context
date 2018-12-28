@@ -1159,7 +1159,7 @@ jobCreator(){
     fi
 
     echo -e "Whats my Price?"
-    echo -e "${projectDic["email"]}"
+    echo -e "${projectDic["JOB"]}"
 
     qsub <<EndofSubmission
     
@@ -1193,7 +1193,7 @@ jobCreator(){
     -gho "${projectDic["owner"]}" \
     -ghr "${projectDic["Myrepository"]}" \
     -CONFIGLOC "${config}" \
-    -JOB THIS_IS_A_JOB
+    -JOB "THIS_IS_A_JOB" \
     
 EndofSubmission
 
