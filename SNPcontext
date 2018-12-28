@@ -121,15 +121,16 @@ config_check(){
                     echo -e "Invalid '.Config' file extension. Exiting..."
                     exit 1
                 fi
-            else   
+            else
                 echo -e "Invalid single entry, either enter config file with correct path or --help/-h. Exiting..."
                 exit 1
             fi
         elif (( "$#" > 1 )); then # If there's more than one argument, assume command-line mode
             isCmd="true"
-            startList=("$@")
+            declare -a startList=("$@")
             
-            starter ${startList} # Calls program to assign variables
+            # starter ${startList} # Calls program to assign variables
+            starter # Calls program to assign variables
         else 
             echo -e "Invalid entries. Exiting..."
             exit 1
@@ -145,6 +146,7 @@ starter(){ #grabs the arguments
     local indexPos=0
     for i in ${startList[@]}; do # Loop over every argument
         # echo -e "${i}"
+        # echo -e "${isCmd}"
         if [[ "${isCmd}" == "true" ]] && [[ ${#startList[@]} != ${indexPos} ]]; then # If parameters were entered via command-line mode and we haven't reached the end of the parameters
             local var="${startList[${indexPos}+1]}"
         elif [[ "${isCmd}" == "false" ]]; then # If parameters were entered via config file, life is easy
@@ -222,6 +224,8 @@ starter(){ #grabs the arguments
         elif [[ "${i}" == "-JOB" ]]; then
             # local var=${args[${indexPos}+1]}
             projectDic["JOB"]="${var}"
+            echo -e "JOB STATUS:\n"
+            echo -e "${projectDic["JOB"]}"
         elif [[ "${i}" == "-CONFIGLOC" ]]; then
             # local var=${args[${indexPos}+1]}
             projectDic["configLocation"]="${var}"
@@ -1163,37 +1167,37 @@ jobCreator(){
 
     qsub <<EndofSubmission
     
-    #PBS -l "${job_specs}"
-    #PBS -M "${projectDic["email"]}"
-    #PBS -N "${projectDic["projectName"]}"
-    #PBS -o "${projectDic["outputLoc"]}"
-    #PBS -e "${projectDic["outputLoc"]}"
-    #PBS -m abe
+#PBS -l "${job_specs}"
+#PBS -M "${projectDic["email"]}"
+#PBS -N "${projectDic["projectName"]}"
+#PBS -o "${projectDic["outputLoc"]}"
+#PBS -e "${projectDic["outputLoc"]}"
+#PBS -m abe
 
-    set -e
-    set -o pipefail
+set -e
+set -o pipefail
 
-    "${scriptPath}"/SNPcontext \
-    -i "${projectDic["inputFile"]}" \
-    -o "${projectDic["outputLoc"]}" \
-    -w "${projectDic["windowLength"]}" \
-    -f "${projectDic["flanks"]}" \
-    -em "${projectDic["email"]}" \
-    -p "${projectDic["projectName"]}" \
-    -r "${projectDic["referenceGenome"]}" \
-    -ad "${projectDic["allData"]}" \
-    -n "${projectDic["nMax"]}" \
-    -s3 "${projectDic["s3"]}" \
-    -msi "${projectDic["msi"]}" \
-    -dpb "${projectDic["dropbox"]}" \
-    -dpba "${projectDic["dropboxAuth"]}" \
-    -gh "${projectDic["github"]}" \
-    -ghu "${projectDic["gitUser"]}" \
-    -ghp "${projectDic["gitPass"]}" \
-    -gho "${projectDic["owner"]}" \
-    -ghr "${projectDic["Myrepository"]}" \
-    -CONFIGLOC "${config}" \
-    -JOB "THIS_IS_A_JOB" \
+"${scriptPath}"/SNPcontext \
+-i "${projectDic["inputFile"]}" \
+-o "${projectDic["outputLoc"]}" \
+-w "${projectDic["windowLength"]}" \
+-f "${projectDic["flanks"]}" \
+-em "${projectDic["email"]}" \
+-p "${projectDic["projectName"]}" \
+-r "${projectDic["referenceGenome"]}" \
+-ad "${projectDic["allData"]}" \
+-n "${projectDic["nMax"]}" \
+-s3 "${projectDic["s3"]}" \
+-msi "${projectDic["msi"]}" \
+-dpb "${projectDic["dropbox"]}" \
+-dpba "${projectDic["dropboxAuth"]}" \
+-gh "${projectDic["github"]}" \
+-ghu "${projectDic["gitUser"]}" \
+-ghp "${projectDic["gitPass"]}" \
+-gho "${projectDic["owner"]}" \
+-ghr "${projectDic["Myrepository"]}" \
+-CONFIGLOC "${config}" \
+-JOB THIS_IS_A_JOB \
     
 EndofSubmission
 
