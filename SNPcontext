@@ -50,6 +50,8 @@ declare -A projectDic=(
     ["gitPass"]='' #-ghp
     ["owner"]='' #-gho
     ["Myrepository"]='' #-ghr
+    ["job_specs"]='' #-sp
+    ["configLocation"]=''
     ["JOB"]='NO_JOB_NOW'
     
 )
@@ -218,8 +220,11 @@ starter(){ #grabs the arguments
                 exit 1
             fi
         elif [[ "${i}" == "-JOB" ]]; then
-            local var=${args[${indexPos}+1]}
+            # local var=${args[${indexPos}+1]}
             projectDic["JOB"]="${var}"
+        elif [[ "${i}" == "-CONFIGLOC" ]]; then
+            # local var=${args[${indexPos}+1]}
+            projectDic["configLocation"]="${var}"
         elif [[ "${i,,}" == "-n"  ]] || [[ "${indel_max_amount}" == $i ]] && ((projectDic["nMax"] == -9091)); then
             # echo -e "ATTACK_ONE"
             if [[ "${var}" =~ [0-9] ]]; then ##CHECK WITH PETER!!!
@@ -352,11 +357,15 @@ starter(){ #grabs the arguments
         echo -e "Changing Dropbox mode to false"
         projectDic["dropbox"]="false"
     fi
-    if [[ "${projectDic["s3"]}" == "2" ]] || [[ "${projectDic["s3"],,}" == 3 ]]; then # If you want to S3, but we can't, that's a problem
-        if [[ ! -d ~/.aws ]]; then 
+    if (( "${projectDic["s3"]}" >= 2 )) || (( "${projectDic["s3"],,}" <= 3 )); then # If you want to S3, but we can't, that's a problem
+        if [[ ! -d ~/.aws ]] && (( "${projectDic["s3"]}" == 2 )); then 
             echo -e "AWS isn't set up in your home directory."
             echo -e "Changing S3 mode to false"
             projectDic["s3"]=0
+        elif [[ ! -d ~/.aws ]] && (( "${projectDic["s3"]}" == 3 )); then 
+            echo -e "AWS isn't set up in your home directory."
+            echo -e "Saving only to MSI's S3.\n"
+            projectDic["s3"]=1
         fi
     fi
     if [[ "${projectDic["github"],,}" == "true" ]]; then # Make sure we have all the things to do Github properly
@@ -499,6 +508,7 @@ s3Saver(){
                 echo -e "\nS3 bucket created..."
                 echo -e "\nTransfering files..."
                 if s3cmd put --recursive "${projectDic["outputLoc"]}"COUNTS_TABLES/ s3://${projectDic["projectName"],,} 2>/dev/null; then
+                    s3cmd put ${config} s3://${projectDic["projectName"],,} 2>/dev/null
                     echo -e "\n Files transfered to MSI S3...\n"
                 else
                     echo -e "MSI S3 file transfer failed...\n"
@@ -1063,7 +1073,7 @@ FASTA_SWEEP
 }
 #    Creates the job on UMN MSI
 #    Demonstrates that Corey can write more verbose code than Paul! Quite a victory!
-jobCreator(){
+jobCreatorOld(){
     myEmail="${projectDic["email"]}" job_specs="${job_specs}" scriptPath="${scriptPath}" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" \
     outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" \
     s3="${projectDic["s3"]}" msi="${projectDic["msi"]}" dpb="${projectDic["dropbox"]}" dpba="${projectDic["dropboxAuth"]}" gh="${projectDic["github"]}" ghu="${projectDic["gitUser"]}" ghp="${projectDic["gitPass"]}" \
@@ -1140,6 +1150,49 @@ exit 2
 
 }
 
+jobCreator(){
+    if [[ ${projectDic["iscmd"]} == "true" ]]; then
+        config=("$@")
+    else
+        config=""
+    fi
+
+    qsub <<EndofSubmission
+    
+    #PBS -l "${job_specs}"
+    #PBS -m abe
+    #PBS -M "${projectDic["email"]}"
+    #PBS -N "${projectDic["projectName"]}"
+    #PBS -o "${projectDic["outputLoc"]}"
+    #PBS -e "${projectDic["outputLoc"]}"
+
+    set -e
+    set -o pipefail
+
+    "${scriptPath}/SNPcontext \
+    -i " + "${projectDic["inputFile"] \
+    -o " + "${projectDic["outputLoc"] \
+    -w " + "${projectDic["windowLength"] \
+    -f " + "${projectDic["flanks"] \
+    -p " + "${projectDic["projectName"] \
+    -r " + "${projectDic["referenceGenome"] \
+    -ad " + "${projectDic["allData"] \
+    -n " + "${projectDic["nMax"] \
+    -s3 " + "${projectDic["s3"] \
+    -msi " + "${projectDic["msi"] \
+    -dpb " + "${projectDic["dropbox"] \
+    -dpba " + "${projectDic["dropboxAuth"] \
+    -gh " + "${projectDic["github"] \
+    -ghu " + "${projectDic["gitUser"] \
+    -ghp " + "${projectDic["gitPass"] \
+    -gho " + "${projectDic["owner"] \
+    -ghr " + "${projectDic["Myrepository"] \
+    -CONFIGLOC "${config}" \
+    -JOB THIS_IS_A_JOB
+    
+EndofSubmission
+}
+
 #    This is the primary function
 main(){
     config_check "$@"
@@ -1147,7 +1200,7 @@ main(){
         # echo -e "${projectDic["JOB"]}"
         # echo -e "${projectDic["msi"]}"
         module load python3_ML/3.6.4
-        jobCreator
+        jobCreator "$@"
     fi
     moduleLoader ##LOADS CORRECT MODULES        
     dirStructure
