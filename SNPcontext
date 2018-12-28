@@ -53,7 +53,7 @@ declare -A projectDic=(
     ["job_specs"]='' #-sp
     ["configLocation"]=''
     ["JOB"]='NO_JOB_NOW'
-    ["iscmd"]=''
+    ["isCmd"]=''
 )
 
 #     A bash list of all possible nucleotide state changes
@@ -126,6 +126,8 @@ config_check(){
                 exit 1
             fi
         elif (( "$#" > 1 )); then # If there's more than one argument, assume command-line mode
+
+
             projectDic["isCmd"]="true"
             declare -a startList=("$@")
             
@@ -502,7 +504,7 @@ dirStructure(){
 }
 #    Checks for UMN or Amazon S3, 1=UMN S3, 2=Amazon S3, 3=Amazon & UMN S3
 s3Saver(){
-    if [[ ${projectDic["iscmd"]} == "true" ]]; then
+    if [[ ${projectDic["isCmd"]} == "true" ]]; then
         config=("$@")
     else
         config="none"
@@ -524,7 +526,7 @@ s3Saver(){
         fi
         if (( "${projectDic["msi"]}" == 2 )) || (( "${projectDic["msi"]}" == 3 )); then
 
-            iscmd=${projectDic["iscmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" python3.6 - << END_OF_TRANSFER
+            isCmd=${projectDic["isCmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" python3.6 - << END_OF_TRANSFER
 #    Here we go in Python 3
 #    Start by loading a bunch of required libraries
 #    Only necessary to upload output to Amazon S3
@@ -533,7 +535,7 @@ import os
 import io
 import datetime
 
-def s3sentit(inputLoc, project, iscmd, config):
+def s3sentit(inputLoc, project, isCmd, config):
     date = datetime.datetime.now() 
     allFiles={}
     currentDir = inputLoc
@@ -551,7 +553,7 @@ def s3sentit(inputLoc, project, iscmd, config):
         with open(path[0], "rb") as fileIO:
             myPath = path[1] + "/" + file
             s3.Object(newFolder, myPath).upload_fileobj(fileIO)                     
-    if( iscmd == "true"):
+    if( isCmd == "true"):
         out=''
         with open(config, "r") as configScanner:
             out_buffer = io.BytesIO()
@@ -574,13 +576,13 @@ def s3sentit(inputLoc, project, iscmd, config):
 def bashimports():
     project = str(os.environ['project'])
     inputLoc = str(os.environ['output'])
-    iscmd = str(os.environ['iscmd'])
+    isCmd = str(os.environ['isCmd'])
     config = str(os.environ['config'])
-    return(inputLoc, project, iscmd, config)
+    return(inputLoc, project, isCmd, config)
 
 def main():
-    output, project, iscmd, config=bashimports()
-    s3sentit(output, project, iscmd, config)
+    output, project, isCmd, config=bashimports()
+    s3sentit(output, project, isCmd, config)
 
 main()
 
@@ -597,18 +599,18 @@ END_OF_TRANSFER
 }
 #    Module to upload output to Dropbox
 dropboxSaver(){
-    if [[ ${projectDic["iscmd"]} == "true" ]]; then
+    if [[ ${projectDic["isCmd"]} == "true" ]]; then
         config=("$@")
     else
         config="none"
     fi
-    iscmd=${projectDic["iscmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" dbAuth="${projectDic["dropboxAuth"]}" python3.6 - << END_OF_TRANSFER
+    isCmd=${projectDic["isCmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" dbAuth="${projectDic["dropboxAuth"]}" python3.6 - << END_OF_TRANSFER
 
 import dropbox
 import os
 import datetime
 
-def dpsentit(inputLoc, project, dbAuth, iscmd, config):
+def dpsentit(inputLoc, project, dbAuth, isCmd, config):
     date = datetime.datetime.now()
     allFiles={}
     currentDir = inputLoc  
@@ -623,7 +625,7 @@ def dpsentit(inputLoc, project, dbAuth, iscmd, config):
             myPath= newFolder + "/" + path[1] + "/" + file
             dbx.files_upload(sendDP.read(), myPath, mode=dropbox.files.WriteMode.overwrite)
 
-    if( iscmd == "true"):
+    if( isCmd == "true"):
         out=''
         with open(config, "r") as configScanner:
             for i in configScanner.readlines():
@@ -642,13 +644,13 @@ def bashimports():
     dbAuth = str(os.environ['dbAuth'])    
     project = str(os.environ['project'])
     inputLoc = str(os.environ['output'])
-    iscmd = str(os.environ['iscmd'])
+    isCmd = str(os.environ['isCmd'])
     config = str(os.environ['config'])
-    return(inputLoc, project, dbAuth, iscmd, config)
+    return(inputLoc, project, dbAuth, isCmd, config)
 
 def main():
-    inputLoc, project, dbAuth, iscmd, config=bashimports()
-    dpsentit(inputLoc, project, dbAuth, iscmd, config)
+    inputLoc, project, dbAuth, isCmd, config=bashimports()
+    dpsentit(inputLoc, project, dbAuth, isCmd, config)
     
 main()
 
@@ -659,19 +661,19 @@ END_OF_TRANSFER
 }
 #    Upload output to GitHub
 gitHubSendIt() {
-    if [[ ${projectDic["iscmd"]} == "true" ]]; then
+    if [[ ${projectDic["isCmd"]} == "true" ]]; then
         config=("$@")
     else
         config="none"
     fi
-           iscmd=${projectDic["iscmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" gitUser="${projectDic["gitUser"]}" gitPass="${projectDic["gitPass"]}" repo="${projectDic["repo"]}" gitowner="${projectDic["gitowner"]}" python3.6 - << END_OF_TRANSFER
+           isCmd=${projectDic["isCmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" gitUser="${projectDic["gitUser"]}" gitPass="${projectDic["gitPass"]}" repo="${projectDic["repo"]}" gitowner="${projectDic["gitowner"]}" python3.6 - << END_OF_TRANSFER
 
 #    Python 3 for GitHub upload
 import os
 import github3
 import datetime
 
-def githubSend(inputLoc, project, gitUser, gitPass, Myrepository, owner, iscmd, config):
+def githubSend(inputLoc, project, gitUser, gitPass, Myrepository, owner, isCmd, config):
     date = datetime.datetime.now() 
     allFiles={}
     currentDir = inputLoc
@@ -692,7 +694,7 @@ def githubSend(inputLoc, project, gitUser, gitPass, Myrepository, owner, iscmd, 
         myPath= newFolder + "/" + path[1] + "/" + file
         repo.create_file(path=myPath, message="Uploading " + file, content=direction)
     
-    if( iscmd == "true"):
+    if( isCmd == "true"):
         out=''
         with open(config, "r") as configScanner:
             for i in configScanner.readlines():
@@ -714,13 +716,13 @@ def bashimports():
     gitPass = str(os.environ['gitPass'])
     Myrepository = str(os.environ['repo'])
     owner = str(os.environ['gitowner'])
-    iscmd = str(os.environ['iscmd'])
+    isCmd = str(os.environ['isCmd'])
     config = str(os.environ['config'])  
-    return(inputLoc, project, gitUser, gitPass, Myrepository, owner, iscmd, config)
+    return(inputLoc, project, gitUser, gitPass, Myrepository, owner, isCmd, config)
 
 def main():
-    inputLoc, project, gitUser, gitPass, Myrepository, owner, iscmd, config = bashimports()
-    githubSend(inputLoc, project, gitUser, gitPass, Myrepository, owner, iscmd, config)
+    inputLoc, project, gitUser, gitPass, Myrepository, owner, isCmd, config = bashimports()
+    githubSend(inputLoc, project, gitUser, gitPass, Myrepository, owner, isCmd, config)
 
 main()
 
@@ -1156,7 +1158,7 @@ exit 2
 }
 
 jobCreator(){
-    if [[ ${projectDic["iscmd"]} == "true" ]]; then
+    if [[ ${projectDic["isCmd"]} == "true" ]]; then
         config=("$@")
     else
         config="none"
