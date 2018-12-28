@@ -1166,8 +1166,8 @@ jobCreator(){
 #PBS -o "${projectDic["outputLoc"]}"
 #PBS -e "${projectDic["outputLoc"]}"
 
-set -e #test
-set -o #test
+set -e
+set -o pipefail
 
 "${scriptPath}"/SNPcontext \
 -i "${projectDic["inputFile"]}" \
