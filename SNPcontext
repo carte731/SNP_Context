@@ -293,6 +293,7 @@ starter(){ #grabs the arguments
 
             else
                 echo -e "No valid entry for github uploading (true or false), defaulting to false."
+                projectDic["github"]="false"
             fi
         elif [[ "${i,,}" == "-msi" ]] || [[ ${MSI_Mode} == $i ]] && [[ ${projectDic["msi"]} == "" ]]; then # Set flag for MSI-specific operations
             # echo -e "MSI MODE:\n"
@@ -1165,9 +1166,6 @@ jobCreator(){
 #PBS -N "${projectDic["projectName"]}"
 #PBS -o "${projectDic["outputLoc"]}"
 #PBS -e "${projectDic["outputLoc"]}"
-
-set -e
-set -o pipefail
 
 "${scriptPath}"/SNPcontext \
 -i "${projectDic["inputFile"]}" \
