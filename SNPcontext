@@ -53,7 +53,7 @@ declare -A projectDic=(
     ["job_specs"]='' #-sp
     ["configLocation"]=''
     ["JOB"]='NO_JOB_NOW'
-    
+    ["iscmd"]=''
 )
 
 #     A bash list of all possible nucleotide state changes
@@ -89,7 +89,7 @@ config_check(){
             elif [[ -f "${args[0]}" ]] || [[ ! -z "${args[0]}" ]]; then # And that argument is a file path
                 local var=${args##*.} ## Grabs only the extension
                 if [[ ${var,,} == "config" ]]; then ## Checks if it's a .config file
-                    isCmd="false"
+                    "${projectDic[isCmd"]}"="false"
                     source "${args[0]}"
                     declare -a startList=(
                         ${window_length}
@@ -126,7 +126,7 @@ config_check(){
                 exit 1
             fi
         elif (( "$#" > 1 )); then # If there's more than one argument, assume command-line mode
-            isCmd="true"
+            "${projectDic[isCmd"]}"="true"
             declare -a startList=("$@")
             
             # starter ${startList} # Calls program to assign variables
@@ -147,9 +147,9 @@ starter(){ #grabs the arguments
     for i in ${startList[@]}; do # Loop over every argument
         # echo -e "${i}"
         # echo -e "${isCmd}"
-        if [[ "${isCmd}" == "true" ]] && [[ ${#startList[@]} != ${indexPos} ]]; then # If parameters were entered via command-line mode and we haven't reached the end of the parameters
+        if [[ "${projectDic[isCmd"]}" == "true" ]] && [[ ${#startList[@]} != ${indexPos} ]]; then # If parameters were entered via command-line mode and we haven't reached the end of the parameters
             local var="${startList[${indexPos}+1]}"
-        elif [[ "${isCmd}" == "false" ]]; then # If parameters were entered via config file, life is easy
+        elif [[ "${projectDic[isCmd"]}" == "false" ]]; then # If parameters were entered via config file, life is easy
             local var="${i}"
         fi
         if [[ "${i,,}" == "-em" ]] || [[ ${input_email} == $i ]] && [[ ${projectDic["email"]} == "" ]]; then # Set the email
@@ -1159,11 +1159,11 @@ jobCreator(){
     if [[ ${projectDic["iscmd"]} == "true" ]]; then
         config=("$@")
     else
-        config=""
+        config="none"
     fi
 
-    echo -e "Whats my Price?"
-    echo -e "${projectDic["JOB"]}"
+    # echo -e "Whats my Price?"
+    # echo -e "${projectDic["JOB"]}"
 
     qsub <<EndofSubmission
     
