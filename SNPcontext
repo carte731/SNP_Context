@@ -127,7 +127,7 @@ config_check(){
             fi
         elif (( "$#" > 1 )); then # If there's more than one argument, assume command-line mode
 
-
+            echo -e "CMD TEST ONE"
             projectDic["isCmd"]="true"
             declare -a startList=("$@")
             
@@ -150,6 +150,8 @@ starter(){ #grabs the arguments
         # echo -e "${i}"
         # echo -e "${isCmd}"
         if [[ "${projectDic["isCmd"]}" == "true" ]] && [[ ${#startList[@]} != ${indexPos} ]]; then # If parameters were entered via command-line mode and we haven't reached the end of the parameters
+        # if [[ "${projectDic["isCmd"]}" == "true" ]] && [[ ${#startList[@]} < ${indexPos} ]]; then # If parameters were entered via command-line mode and we haven't reached the end of the parameters
+            echo -e "CMD TEST TWO"
             local var="${startList[${indexPos}+1]}"
         elif [[ "${projectDic["isCmd"]}" == "false" ]]; then # If parameters were entered via config file, life is easy
             local var="${i}"
@@ -226,7 +228,7 @@ starter(){ #grabs the arguments
         elif [[ "${i}" == "-JOB" ]]; then
             # local var=${args[${indexPos}+1]}
             projectDic["JOB"]="${var}"
-            echo -e "JOB STATUS:\n"
+            echo -e "JOB STATUS:"
             echo -e "${projectDic["JOB"]}"
         elif [[ "${i}" == "-CONFIGLOC" ]]; then
             # local var=${args[${indexPos}+1]}
