@@ -1194,21 +1194,21 @@ jobCreator(){
 
     echo -e "${job}"
 
-#     qsub <<EndofSubmission
+    qsub <<EndofSubmission
     
-# #PBS -l "${job_specs}"
-# #PBS -M "${projectDic["email"]}"
-# #PBS -N "${projectDic["projectName"]}"
-# #PBS -o "${projectDic["outputLoc"]}"
-# #PBS -e "${projectDic["outputLoc"]}"
-# #PBS -m abe
+#PBS -l "${job_specs}"
+#PBS -M "${projectDic["email"]}"
+#PBS -N "${projectDic["projectName"]}"
+#PBS -o "${projectDic["outputLoc"]}"
+#PBS -e "${projectDic["outputLoc"]}"
+#PBS -m abe
 
-# set -e
-# set -o pipefail
+set -e
+set -o pipefail
 
-# "${scriptPath}"/SNPcontext "${job}"
+"${scriptPath}"/SNPcontext "${job}"
     
-# EndofSubmission
+EndofSubmission
 
     echo -e "\nJob submited.\nEXITING...\n"
     exit 2
