@@ -1179,27 +1179,13 @@ qsub <<EndofSubmission
     #PBS -e "${projectDic["outputLoc"]}"
     #PBS -m abe
 
-    "${scriptPath}"/SNPcontext \
-    -i "${projectDic["inputFile"]}" \
-    -o "${projectDic["outputLoc"]}" \
-    -w "${projectDic["windowLength"]}" \
-    -f "${projectDic["flanks"]}" \
-    -em "${projectDic["email"]}" \
-    -p "${projectDic["projectName"]}" \
-    -r "${projectDic["referenceGenome"]}" \
-    -ad "${projectDic["allData"]}" \
-    -n "${projectDic["nMax"]}" \
-    -s3 "${projectDic["s3"]}" \
-    -msi "${projectDic["msi"]}" \
-    -dpb "${projectDic["dropbox"]}" \
-    -dpba "${projectDic["dropboxAuth"]}" \
-    -gh "${projectDic["github"]}" \
-    -ghu "${projectDic["gitUser"]}" \
-    -ghp "${projectDic["gitPass"]}" \
-    -gho "${projectDic["owner"]}" \
-    -ghr "${projectDic["Myrepository"]}" \
-    -CONFIGLOC "${config}" \
-    -JOB THIS_IS_A_JOB
+    "${scriptPath}"/SNPcontext -i "${projectDic["inputFile"]}" -o "${projectDic["outputLoc"]}" \
+    -w "${projectDic["windowLength"]}" -f "${projectDic["flanks"]}" -em "${projectDic["email"]}" \
+    -p "${projectDic["projectName"]}" -r "${projectDic["referenceGenome"]}" -ad "${projectDic["allData"]}" \
+    -n "${projectDic["nMax"]}" -s3 "${projectDic["s3"]}" -msi "${projectDic["msi"]}" \
+    -dpb "${projectDic["dropbox"]}" -dpba "${projectDic["dropboxAuth"]}" -gh "${projectDic["github"]}" \
+    -ghu "${projectDic["gitUser"]}" -ghp "${projectDic["gitPass"]}" -gho "${projectDic["owner"]}" \
+    -ghr "${projectDic["Myrepository"]}" -CONFIGLOC "${config}" -JOB THIS_IS_A_JOB
     
 EndofSubmission
 
