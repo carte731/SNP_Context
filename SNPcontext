@@ -148,7 +148,7 @@ starter(){ #grabs the arguments
     local frontgate=0
     local indexPos=0
     for i in ${startList[@]}; do # Loop over every argument
-        # echo -e "${i}"
+        echo -e "${i}"
         # echo -e "${isCmd}"
         if [[ "${projectDic["isCmd"]}" == "true" ]] && [[ ${#startList[@]} != ${indexPos} ]]; then # If parameters were entered via command-line mode and we haven't reached the end of the parameters
         # if [[ "${projectDic["isCmd"]}" == "true" ]] && [[ ${#startList[@]} < ${indexPos} ]]; then # If parameters were entered via command-line mode and we haven't reached the end of the parameters
@@ -274,15 +274,13 @@ starter(){ #grabs the arguments
                 echo -e "No valid all data entry (true or false), defaulting to false. Only counts tables will be saved."
             fi
         elif [[ "${i,,}" == "-s3" ]] || [[ ${save_S3} == $i ]] && (( ${projectDic["s3"]} == -9091 )); then # Set flag for saving to S3
-            if (( ${var} > 0 )); then
-                if (( ${var} == 1 )) || (( ${var} == 2 )) || (( ${var} == 3 )); then
-                    projectDic["s3"]="${var,,}"
-                    frontgate=1
-                    unset save_S3
-                else
-                    echo -e "No valid entry for S3 storage (0 to 3), defaulting to false."
-                    projectDic["s3"]=0
-                fi
+            if (( ${var} >= 1 )) && (( ${var} <= 3 )); then
+                projectDic["s3"]="${var,,}"
+                frontgate=1
+                unset save_S3
+            else
+                echo -e "No valid entry for S3 storage (0 to 3), defaulting to false."
+                projectDic["s3"]=0
             fi
         elif [[ "${i,,}" == "-dpb" ]] || [[ ${dropbox} == $i ]] && [[ ${projectDic["dropbox"]} == "" ]]; then # Set flag for saving to Dropbox
             if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
@@ -1162,9 +1160,9 @@ exit 2
 
 jobCreator(){
     if [[ ${projectDic["isCmd"]} == "false" ]]; then
-        config=("$@")
+        local config="$@"
     else
-        config="none"
+        local config="none"
     fi
 
     # echo -e "Whats my Price?"
