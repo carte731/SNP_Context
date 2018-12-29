@@ -1182,10 +1182,10 @@ qsub <<EndofSubmission
     "${scriptPath}"/SNPcontext -i "${projectDic["inputFile"]}" -o "${projectDic["outputLoc"]}" \
     -w "${projectDic["windowLength"]}" -f "${projectDic["flanks"]}" -em "${projectDic["email"]}" \
     -p "${projectDic["projectName"]}" -r "${projectDic["referenceGenome"]}" -ad "${projectDic["allData"]}" \
-    -n "${projectDic["nMax"]}" -s3 "${projectDic["s3"]}" -msi "${projectDic["msi"]}" \
+    -n "${projectDic["nMax"]}" -JOB THIS_IS_A_JOB -msi "${projectDic["msi"]}" \
     -dpb "${projectDic["dropbox"]}" -dpba "${projectDic["dropboxAuth"]}" -gh "${projectDic["github"]}" \
     -ghu "${projectDic["gitUser"]}" -ghp "${projectDic["gitPass"]}" -gho "${projectDic["owner"]}" \
-    -ghr "${projectDic["Myrepository"]}" -CONFIGLOC "${config}" -JOB THIS_IS_A_JOB
+    -s3 "${projectDic["s3"]}" -ghr "${projectDic["Myrepository"]}" -CONFIGLOC "${config}"
     
 EndofSubmission
 
