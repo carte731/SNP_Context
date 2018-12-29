@@ -1161,11 +1161,11 @@ exit 2
 }
 
 jobCreator(){
-    if [[ ${projectDic["isCmd"]} == "true" ]]; then
-        echo -e "IS CMD TRUE"
+    if [[ ${projectDic["isCmd"]} == "false" ]]; then
+        echo -e "IS CMD FALSE."
         config=("$@")
     else
-        echo -e "IS CMD FALSE"
+        echo -e "IS CMD TRUE."
         config="none"
     fi
 
