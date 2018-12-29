@@ -1162,37 +1162,13 @@ exit 2
 
 jobCreator(){
     if [[ ${projectDic["isCmd"]} == "false" ]]; then
-        echo -e "IS CMD FALSE."
         config=("$@")
     else
-        echo -e "IS CMD TRUE."
         config="none"
     fi
 
     # echo -e "Whats my Price?"
     # echo -e "${projectDic["JOB"]}"
-    job="-i ${projectDic["inputFile"]} "
-    job+=" -o ${projectDic["outputLoc"]} " 
-    job+=" -w ${projectDic["windowLength"]} " 
-    job+=" -f ${projectDic["flanks"]} " 
-    job+=" -em ${projectDic["email"]} " 
-    job+=" -p ${projectDic["projectName"]} " 
-    job+=" -r ${projectDic["referenceGenome"]} " 
-    job+=" -ad ${projectDic["allData"]} " 
-    job+=" -n ${projectDic["nMax"]} " 
-    job+=" -s3 ${projectDic["s3"]} " 
-    job+=" -msi ${projectDic["msi"]} " 
-    job+=" -dpb ${projectDic["dropbox"]} " 
-    job+=" -dpba ${projectDic["dropboxAuth"]} " 
-    job+=" -gh ${projectDic["github"]} " 
-    job+=" -ghu ${projectDic["gitUser"]} " 
-    job+=" -ghp ${projectDic["gitPass"]} " 
-    job+=" -gho ${projectDic["owner"]} " 
-    job+=" -ghr ${projectDic["Myrepository"]} " 
-    job+=" -CONFIGLOC ${config} " 
-    job+=" -JOB THIS_IS_A_JOB"
-
-    echo -e "${job}"
 
     qsub <<EndofSubmission
     
@@ -1206,7 +1182,27 @@ jobCreator(){
 set -e
 set -o pipefail
 
-"${scriptPath}"/SNPcontext "${job}"
+"${scriptPath}"/SNPcontext \
+-i "${projectDic["inputFile"]}" \
+-o "${projectDic["outputLoc"]}" \
+-w "${projectDic["windowLength"]}" \
+-f "${projectDic["flanks"]}" \
+-em "${projectDic["email"]}" \
+-p "${projectDic["projectName"]}" \
+-r "${projectDic["referenceGenome"]}" \
+-ad "${projectDic["allData"]}" \
+-n "${projectDic["nMax"]}" \
+-s3 "${projectDic["s3"]}" \
+-msi "${projectDic["msi"]}" \
+-dpb "${projectDic["dropbox"]}" \
+-dpba "${projectDic["dropboxAuth"]}" \
+-gh "${projectDic["github"]}" \
+-ghu "${projectDic["gitUser"]}" \
+-ghp "${projectDic["gitPass"]}" \
+-gho "${projectDic["owner"]}" \
+-ghr "${projectDic["Myrepository"]}" \
+-CONFIGLOC "${config}" \
+-JOB "THIS_IS_A_JOB"
     
 EndofSubmission
 
