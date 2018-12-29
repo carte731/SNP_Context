@@ -89,6 +89,7 @@ config_check(){
             elif [[ -f "${args[0]}" ]] || [[ ! -z "${args[0]}" ]]; then # And that argument is a file path
                 local var=${args##*.} ## Grabs only the extension
                 if [[ ${var,,} == "config" ]]; then ## Checks if it's a .config file
+                    echo -e "CONFIG FILE TEST ONE"
                     projectDic["isCmd"]="false"
                     source "${args[0]}"
                     declare -a startList=(
