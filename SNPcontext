@@ -89,7 +89,7 @@ config_check(){
             elif [[ -f "${args[0]}" ]] || [[ ! -z "${args[0]}" ]]; then # And that argument is a file path
                 local var=${args##*.} ## Grabs only the extension
                 if [[ ${var,,} == "config" ]]; then ## Checks if it's a .config file
-                    echo -e "CONFIG FILE TEST ONE"
+                    # echo -e "CONFIG FILE TEST ONE"
                     projectDic["isCmd"]="false"
                     source "${args[0]}"
                     declare -a startList=(
@@ -128,7 +128,7 @@ config_check(){
             fi
         elif (( "$#" > 1 )); then # If there's more than one argument, assume command-line mode
 
-            echo -e "CMD TEST ONE"
+            # echo -e "CMD TEST ONE"
             projectDic["isCmd"]="true"
             declare -a startList=("$@")
             
@@ -148,11 +148,11 @@ starter(){ #grabs the arguments
     local frontgate=0
     local indexPos=0
     for i in ${startList[@]}; do # Loop over every argument
-        echo -e "${i}"
+        # echo -e "${i}"
         # echo -e "${isCmd}"
         if [[ "${projectDic["isCmd"]}" == "true" ]] && [[ ${#startList[@]} != ${indexPos} ]]; then # If parameters were entered via command-line mode and we haven't reached the end of the parameters
         # if [[ "${projectDic["isCmd"]}" == "true" ]] && [[ ${#startList[@]} < ${indexPos} ]]; then # If parameters were entered via command-line mode and we haven't reached the end of the parameters
-            echo -e "CMD TEST TWO"
+            # echo -e "CMD TEST TWO"
             local var="${startList[${indexPos}+1]}"
         elif [[ "${projectDic["isCmd"]}" == "false" ]]; then # If parameters were entered via config file, life is easy
             local var="${i}"
@@ -229,8 +229,8 @@ starter(){ #grabs the arguments
         elif [[ "${i}" == "-JOB" ]]; then
             # local var=${args[${indexPos}+1]}
             projectDic["JOB"]="${var}"
-            echo -e "JOB STATUS:"
-            echo -e "${projectDic["JOB"]}"
+            # echo -e "JOB STATUS:"
+            # echo -e "${projectDic["JOB"]}"
         elif [[ "${i}" == "-CONFIGLOC" ]]; then
             # local var=${args[${indexPos}+1]}
             projectDic["configLocation"]="${var}"
@@ -1166,7 +1166,7 @@ jobCreator(){
     fi
 
     # echo -e "Whats my Price?"
-    echo -e "${scriptPath}"
+    # echo -e "${scriptPath}"
 
 qsub <<EndofSubmission
     
