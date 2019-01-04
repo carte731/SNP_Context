@@ -341,7 +341,7 @@ starter(){ #grabs the arguments
         fi
         ((indexPos+=1))
     done
-    if ((${frontgate} <= 0)); then # If none of the above if statements were true, then something was invalid
+    if [[ "${frontgate}" -ge 0 ]]; then # If none of the above if statements were true, then something was invalid
         echo -e "\nPlease enter valid arguments. None were valid.\n"
         exit 1
     fi
@@ -366,7 +366,7 @@ starter(){ #grabs the arguments
         echo -e "Changing Dropbox mode to false"
         projectDic["dropbox"]="false"
     fi
-    if (( "${projectDic["s3"]}" >= 2 )) || (( "${projectDic["s3"],,}" <= 3 )); then # If you want to S3, but we can't, that's a problem
+    if [[ "${projectDic["s3"]}" -eq 2 ]] || [[ "${projectDic["s3"],,}" -eq 3 ]]; then # If you want to S3, but we can't, that's a problem
         if [[ ! -d ~/.aws ]] && (( "${projectDic["s3"]}" == 2 )); then 
             echo -e "AWS isn't set up in your home directory."
             echo -e "Changing S3 mode to false"
@@ -1248,7 +1248,7 @@ main(){
         local templocation="${projectDic["TempLoc"]}"
         rm -rf "${templocation}"
     fi
-    if (( "${projectDic["s3"]}" > 0 )); then
+    if [[ "${projectDic["s3"]}" -gt 0 ]]; then
         # echo -e "TEST"
         # echo -e "${projectDic["s3"]}\n"
         s3Saver "$@"
