@@ -150,12 +150,13 @@ starter(){ #grabs the arguments
     for i in ${startList[@]}; do # Loop over every argument
         # echo -e "${i}"
         # echo -e "${isCmd}"
-        if [[ "${projectDic["isCmd"]}" == "true" ]] && [[ ${#startList[@]} != ${indexPos} ]]; then # If parameters were entered via command-line mode and we haven't reached the end of the parameters
-        # if [[ "${projectDic["isCmd"]}" == "true" ]] && [[ ${#startList[@]} < ${indexPos} ]]; then # If parameters were entered via command-line mode and we haven't reached the end of the parameters
+        # if [[ "${projectDic["isCmd"]}" == "true" ]] && [[ ${#startList[@]} != ${indexPos} ]]; then # If parameters were entered via command-line mode and we haven't reached the end of the parameters
+        if [[ "${projectDic["isCmd"]}" == "true" ]]; then # If parameters were entered via command-line mode and we haven't reached the end of the parameters
             # echo -e "CMD TEST TWO"
-            local var="${startList[${indexPos}+1]}"
-        elif [[ "${projectDic["isCmd"]}" == "false" ]]; then # If parameters were entered via config file, life is easy
-            local var="${i}"
+            var="${startList[${indexPos}+1]}"
+        # elif [[ "${projectDic["isCmd"]}" == "false" ]]; then # If parameters were entered via config file, life is easy
+        else
+            var="${i}"
         fi
         if [[ "${i,,}" == "-em" ]] || [[ ${input_email} == $i ]] && [[ ${projectDic["email"]} == "" ]]; then # Set the email
             projectDic["email"]="${var}"
@@ -1167,8 +1168,10 @@ main()
     
 JOB_CREATED
 
+echo -e ""
+
 qsub "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
-echo -e "\nJob submitted.\nEXITING...\n"
+echo -e "Job submitted.\nEXITING...\n"
 exit 2
 
 }
