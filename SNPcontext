@@ -505,12 +505,20 @@ dirStructure(){
 }
 #    Checks for UMN or Amazon S3, 1=UMN S3, 2=Amazon S3, 3=Amazon & UMN S3
 s3Saver(){
-    if [[ ${projectDic["isCmd"]} == "false" ]]; then
-        if [[ ${projectDic["configLocation"]} != '' ]]; then
-            config=${projectDic["configLocation"]}
-        else
-            config="$@"
-        fi
+    # if [[ ${projectDic["isCmd"]} == "false" ]]; then
+    #     if [[ ${projectDic["configLocation"]} != '' ]]; then
+    #         config=${projectDic["configLocation"]}
+    #     else
+    #         config="$@"
+    #     fi
+    # else
+    #     config="none"
+    # fi
+
+    if [[ ${projectDic["isCmd"]} == "false" ]] && [[ ${projectDic["configLocation"]} == '' ]]; then
+        config="$@"
+    elif [[ ${projectDic["isCmd"]} == "true" ]] && [[ ${projectDic["configLocation"]} != '' ]]; then
+        config=${projectDic["configLocation"]}
     else
         config="none"
     fi
