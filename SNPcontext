@@ -505,8 +505,11 @@ dirStructure(){
 }
 #    Checks for UMN or Amazon S3, 1=UMN S3, 2=Amazon S3, 3=Amazon & UMN S3
 s3Saver(){
-    if [[ ${projectDic["isCmd"]} == "true" ]]; then
-        config=("$@")
+    if [[ ${projectDic["isCmd"]} == "false" ]]; then
+        if [[ ${projectDic["configLocation"]} ]]; then
+            config=${projectDic["configLocation"]}
+        else
+            config="$@"
     else
         config="none"
     fi
@@ -537,7 +540,7 @@ import io
 import datetime
 
 def s3sentit(inputLoc, project, isCmd, config):
-    date = datetime.datetime.now() 
+    date = datetime.datetime.now()
     allFiles={}
     currentDir = inputLoc
     s3 = boto3.resource('s3')
@@ -554,7 +557,7 @@ def s3sentit(inputLoc, project, isCmd, config):
         with open(path[0], "rb") as fileIO:
             myPath = path[1] + "/" + file
             s3.Object(newFolder, myPath).upload_fileobj(fileIO)                     
-    if( isCmd == "true"):
+    if(isCmd == "false"):
         out=''
         with open(config, "r") as configScanner:
             out_buffer = io.BytesIO()
@@ -600,8 +603,11 @@ END_OF_TRANSFER
 }
 #    Module to upload output to Dropbox
 dropboxSaver(){
-    if [[ ${projectDic["isCmd"]} == "true" ]]; then
-        config=("$@")
+    if [[ ${projectDic["isCmd"]} == "false" ]]; then
+        if [[ ${projectDic["configLocation"]} ]]; then
+            config=${projectDic["configLocation"]}
+        else
+            config="$@"
     else
         config="none"
     fi
@@ -626,7 +632,7 @@ def dpsentit(inputLoc, project, dbAuth, isCmd, config):
             myPath= newFolder + "/" + path[1] + "/" + file
             dbx.files_upload(sendDP.read(), myPath, mode=dropbox.files.WriteMode.overwrite)
 
-    if( isCmd == "true"):
+    if( isCmd == "false"):
         out=''
         with open(config, "r") as configScanner:
             for i in configScanner.readlines():
@@ -662,8 +668,11 @@ END_OF_TRANSFER
 }
 #    Upload output to GitHub
 gitHubSendIt() {
-    if [[ ${projectDic["isCmd"]} == "true" ]]; then
-        config=("$@")
+    if [[ ${projectDic["isCmd"]} == "false" ]]; then
+        if [[ ${projectDic["configLocation"]} ]]; then
+            config=${projectDic["configLocation"]}
+        else
+            config="$@"
     else
         config="none"
     fi
@@ -695,7 +704,7 @@ def githubSend(inputLoc, project, gitUser, gitPass, Myrepository, owner, isCmd, 
         myPath= newFolder + "/" + path[1] + "/" + file
         repo.create_file(path=myPath, message="Uploading " + file, content=direction)
     
-    if( isCmd == "true"):
+    if( isCmd == "false"):
         out=''
         with open(config, "r") as configScanner:
             for i in configScanner.readlines():
