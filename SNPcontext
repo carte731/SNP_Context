@@ -624,6 +624,7 @@ def dpsentit(inputLoc, project, dbAuth, isCmd, config):
     dbx = dropbox.Dropbox(dbAuth)
     newFolder = "/" + project + "-countfiles" + "-" + date.strftime("%Y%m%d") + "-" + date.strftime("%H%M")
     countsDirs = next(os.walk(inputLoc + "COUNTS_TABLES/"))[1]
+    print(countsDirs)
     for files in countsDirs:
         bottomDirs = currentDir + "COUNTS_TABLES/" + files + "/"        
         [ allFiles.update({f: [bottomDirs + f, files]}) for f in os.listdir(bottomDirs) if os.path.isfile(bottomDirs + f) ]
