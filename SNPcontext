@@ -287,7 +287,6 @@ starter(){ #grabs the arguments
                 projectDic["dropbox"]="${var,,}"
                 frontgate=1
                 unset dropbox
-
             else
                 echo -e "No valid entry for Dropbox uploading (true or false), defaulting to false."
             fi
@@ -297,7 +296,6 @@ starter(){ #grabs the arguments
                 projectDic["github"]="${var,,}"
                 frontgate=1
                 unset github
-
             else
                 echo -e "No valid entry for github uploading (true or false), defaulting to false."
                 projectDic["github"]="false"
