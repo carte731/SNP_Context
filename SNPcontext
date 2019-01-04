@@ -510,6 +510,7 @@ s3Saver(){
             config=${projectDic["configLocation"]}
         else
             config="$@"
+        fi
     else
         config="none"
     fi
@@ -608,6 +609,7 @@ dropboxSaver(){
             config=${projectDic["configLocation"]}
         else
             config="$@"
+        fi
     else
         config="none"
     fi
@@ -673,6 +675,7 @@ gitHubSendIt() {
             config=${projectDic["configLocation"]}
         else
             config="$@"
+        fi
     else
         config="none"
     fi
