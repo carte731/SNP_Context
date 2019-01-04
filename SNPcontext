@@ -557,7 +557,7 @@ def s3sentit(inputLoc, project, isCmd, config):
         with open(path[0], "rb") as fileIO:
             myPath = path[1] + "/" + file
             s3.Object(newFolder, myPath).upload_fileobj(fileIO)                     
-    if(isCmd == "false"):
+    if(config != "none"):
         out=''
         with open(config, "r") as configScanner:
             out_buffer = io.BytesIO()
@@ -632,7 +632,7 @@ def dpsentit(inputLoc, project, dbAuth, isCmd, config):
             myPath= newFolder + "/" + path[1] + "/" + file
             dbx.files_upload(sendDP.read(), myPath, mode=dropbox.files.WriteMode.overwrite)
 
-    if( isCmd == "false"):
+    if(config != "none"):
         out=''
         with open(config, "r") as configScanner:
             for i in configScanner.readlines():
@@ -675,7 +675,7 @@ gitHubSendIt() {
     else
         config="none"
     fi
-    
+
            isCmd=${projectDic["isCmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" gitUser="${projectDic["gitUser"]}" gitPass="${projectDic["gitPass"]}" repo="${projectDic["repo"]}" gitowner="${projectDic["gitowner"]}" python3.6 - << END_OF_TRANSFER
 
 #    Python 3 for GitHub upload
@@ -704,7 +704,7 @@ def githubSend(inputLoc, project, gitUser, gitPass, Myrepository, owner, isCmd, 
         myPath= newFolder + "/" + path[1] + "/" + file
         repo.create_file(path=myPath, message="Uploading " + file, content=direction)
     
-    if( isCmd == "false"):
+    if(config != "none"):
         out=''
         with open(config, "r") as configScanner:
             for i in configScanner.readlines():
