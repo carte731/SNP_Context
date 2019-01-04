@@ -293,7 +293,7 @@ starter(){ #grabs the arguments
                 echo -e "No valid entry for Dropbox uploading (true or false), defaulting to false."
             fi
         elif [[ "${i,,}" == "-gh" ]] || [[ ${github} == $i ]] && [[ ${projectDic["github"]} == "" ]]; then # Set flag for saving to Github
-            echo -e "${var,,}"
+            # echo -e "${var,,}"
             if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
                 # echo -e "${var,,}"
                 projectDic["github"]="${var,,}"
@@ -1112,8 +1112,8 @@ import os
 
 def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config):
     job="#!/bin/bash -l\n\n#PBS -l " + job_specs + "\n#PBS -m abe\n#PBS -M " + email + "\n"
-    job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\n"
-    job+="#PBS -o " + outputLoc + "_" + projectName + "\n#PBS -e " + outputLoc + "_" + projectName + "\n\n"
+    job+="#PBS -N " + projectName + "\n"
+    job+="#PBS -o " + outputLoc + "\n#PBS -e " + outputLoc + "\n\n"
     
     job+= scriptPath + "/SNPcontext "
     job+= "-i " + inputFile + " "
