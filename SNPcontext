@@ -320,7 +320,7 @@ starter(){ #grabs the arguments
                 unset MSI_Mode                
             fi
         elif [[ "${i,,}" == "-dpba" ]] || [[ ${dropbox_auth} == $i ]] && [[ ${projectDic["dropboxAuth"]} == "" ]]; then # Set variable for Dropbox authorization
-            projectDic["dropboxAuth"]="${var,,}"
+            projectDic["dropboxAuth"]="${var}"
             frontgate=1
             unset dropbox_auth
         elif [[ "${i,,}" == "-ghu" ]] || [[ ${gitUser} == $i ]] && [[ ${projectDic["gitUser"]} == "" ]]; then # Set variable for Git username
@@ -612,8 +612,6 @@ dropboxSaver(){
     else
         config="none"
     fi
-    # echo -e "CONFIG: ${config}"
-    echo -e "DROPBOX AUTH: ${projectDic["dropboxAuth"]}""
 
     isCmd=${projectDic["isCmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" dbAuth="${projectDic["dropboxAuth"]}" python3.6 - << END_OF_TRANSFER
 
