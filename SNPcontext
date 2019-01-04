@@ -623,7 +623,10 @@ def dpsentit(inputLoc, project, dbAuth, isCmd, config):
     currentDir = inputLoc  
     dbx = dropbox.Dropbox(dbAuth)
     newFolder = "/" + project + "-countfiles" + "-" + date.strftime("%Y%m%d") + "-" + date.strftime("%H%M")
-    countsDirs = next(os.walk(inputLoc + "COUNTS_TABLES/"))[1]
+    countsDirs = ""
+    for path in os.walk(inputLoc + "COUNTS_TABLES/"):
+        countsDirs += path + " "
+    # countsDirs = next(os.walk(inputLoc + "COUNTS_TABLES/"))[1]
     print(countsDirs)
     for files in countsDirs:
         bottomDirs = currentDir + "COUNTS_TABLES/" + files + "/"        
