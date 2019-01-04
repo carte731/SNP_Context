@@ -1097,15 +1097,20 @@ FASTA_SWEEP
 }
 #    Creates the job on UMN MSI
 #    Demonstrates that Corey can write more verbose code than Paul! Quite a victory!
-jobCreatorOld(){
+jobCreator(){
+    if [[ ${projectDic["isCmd"]} == "false" ]]; then
+        local config="$@"
+    else
+        local config="none"
+    fi
     myEmail="${projectDic["email"]}" job_specs="${job_specs}" scriptPath="${scriptPath}" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" \
     outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" \
     s3="${projectDic["s3"]}" msi="${projectDic["msi"]}" dpb="${projectDic["dropbox"]}" dpba="${projectDic["dropboxAuth"]}" gh="${projectDic["github"]}" ghu="${projectDic["gitUser"]}" ghp="${projectDic["gitPass"]}" \
-    gho="${projectDic["owner"]}" ghr="${projectDic["Myrepository"]}" python3.6 - <<JOB_CREATED
+    gho="${projectDic["owner"]}" ghr="${projectDic["Myrepository"]}" config="${config}" python3.6 - <<JOB_CREATED
 
 import os
 
-def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr):
+def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config):
     job="#!/bin/bash -l\n\n#PBS -l " + job_specs + "\n#PBS -m abe\n#PBS -M " + email + "\n"
     job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\nset -e\nset -o pipefail\n\n"
     job+="#PBS -o " + outputLoc + "_" + projectName + "\n#PBS -e " + outputLoc + "_" + projectName + "\n"
@@ -1130,7 +1135,8 @@ def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, ema
     job+= "-gho " + gho + " "
     job+= "-ghr " + ghr + " "
 
-    job+= "-JOB THIS_IS_A_JOB"
+    job+= "-JOB THIS_IS_A_JOB "
+    job+= "-CONFIGLOC " + config
 
     with open(outputLoc + projectName + ".job", "w") as jobScript:
         jobScript.write(job)
@@ -1140,6 +1146,7 @@ def bashImport():
     job_specs=str(os.environ['job_specs'])
     email=str(os.environ['myEmail'])
     flanks=str(os.environ['flanks'])
+    config=str(os.environ['config'])
     scriptPath=str(os.environ['scriptPath'])
     referenceGenome=str(os.environ['referenceGenome'])
     windowLength=str(os.environ['windowLength'])
@@ -1158,11 +1165,11 @@ def bashImport():
     gho=str(os.environ['gho'])
     ghr=str(os.environ['ghr'])
 
-    return(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr)
+    return(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config)
 
 def main():
-    projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr = bashImport()
-    jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr)
+    projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config = bashImport()
+    jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config)
 
 main()
     
@@ -1176,7 +1183,7 @@ exit 2
 
 }
 
-jobCreator(){
+jobCreatorTest(){
     if [[ ${projectDic["isCmd"]} == "false" ]]; then
         local config="$@"
     else
