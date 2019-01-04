@@ -1097,7 +1097,7 @@ FASTA_SWEEP
 }
 #    Creates the job on UMN MSI
 #    Demonstrates that Corey can write more verbose code than Paul! Quite a victory!
-jobCreatorOld(){
+jobCreator(){
     if [[ ${projectDic["isCmd"]} == "false" ]]; then
         local config="$@"
     else
@@ -1183,7 +1183,7 @@ exit 2
 
 }
 
-jobCreator(){
+jobCreatorTest(){
     if [[ ${projectDic["isCmd"]} == "false" ]]; then
         local config="$@"
     else
