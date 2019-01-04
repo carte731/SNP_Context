@@ -505,16 +505,6 @@ dirStructure(){
 }
 #    Checks for UMN or Amazon S3, 1=UMN S3, 2=Amazon S3, 3=Amazon & UMN S3
 s3Saver(){
-    # if [[ ${projectDic["isCmd"]} == "false" ]]; then
-    #     if [[ ${projectDic["configLocation"]} != '' ]]; then
-    #         config=${projectDic["configLocation"]}
-    #     else
-    #         config="$@"
-    #     fi
-    # else
-    #     config="none"
-    # fi
-
     if [[ ${projectDic["isCmd"]} == "false" ]] && [[ ${projectDic["configLocation"]} == '' ]]; then
         config="$@"
     elif [[ ${projectDic["isCmd"]} == "true" ]] && [[ ${projectDic["configLocation"]} != '' ]]; then
@@ -522,19 +512,20 @@ s3Saver(){
     else
         config="none"
     fi
+
     if (( "${projectDic["s3"]}" != 0 )); then
         if (( "${projectDic["s3"]}" == 1 )) || (( "${projectDic["mss3i"]}" == 3 )); then
             if s3cmd mb s3://${projectDic["projectName"],,} > /dev/null; then
                 echo -e "\nS3 bucket created..."
-                echo -e "\nTransfering files..."
+                echo -e "Transfering files..."
                 if s3cmd put --recursive "${projectDic["outputLoc"]}"COUNTS_TABLES/ s3://${projectDic["projectName"],,} 2>/dev/null; then
                     s3cmd put ${config} s3://${projectDic["projectName"],,} 2>/dev/null
-                    echo -e "\n Files transfered to MSI S3...\n"
+                    echo -e "\nFiles transfered to MSI S3...\n"
                 else
-                    echo -e "MSI S3 file transfer failed...\n"
+                    echo -e "\nMSI S3 file transfer failed...\n"
                 fi
             else
-                echo "S3 bucket creation failed."
+                echo -e "S3 bucket creation failed."
             fi
         fi
         if (( "${projectDic["msi"]}" == 2 )) || (( "${projectDic["msi"]}" == 3 )); then
@@ -612,15 +603,14 @@ END_OF_TRANSFER
 }
 #    Module to upload output to Dropbox
 dropboxSaver(){
-    if [[ ${projectDic["isCmd"]} == "false" ]]; then
-        if [[ ${projectDic["configLocation"]} != '' ]]; then
-            config=${projectDic["configLocation"]}
-        else
-            config="$@"
-        fi
+    if [[ ${projectDic["isCmd"]} == "false" ]] && [[ ${projectDic["configLocation"]} == '' ]]; then
+        config="$@"
+    elif [[ ${projectDic["isCmd"]} == "true" ]] && [[ ${projectDic["configLocation"]} != '' ]]; then
+        config=${projectDic["configLocation"]}
     else
         config="none"
     fi
+
     isCmd=${projectDic["isCmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" dbAuth="${projectDic["dropboxAuth"]}" python3.6 - << END_OF_TRANSFER
 
 import dropbox
@@ -678,15 +668,14 @@ END_OF_TRANSFER
 }
 #    Upload output to GitHub
 gitHubSendIt() {
-    if [[ ${projectDic["isCmd"]} == "false" ]]; then
-        if [[ ${projectDic["configLocation"]} != '' ]]; then
-            config=${projectDic["configLocation"]}
-        else
-            config="$@"
-        fi
+    if [[ ${projectDic["isCmd"]} == "false" ]] && [[ ${projectDic["configLocation"]} == '' ]]; then
+        config="$@"
+    elif [[ ${projectDic["isCmd"]} == "true" ]] && [[ ${projectDic["configLocation"]} != '' ]]; then
+        config=${projectDic["configLocation"]}
     else
         config="none"
     fi
+    
            isCmd=${projectDic["isCmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" gitUser="${projectDic["gitUser"]}" gitPass="${projectDic["gitPass"]}" repo="${projectDic["repo"]}" gitowner="${projectDic["gitowner"]}" python3.6 - << END_OF_TRANSFER
 
 #    Python 3 for GitHub upload
