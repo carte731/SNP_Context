@@ -342,7 +342,7 @@ starter(){ #grabs the arguments
         fi
         ((indexPos+=1))
     done
-    if [[ "${frontgate}" -ge 0 ]]; then # If none of the above if statements were true, then something was invalid
+    if [[ "${frontgate}" -le 0 ]]; then # If none of the above if statements were true, then something was invalid
         echo -e "\nPlease enter valid arguments. None were valid.\n"
         exit 1
     fi
