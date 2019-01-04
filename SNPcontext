@@ -1097,7 +1097,7 @@ FASTA_SWEEP
 }
 #    Creates the job on UMN MSI
 #    Demonstrates that Corey can write more verbose code than Paul! Quite a victory!
-jobCreator(){
+jobCreatorOld(){
     if [[ ${projectDic["isCmd"]} == "false" ]]; then
         local config="$@"
     else
@@ -1112,8 +1112,8 @@ import os
 
 def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config):
     job="#!/bin/bash -l\n\n#PBS -l " + job_specs + "\n#PBS -m abe\n#PBS -M " + email + "\n"
-    job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\nset -e\nset -o pipefail\n\n"
-    job+="#PBS -o " + outputLoc + "_" + projectName + "\n#PBS -e " + outputLoc + "_" + projectName + "\n"
+    job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\n"
+    job+="#PBS -o " + outputLoc + "_" + projectName + "\n#PBS -e " + outputLoc + "_" + projectName + "\n\n"
     
     job+= scriptPath + "/SNPcontext "
     job+= "-i " + inputFile + " "
@@ -1183,7 +1183,7 @@ exit 2
 
 }
 
-jobCreatorTest(){
+jobCreator(){
     if [[ ${projectDic["isCmd"]} == "false" ]]; then
         local config="$@"
     else
@@ -1204,13 +1204,7 @@ qsub <<EndofSubmission
     #PBS -e "${projectDic["outputLoc"]}"
     #PBS -m abe
 
-    "${scriptPath}"/SNPcontext -i "${projectDic["inputFile"]}" -o "${projectDic["outputLoc"]}" \
-    -w "${projectDic["windowLength"]}" -f "${projectDic["flanks"]}" -em "${projectDic["email"]}" \
-    -p "${projectDic["projectName"]}" -r "${projectDic["referenceGenome"]}" -ad "${projectDic["allData"]}" \
-    -n "${projectDic["nMax"]}" -JOB THIS_IS_A_JOB -msi "${projectDic["msi"]}" \
-    -dpb "${projectDic["dropbox"]}" -dpba "${projectDic["dropboxAuth"]}" -gh "${projectDic["github"]}" \
-    -ghu "${projectDic["gitUser"]}" -ghp "${projectDic["gitPass"]}" -gho "${projectDic["owner"]}" \
-    -s3 "${projectDic["s3"]}" -ghr "${projectDic["Myrepository"]}" -CONFIGLOC "${config}"
+    "${scriptPath}"/SNPcontext -i "${projectDic["inputFile"]}" -o "${projectDic["outputLoc"]}" -w "${projectDic["windowLength"]}" -f "${projectDic["flanks"]}" -p "${projectDic["projectName"]}" -r "${projectDic["referenceGenome"]}" -ad "${projectDic["allData"]}" -n "${projectDic["nMax"]}" -JOB THIS_IS_A_JOB -msi "${projectDic["msi"]}" -dpb "${projectDic["dropbox"]}" -dpba "${projectDic["dropboxAuth"]}" -gh "${projectDic["github"]}" -ghu "${projectDic["gitUser"]}" -ghp "${projectDic["gitPass"]}" -gho "${projectDic["owner"]}" -s3 "${projectDic["s3"]}" -ghr "${projectDic["Myrepository"]}" -CONFIGLOC "${config}"
     
 EndofSubmission
 
