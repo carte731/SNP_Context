@@ -610,6 +610,7 @@ dropboxSaver(){
     else
         config="none"
     fi
+    echo -e "CONFIG: ${config}"
 
     isCmd=${projectDic["isCmd"]} config=${config} project=${projectDic["projectName"]} output="${projectDic["tempOut"]}" dbAuth="${projectDic["dropboxAuth"]}" python3.6 - << END_OF_TRANSFER
 
