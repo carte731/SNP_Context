@@ -459,28 +459,46 @@ fileConverter(){
         local temp="${projectDic["tempOut"]}"FASTA_SPLIT/
         local splitDir=("${temp}"*_"${projectDic[filename]}".fasta*)
         echo -e "Creating counts tables..."
+
+        mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"
+        mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS
         for gene in "${splitDir[@]}"; do
             local countfile="${gene%.*}"
             countfile="${countfile##*/}"
             local geneDirection=${countfile:0:4}
-            mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"
-            mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS
-            for loopGene in "${dirL[@]}"; do
-                aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/ --flank_size "${projectDic[flanks]}" --direction "${loopGene}" -F > /dev/null
-                mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".txt
-                mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".log ##FIX Unique Log ID'S            
-            done
+            aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES/ --flank_size "${projectDic[flanks]}" --direction "${geneDirection}" -F > /dev/null
+            mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"_"${projectDic[filename]}".txt
+            mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS/"${geneDirection}"_"${projectDic[filename]}".log ##FIX Unique Log ID'S    
             active+=("${geneDirection}")
         done
+
+
+        # for gene in "${splitDir[@]}"; do
+        #     local countfile="${gene%.*}"
+        #     countfile="${countfile##*/}"
+        #     local geneDirection=${countfile:0:4}
+        #     mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"
+        #     mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS
+        #     for loopGene in "${dirL[@]}"; do
+        #         aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/ --flank_size "${projectDic[flanks]}" --direction "${loopGene}" -F > /dev/null
+        #         mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".txt
+        #         mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".log ##FIX Unique Log ID'S            
+        #     done
+        #     active+=("${geneDirection}")
+        # done
         projectDic["OperationalStage"]="allCounts"
     elif [ "${projectDic[OperationalStage]}" == "allCounts" ]; then
         echo -e "Creating combined tables..."
         mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS
-        for loopGene in "${active[@]}"; do
-            cd "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/
-            all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/ --strand_symmetric > /dev/null 
-            mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${loopGene}"_combined_counts.txt
-        done
+        # for loopGene in "${active[@]}"; do
+        all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/ --strand_symmetric > /dev/null 
+        mv "${projectDic[outputLoc]}"COUNTS_TABLES/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${projectDic[filename]}"_combined_counts.txt
+
+        # for loopGene in "${active[@]}"; do
+        #     cd "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/
+        #     all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/ --strand_symmetric > /dev/null 
+        #     mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${loopGene}"_combined_counts.txt
+        # done
         projectDic["OperationalStage"]="DONE..."
     fi
 
