@@ -14,15 +14,17 @@
 
 scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" ## Location of the script
 
-set -eE
+set -e
 
-error_catch(){
-    echo -e "There has been an error, The error message has been saved to: ${1} as SNP_CONTEXT_ERROR_LOG.txt\n"
-    exec 2>>"${1}"/SNP_CONTEXT_ERROR_LOG.txt
-    exit 1
-}
+# set -eE
 
-trap 'error_catch "${scriptPath}"' ERR
+# error_catch(){
+#     echo -e "There has been an error, The error message has been saved to: ${1} as SNP_CONTEXT_ERROR_LOG.txt\n"
+#     exec 2>>"${1}"/SNP_CONTEXT_ERROR_LOG.txt
+#     exit 1
+# }
+
+# trap 'error_catch "${scriptPath}"' ERR
 
 #     A bash dictionary for input parameters
 
@@ -467,9 +469,9 @@ fileConverter(){
             countfile="${countfile##*/}"
             local geneDirection=${countfile:0:4}
             aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES/ --flank_size "${projectDic[flanks]}" --direction "${geneDirection}" -F > /dev/null
-            mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"_"${projectDic[filename]}".txt
-            mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS/"${geneDirection}"_"${projectDic[filename]}".log ##FIX Unique Log ID'S    
-            active+=("${geneDirection}")
+            # mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"_"${projectDic[filename]}".txt
+            mv "${projectDic[outputLoc]}"COUNTS_TABLES/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS/"${geneDirection}"_"${projectDic[filename]}".log ##FIX Unique Log ID'S    
+            # active+=("${geneDirection}")
         done
 
 
@@ -489,10 +491,12 @@ fileConverter(){
         projectDic["OperationalStage"]="allCounts"
     elif [ "${projectDic[OperationalStage]}" == "allCounts" ]; then
         echo -e "Creating combined tables..."
+        cd "${projectDic[outputLoc]}"COUNTS_TABLES/
         mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS
-        # for loopGene in "${active[@]}"; do
-        all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/ --strand_symmetric > /dev/null 
+        # all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/ --strand_symmetric > /dev/null
+        all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/ --strand_symmetric
         mv "${projectDic[outputLoc]}"COUNTS_TABLES/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${projectDic[filename]}"_combined_counts.txt
+        mv "${projectDic[outputLoc]}"COUNTS_TABLES/combined_counts.log "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${projectDic[filename]}"_combined_counts.log
 
         # for loopGene in "${active[@]}"; do
         #     cd "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/
