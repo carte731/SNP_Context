@@ -493,8 +493,8 @@ fileConverter(){
         echo -e "Creating combined tables..."
         cd "${projectDic[outputLoc]}"COUNTS_TABLES/
         mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS
-        # all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/ --strand_symmetric > /dev/null
-        all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/ --strand_symmetric
+        all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/ --strand_symmetric > /dev/null
+        # all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/ --strand_symmetric
         mv "${projectDic[outputLoc]}"COUNTS_TABLES/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${projectDic[filename]}"_combined_counts.txt
         mv "${projectDic[outputLoc]}"COUNTS_TABLES/combined_counts.log "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${projectDic[filename]}"_combined_counts.log
 
