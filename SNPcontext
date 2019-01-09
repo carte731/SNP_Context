@@ -1235,7 +1235,7 @@ main(){
     if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]] && [[ "${projectDic["msi"]}" == 'true' ]]; then
         # echo -e "${projectDic["JOB"]}"
         # echo -e "${projectDic["msi"]}"
-        # module load python3_ML/3.6.4
+        module load python3_ML/3.6.4
         jobCreator "$@"
     fi
     moduleLoader ##LOADS CORRECT MODULES        
