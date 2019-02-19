@@ -339,32 +339,24 @@ starter(){ #grabs the arguments
                 unset mutation_analysis                
             fi
         elif [[ "${i,,}" == "-nbrs" ]] || [[ ${nbr_or_spectra} == $i ]] && [[ ${projectDic["nbrOrSpec"]} == "" ]]; then
-            if [[ "${var,,}" -eq 0 ]]; then
-                projectDic["nbrOrSpec"]="nbr"
-                frontgate=1
-                unset nbr_or_spectra
-            elif [[ "${var,,}" -eq 1 ]]; then
-                projectDic["nbrOrSpec"]="spectra"
+            if [[ "${var,,}" -eq 1 ]] || [[ "${var,,}" -eq 2 ]]; then
+                projectDic["nbrOrSpec"]="${var,,}"
                 frontgate=1
                 unset nbr_or_spectra
             else
                 echo -e "No valid entry for nbr or spectra mode (1 or 2), defaulting to nbr."
-                projectDic["nbrOrSpec"]="nbr"
+                projectDic["nbrOrSpec"]=1
                 frontgate=1
                 unset nbr_or_spectra                
             fi
         elif [[ "${i,,}" == "-symas" ]] || [[ ${strand_symmetry_or_asymmetry} == $i ]] && [[ ${projectDic["symOrAsy"]} == "" ]]; then
-            if [[ "${var,,}" -eq 1 ]]; then
-                projectDic["symOrAsy"]="--strand_symmetry"
-                frontgate=1
-                unset strand_symmetry_or_asymmetry
-            elif [[ "${var,,}" -eq 2 ]]; then
-                projectDic["symOrAsy"]="--asymmetry"
+            if [[ "${var,,}" -eq 1 ]] || [[ "${var,,}" -eq 2 ]]; then
+                projectDic["symOrAsy"]="${var,,}"
                 frontgate=1
                 unset strand_symmetry_or_asymmetry
             else
                 echo -e "No valid entry for strand symmetry or asymmetry mode (true or false), defaulting to strand symmetry0."
-                projectDic["symOrAsy"]=0
+                projectDic["symOrAsy"]=1
                 frontgate=1
                 unset strand_symmetry_or_asymmetry                
             fi
@@ -550,10 +542,24 @@ fileConverter(){
         #     all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/ --strand_symmetric > /dev/null 
         #     mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${loopGene}"_combined_counts.txt
         # done
-        if [ "${projectDic["mutationAnalysis"]}" == "true"]; then
+        if [ "${projectDic["mutationAnalysis"]}" == "true" ]; then
+            if [[ "${projectDic["nbrOrSpec"]}" -eq 1 ]]; then
+                nOrS="nbr"
+            elif [[ "${projectDic["nbrOrSpec"]}" -eq 2 ]]; then
+                nOrS="spectra"
+            else
+                nOrS="nbr"
+            fi
+            if [[ "${projectDic["symOrAsy"]}" -eq 1 ]]; then
+                sOrA="--strand_symmetry"
+            elif [[ "${projectDic["symOrAsy"]}" -eq 2 ]]; then
+                sOrA="--asymmetry"
+            else
+                sOrA="--strand_symmetry"
+            fi
             mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS
             cd "${projectDic[outputLoc]}"MUTATION_ANALYSIS
-            mutation_analysis "${projectDic[nbrOrSpec]}" -1 "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${projectDic[filename]}"_combined_counts.txt -o . "${projectDic[symOrAsy]}"
+            mutation_analysis "${nOrS}" -1 "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${projectDic[filename]}"_combined_counts.txt -o . "${sOrA}"
             echo -e "Mutation Analysis complete...\n"
             projectDic["OperationalStage"]="DONE..."
         else
