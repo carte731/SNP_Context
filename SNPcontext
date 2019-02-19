@@ -54,8 +54,8 @@ declare -A projectDic=(
     ["Myrepository"]='' #-ghr
     ["job_specs"]='' #-sp
     ["mutationAnalysis"]='' #-ma
-    ["nbrOrSpec"]='' #-nbrs
-    ["symOrAsy"]='' #-symas
+    ["nbrOrSpec"]=9091 #-nbrs
+    ["symOrAsy"]=9091 #-symas
     ["configLocation"]=''
     ["JOB"]='NO_JOB_NOW'
     ["isCmd"]=''
@@ -356,7 +356,7 @@ starter(){ #grabs the arguments
                 unset strand_symmetry_or_asymmetry
             else
                 echo -e "No valid entry for strand symmetry or asymmetry mode (true or false), defaulting to strand symmetry0."
-                projectDic["symOrAsy"]=1
+                projectDic["symOrAsy"]=0
                 frontgate=1
                 unset strand_symmetry_or_asymmetry                
             fi
@@ -555,7 +555,7 @@ fileConverter(){
             elif [[ "${projectDic["symOrAsy"]}" -eq 2 ]]; then
                 sOrA="--asymmetry"
             else
-                sOrA="--strand_symmetry"
+                sOrA=""
             fi
             mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS
             cd "${projectDic[outputLoc]}"MUTATION_ANALYSIS
