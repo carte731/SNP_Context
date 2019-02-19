@@ -53,6 +53,9 @@ declare -A projectDic=(
     ["owner"]='' #-gho
     ["Myrepository"]='' #-ghr
     ["job_specs"]='' #-sp
+    ["mutationAnalysis"]='' #-ma
+    ["nbrOrSpec"]='' #-nbrs
+    ["symOrAsy"]='' #-symas
     ["configLocation"]=''
     ["JOB"]='NO_JOB_NOW'
     ["isCmd"]=''
@@ -109,6 +112,9 @@ config_check(){
                         ${input_email}
                         ${MSI_Mode}
                         ${job_specs}
+                        ${mutation_analysis}
+                        ${nbr_or_spectra}
+                        ${strand_symmetry_or_asymmetry}
                         ${save_all_data}
                         ${dropbox}
                         ${dropbox_auth}
@@ -321,6 +327,47 @@ starter(){ #grabs the arguments
                 frontgate=1
                 unset MSI_Mode                
             fi
+        elif [[ "${i,,}" == "-ma" ]] || [[ ${mutation_analysis} == $i ]] && [[ ${projectDic["mutationAnalysis"]} == "" ]]; then
+            if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
+                projectDic["mutationAnalysis"]="${var,,}"
+                frontgate=1
+                unset mutation_analysis
+            else
+                echo -e "No valid entry for mutation Analysis mode (true or false), defaulting to false."
+                projectDic["mutationAnalysis"]='false'
+                frontgate=1
+                unset mutation_analysis                
+            fi
+        elif [[ "${i,,}" == "-nbrs" ]] || [[ ${nbr_or_spectra} == $i ]] && [[ ${projectDic["nbrOrSpec"]} == "" ]]; then
+            if [[ "${var,,}" -eq 0 ]]; then
+                projectDic["nbrOrSpec"]="nbr"
+                frontgate=1
+                unset nbr_or_spectra
+            elif [[ "${var,,}" -eq 1 ]]; then
+                projectDic["nbrOrSpec"]="spectra"
+                frontgate=1
+                unset nbr_or_spectra
+            else
+                echo -e "No valid entry for nbr or spectra mode (1 or 2), defaulting to nbr."
+                projectDic["nbrOrSpec"]="nbr"
+                frontgate=1
+                unset nbr_or_spectra                
+            fi
+        elif [[ "${i,,}" == "-symas" ]] || [[ ${strand_symmetry_or_asymmetry} == $i ]] && [[ ${projectDic["symOrAsy"]} == "" ]]; then
+            if [[ "${var,,}" -eq 1 ]]; then
+                projectDic["symOrAsy"]="--strand_symmetry"
+                frontgate=1
+                unset strand_symmetry_or_asymmetry
+            elif [[ "${var,,}" -eq 2 ]]; then
+                projectDic["symOrAsy"]="--asymmetry"
+                frontgate=1
+                unset strand_symmetry_or_asymmetry
+            else
+                echo -e "No valid entry for strand symmetry or asymmetry mode (true or false), defaulting to strand symmetry0."
+                projectDic["symOrAsy"]=0
+                frontgate=1
+                unset strand_symmetry_or_asymmetry                
+            fi
         elif [[ "${i,,}" == "-dpba" ]] || [[ ${dropbox_auth} == $i ]] && [[ ${projectDic["dropboxAuth"]} == "" ]]; then # Set variable for Dropbox authorization
             projectDic["dropboxAuth"]="${var}"
             frontgate=1
@@ -503,7 +550,15 @@ fileConverter(){
         #     all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/ --strand_symmetric > /dev/null 
         #     mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${loopGene}"_combined_counts.txt
         # done
-        projectDic["OperationalStage"]="DONE..."
+        if [ "${projectDic["mutationAnalysis"]}" == "true"]; then
+            mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS
+            cd "${projectDic[outputLoc]}"MUTATION_ANALYSIS
+            mutation_analysis "${projectDic[nbrOrSpec]}" -1 "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${projectDic[filename]}"_combined_counts.txt -o . "${projectDic[symOrAsy]}"
+            echo -e "Mutation Analysis complete...\n"
+            projectDic["OperationalStage"]="DONE..."
+        else
+            projectDic["OperationalStage"]="DONE..."
+        fi
     fi
 
 }
@@ -1128,7 +1183,8 @@ jobCreator(){
     myEmail="${projectDic["email"]}" job_specs="${job_specs}" scriptPath="${scriptPath}" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" \
     outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" \
     s3="${projectDic["s3"]}" msi="${projectDic["msi"]}" dpb="${projectDic["dropbox"]}" dpba="${projectDic["dropboxAuth"]}" gh="${projectDic["github"]}" ghu="${projectDic["gitUser"]}" ghp="${projectDic["gitPass"]}" \
-    gho="${projectDic["owner"]}" ghr="${projectDic["Myrepository"]}" config="${config}" python3.6 - <<JOB_CREATED
+    gho="${projectDic["owner"]}" ghr="${projectDic["Myrepository"]}" config="${config}" ma="${projectDic["mutationAnalysis"]}" nbrs="${projectDic["nbrOrSpec"]}" \
+    symas="${projectDic["symOrAsy"]}" python3.6 - <<JOB_CREATED
 
 import os
 
@@ -1146,6 +1202,9 @@ def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, ema
     job+= "-r " + referenceGenome + " "
     job+= "-ad " + allData + " "
     job+= "-n " + nMax + " "
+    job+= "-ma " + ma + " "
+    job+= "-nbrs " + nbrs + " "
+    job+= "-symas " + symas + " "
 
     job+= "-s3 " + s3 + " "
     job+= "-msi " + msi + " "
@@ -1176,6 +1235,9 @@ def bashImport():
     projectName=str(os.environ['projectName'])
     allData=str(os.environ['allData'])
     nMax=str(os.environ['nMax'])
+    ma=str(os.environ['ma'])
+    nbrs=str(os.environ['nbrs'])
+    symas=str(os.environ['symas'])
 
     s3=str(os.environ['s3'])
     msi=str(os.environ['msi'])
@@ -1187,11 +1249,11 @@ def bashImport():
     gho=str(os.environ['gho'])
     ghr=str(os.environ['ghr'])
 
-    return(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config)
+    return(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas)
 
 def main():
-    projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config = bashImport()
-    jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config)
+    projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas = bashImport()
+    jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas)
 
 main()
     
