@@ -54,8 +54,8 @@ declare -A projectDic=(
     ["Myrepository"]='' #-ghr
     ["job_specs"]='' #-sp
     ["mutationAnalysis"]='' #-ma
-    ["nbrOrSpec"]=9091 #-nbrs
-    ["symOrAsy"]=9091 #-symas
+    ["nbrOrSpec"]=-9091 #-nbrs
+    ["symOrAsy"]=-9091 #-symas
     ["configLocation"]=''
     ["JOB"]='NO_JOB_NOW'
     ["isCmd"]=''
@@ -182,7 +182,7 @@ starter(){ #grabs the arguments
                     frontgate=1 
                     unset window_length
                 fi     
-            else # If it's not an integer number, default to 1 (???)
+            else # Imutation_analysisf it's not an integer number, default to 1 (???)
                 echo -e "\nPlease enter a valid integer for window expansion size - defaulting to 1.\n"
                 projectDic["windowLength"]=1
                 frontgate=1 
@@ -338,7 +338,7 @@ starter(){ #grabs the arguments
                 frontgate=1
                 unset mutation_analysis                
             fi
-        elif [[ "${i,,}" == "-nbrs" ]] || [[ ${nbr_or_spectra} == $i ]] && [[ ${projectDic["nbrOrSpec"]} == "" ]]; then
+        elif [[ "${i,,}" == "-nbrs" ]] || [[ ${nbr_or_spectra} == $i ]] && ((projectDic["nbrOrSpec"] == -9091)); then
             if [[ "${var,,}" -eq 1 ]] || [[ "${var,,}" -eq 2 ]]; then
                 projectDic["nbrOrSpec"]="${var,,}"
                 frontgate=1
@@ -349,13 +349,13 @@ starter(){ #grabs the arguments
                 frontgate=1
                 unset nbr_or_spectra                
             fi
-        elif [[ "${i,,}" == "-symas" ]] || [[ ${strand_symmetry_or_asymmetry} == $i ]] && [[ ${projectDic["symOrAsy"]} == "" ]]; then
-            if [[ "${var,,}" -eq 1 ]] || [[ "${var,,}" -eq 2 ]]; then
+        elif [[ "${i,,}" == "-symas" ]] || [[ ${strand_symmetry_or_asymmetry} == $i ]] && ((projectDic["symOrAsy"] == -9091)); then
+            if [[ "${var,,}" -eq 0 ]] || [[ "${var,,}" -eq 1 ]] || [[ "${var,,}" -eq 2 ]]; then
                 projectDic["symOrAsy"]="${var,,}"
                 frontgate=1
                 unset strand_symmetry_or_asymmetry
             else
-                echo -e "No valid entry for strand symmetry or asymmetry mode (true or false), defaulting to strand symmetry0."
+                echo -e "No valid entry for strand symmetry or asymmetry mode (0, 1 or 2), defaulting to neither (0)."
                 projectDic["symOrAsy"]=0
                 frontgate=1
                 unset strand_symmetry_or_asymmetry                
