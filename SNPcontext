@@ -1188,7 +1188,7 @@ jobCreator(){
 
 import os
 
-def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config):
+def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas):
     job="#!/bin/bash -l\n\n#PBS -l " + job_specs + "\n#PBS -m abe\n#PBS -M " + email + "\n"
     job+="#PBS -N " + projectName + "\n"
     job+="#PBS -o " + outputLoc + "\n#PBS -e " + outputLoc + "\n\n"
