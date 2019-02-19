@@ -340,23 +340,23 @@ starter(){ #grabs the arguments
             fi
         elif [[ "${i,,}" == "-nbrs" ]] || [[ ${nbr_or_spectra} == $i ]] && ((projectDic["nbrOrSpec"] == -9091)); then
             if [[ "${var,,}" -eq 1 ]] || [[ "${var,,}" -eq 2 ]]; then
-                projectDic["nbrOrSpec"]="${var,,}"
+                ((projectDic["nbrOrSpec"]="${var,,}"))
                 frontgate=1
                 unset nbr_or_spectra
             else
                 echo -e "No valid entry for nbr or spectra mode (1 or 2), defaulting to nbr."
-                projectDic["nbrOrSpec"]=1
+                ((projectDic["nbrOrSpec"]=1))
                 frontgate=1
                 unset nbr_or_spectra                
             fi
         elif [[ "${i,,}" == "-symas" ]] || [[ ${strand_symmetry_or_asymmetry} == $i ]] && ((projectDic["symOrAsy"] == -9091)); then
             if [[ "${var,,}" -eq 0 ]] || [[ "${var,,}" -eq 1 ]] || [[ "${var,,}" -eq 2 ]]; then
-                projectDic["symOrAsy"]="${var,,}"
+                ((projectDic["symOrAsy"]="${var,,}"))
                 frontgate=1
                 unset strand_symmetry_or_asymmetry
             else
                 echo -e "No valid entry for strand symmetry or asymmetry mode (0, 1 or 2), defaulting to neither (0)."
-                projectDic["symOrAsy"]=0
+                ((projectDic["symOrAsy"]=0))
                 frontgate=1
                 unset strand_symmetry_or_asymmetry                
             fi
