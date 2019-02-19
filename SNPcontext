@@ -543,16 +543,16 @@ fileConverter(){
         #     mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${loopGene}"_combined_counts.txt
         # done
         if [ "${projectDic["mutationAnalysis"]}" == "true" ]; then
-            if [[ "${projectDic["nbrOrSpec"]}" -eq 1 ]]; then
+            if ((projectDic["nbrOrSpec"] -eq 1)); then
                 nOrS="nbr"
-            elif [[ "${projectDic["nbrOrSpec"]}" -eq 2 ]]; then
+            elif ((projectDic["nbrOrSpec"] -eq 2)); then
                 nOrS="spectra"
             else
                 nOrS="nbr"
             fi
-            if [[ "${projectDic["symOrAsy"]}" -eq 1 ]]; then
+            if ((projectDic["symOrAsy"] -eq 1)); then
                 sOrA="--strand_symmetry"
-            elif [[ "${projectDic["symOrAsy"]}" -eq 2 ]]; then
+            elif ((projectDic["symOrAsy"] -eq 2)); then
                 sOrA="--asymmetry"
             else
                 sOrA=""
