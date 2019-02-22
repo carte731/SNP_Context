@@ -350,13 +350,13 @@ starter(){ #grabs the arguments
                 unset nbr_or_spectra                
             fi
         elif [[ "${i,,}" == "-symas" ]] || [[ ${strand_symmetry_or_asymmetry} == $i ]] && [[ "${projectDic["symOrAsy"]}" == '' ]]; then
-            if [[ "${var,,}" == "0" ]] || [[ "${var,,}" == "1" ]] || [[ "${var,,}" == "2" ]]; then
+            if [[ "${var,,}" == "0" ]] || [[ "${var,,}" == "1" ]]; then
                 ((projectDic["symOrAsy"]="${var,,}"))
                 frontgate=1
                 unset strand_symmetry_or_asymmetry
             else
-                echo -e "No valid entry for strand symmetry or asymmetry mode (0, 1 or 2), defaulting to neither (0)."
-                ((projectDic["symOrAsy"]=1))
+                echo -e "No valid entry for strand symmetry(0, 1), defaulting to none (0)."
+                ((projectDic["symOrAsy"]=0))
                 frontgate=1
                 unset strand_symmetry_or_asymmetry                
             fi
@@ -552,8 +552,6 @@ fileConverter(){
             fi
             if [[ "${projectDic["symOrAsy"]}" == "1" ]]; then
                 sOrA="--strand_symmetry"
-            elif [[ "${projectDic["symOrAsy"]}" == "2" ]]; then
-                sOrA="--asymmetry"
             else
                 sOrA=""
             fi
