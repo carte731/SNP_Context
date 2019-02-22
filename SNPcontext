@@ -356,7 +356,7 @@ starter(){ #grabs the arguments
                 unset strand_symmetry_or_asymmetry
             else
                 echo -e "No valid entry for strand symmetry or asymmetry mode (0, 1 or 2), defaulting to neither (0)."
-                ((projectDic["symOrAsy"]=0))
+                ((projectDic["symOrAsy"]=1))
                 frontgate=1
                 unset strand_symmetry_or_asymmetry                
             fi
@@ -557,8 +557,6 @@ fileConverter(){
             else
                 sOrA=""
             fi
-            echo -e "\nMY nbrOrSpec ${nOrS}"
-            echo -e "\nMY symOrAsy ${sOrA}"
             mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS
             cd "${projectDic[outputLoc]}"MUTATION_ANALYSIS
             mutation_analysis "${nOrS}" -1 "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${projectDic[filename]}"_combined_counts.txt -o . "${sOrA}"
