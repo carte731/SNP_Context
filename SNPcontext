@@ -550,10 +550,11 @@ fileConverter(){
             else
                 nOrS="nbr"
             fi
-            if [[ "${projectDic["symOrAsy"]}" == "1" ]]; then
-                sOrA="--strand_symmetry"
+            if [[ "${projectDic["symOrAsy"]}" == "2" ]] && [[ "${projectDic["nbrOrSpec"]}" == "1" ]]; then
+                sOrA=" "
             else
-                sOrA=""
+                sOrA="--strand_symmetry"
+		
             fi
             mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS
             cd "${projectDic[outputLoc]}"MUTATION_ANALYSIS
