@@ -445,6 +445,7 @@ moduleLoader(){ #Load modules needed for operations
         module load python3_ML/3.6.4
         module load bedops_ML/2.4.35 
         module load bedtools_ML/2.23.0
+	module load pypy_ML/3.6
     else
         declare -A testlisting=( ["python3"]=3.6.4 ["bedops"]=2.4.35 ["bedtools"]=2.23.0 )
         for inProgram in ${!testlisting[@]}; do # Make sure that all dependencies are functional
@@ -837,7 +838,7 @@ END_OF_TRANSFER
 #    A "Type One overlap" is another SNP within immediate contextual sequence
 #    A "Type Two overlap" is another SNP within the expanded flanking contextual sequencing
 pythonBEDScanner(){
-    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" interval="${projectDic["windowLength"]}" geneDir="$geneDir" python3.6 - <<END_OF_PYTHON
+    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" interval="${projectDic["windowLength"]}" geneDir="$geneDir" pypy3.6 - <<END_OF_PYTHON
     
 import os
 import re
@@ -966,7 +967,7 @@ END_OF_PYTHON
 }
 #    Split up file based on mutation direction
 vcfSplit(){
-    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" python3.6 - <<VCF_SPLIT_END
+    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" pypy3.6 - <<VCF_SPLIT_END
 
 import os
 
@@ -1064,7 +1065,7 @@ VCF_SPLIT_END
 #    If indel percentage is greater than desired, fasta entry is removed
 fastaScanner(){
 
-    inputFile="${projectDic["inputFile"]}" flank="${projectDic["flanks"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" geneTwo=${geneTwo} geneDirTwo="${geneDirTwo}" nMax="${projectDic["nMax"]}" windowLength="${projectDic["windowLength"]}" python3.6 - <<FASTA_SWEEP
+    inputFile="${projectDic["inputFile"]}" flank="${projectDic["flanks"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" geneTwo=${geneTwo} geneDirTwo="${geneDirTwo}" nMax="${projectDic["nMax"]}" windowLength="${projectDic["windowLength"]}" pypy3.6 - <<FASTA_SWEEP
     
 from itertools import chain
 import os
@@ -1189,7 +1190,7 @@ jobCreator(){
     outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" \
     s3="${projectDic["s3"]}" msi="${projectDic["msi"]}" dpb="${projectDic["dropbox"]}" dpba="${projectDic["dropboxAuth"]}" gh="${projectDic["github"]}" ghu="${projectDic["gitUser"]}" ghp="${projectDic["gitPass"]}" \
     gho="${projectDic["owner"]}" ghr="${projectDic["Myrepository"]}" config="${config}" ma="${projectDic["mutationAnalysis"]}" nbrs="${projectDic["nbrOrSpec"]}" \
-    symas="${projectDic["symOrAsy"]}" python3.6 - <<JOB_CREATED
+    symas="${projectDic["symOrAsy"]}" pypy3.6 - <<JOB_CREATED
 
 import os
 
