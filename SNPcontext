@@ -59,6 +59,7 @@ declare -A projectDic=(
     ["configLocation"]=''
     ["JOB"]='NO_JOB_NOW'
     ["isCmd"]=''
+    ["queue"]='' #-qu
 )
 
 #     A bash list of all possible nucleotide state changes
@@ -111,6 +112,7 @@ config_check(){
                         ${s3_password}
                         ${input_email}
                         ${MSI_Mode}
+			${queue}
                         ${job_specs}
                         ${mutation_analysis}
                         ${nbr_or_spectra}
@@ -379,7 +381,16 @@ starter(){ #grabs the arguments
         elif [[ "${i,,}" == "-ghr" ]] || [[ ${Myrepository} == $i ]] && [[ ${projectDic["Myrepository"]} == "" ]]; then # Set variable for Git repository
             projectDic["Myrepository"]="${var,,}"
             frontgate=1
-            unset Myrepository           
+            unset Myrepository
+	elif [[ "${i,,}" == "-qu"  ]] || [[ ${Myrepository} == $i ]] && [[ ${projectDic["Myrepository"]} == "" ]]; then
+            if [[ "${var,,}" == "mesabi"  ]] || [[ "${var,,}" == "lab"  ]]; then
+	    	projectDic["queue"]="${var,,}"
+	    	frontgate=1
+	    	unset queue
+	    else
+		echo "Not a valid job queue. Defaulting to mesabi...\n"
+		projectDic["queue"]="mesabi"
+		               frontgate=1                                                                                                                                   unset queue
         fi
         ((indexPos+=1))
     done
