@@ -391,6 +391,7 @@ starter(){ #grabs the arguments
 		echo "Not a valid job queue. Defaulting to mesabi...\n"
 		projectDic["queue"]="mesabi"
 		               frontgate=1                                                                                                                                   unset queue
+	    fi
         fi
         ((indexPos+=1))
     done
@@ -1201,14 +1202,14 @@ jobCreator(){
     outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" \
     s3="${projectDic["s3"]}" msi="${projectDic["msi"]}" dpb="${projectDic["dropbox"]}" dpba="${projectDic["dropboxAuth"]}" gh="${projectDic["github"]}" ghu="${projectDic["gitUser"]}" ghp="${projectDic["gitPass"]}" \
     gho="${projectDic["owner"]}" ghr="${projectDic["Myrepository"]}" config="${config}" ma="${projectDic["mutationAnalysis"]}" nbrs="${projectDic["nbrOrSpec"]}" \
-    symas="${projectDic["symOrAsy"]}" python3.6 - <<JOB_CREATED
+    symas="${projectDic["symOrAsy"]}" queue="${projectDic["queue"]}" python3.6 - <<JOB_CREATED
 
 import os
 
-def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas):
+def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas, queue):
     job="#!/bin/bash -l\n\n#PBS -l " + job_specs + "\n#PBS -m abe\n#PBS -M " + email + "\n"
     job+="#PBS -N " + projectName + "\n"
-    job+="#PBS -o " + outputLoc + "\n#PBS -e " + outputLoc + "\n\n"
+    job+="#PBS -o " + outputLoc + "\n#PBS -e " + outputLoc +" #PBS -q queue\n\n"
     
     job+= scriptPath + "/SNPcontext "
     job+= "-i " + inputFile + " "
@@ -1255,6 +1256,7 @@ def bashImport():
     ma=str(os.environ['ma'])
     nbrs=str(os.environ['nbrs'])
     symas=str(os.environ['symas'])
+    queue=str(os.environ["queue"])
 
     s3=str(os.environ['s3'])
     msi=str(os.environ['msi'])
@@ -1266,11 +1268,11 @@ def bashImport():
     gho=str(os.environ['gho'])
     ghr=str(os.environ['ghr'])
 
-    return(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas)
+    return(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas, queue)
 
 def main():
-    projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas = bashImport()
-    jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas)
+    projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas, queue = bashImport()
+    jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas, queue)
 
 main()
     
