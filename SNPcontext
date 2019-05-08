@@ -112,7 +112,7 @@ config_check(){
                         ${s3_password}
                         ${input_email}
                         ${MSI_Mode}
-			${queue}
+			            ${queue}
                         ${job_specs}
                         ${mutation_analysis}
                         ${nbr_or_spectra}
@@ -382,16 +382,11 @@ starter(){ #grabs the arguments
             projectDic["Myrepository"]="${var,,}"
             frontgate=1
             unset Myrepository
-	elif [[ "${i,,}" == "-qu"  ]] || [[ ${Myrepository} == $i ]] && [[ ${projectDic["Myrepository"]} == "" ]]; then
-            if [[ "${var,,}" == "mesabi"  ]] || [[ "${var,,}" == "lab"  ]]; then
-	    	projectDic["queue"]="${var,,}"
-	    	frontgate=1
-	    	unset queue
-	    else
-		echo "Not a valid job queue. Defaulting to mesabi...\n"
-		projectDic["queue"]="mesabi"
-		               frontgate=1                                                                                                                                   unset queue
-	    fi
+        elif [[ "${i,,}" == "-qu"  ]] || [[ ${queue} == $i ]]; then
+            # There's no need to check if the queue is valid since PBS does that automatically upon job submission
+            projectDic["queue"]="${var,,}"
+            frontgate=1
+            unset queue
         fi
         ((indexPos+=1))
     done
@@ -444,7 +439,6 @@ starter(){ #grabs the arguments
             projectDic["owner"]="${projectDic["gitUser"]}"
         fi
     fi
-
     unset startList
 }
 
@@ -1204,12 +1198,13 @@ jobCreator(){
     gho="${projectDic["owner"]}" ghr="${projectDic["Myrepository"]}" config="${config}" ma="${projectDic["mutationAnalysis"]}" nbrs="${projectDic["nbrOrSpec"]}" \
     symas="${projectDic["symOrAsy"]}" queue="${projectDic["queue"]}" python3.6 - <<JOB_CREATED
 
+
 import os
 
 def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas, queue):
     job="#!/bin/bash -l\n\n#PBS -l " + job_specs + "\n#PBS -m abe\n#PBS -M " + email + "\n"
     job+="#PBS -N " + projectName + "\n"
-    job+="#PBS -o " + outputLoc + "\n#PBS -e " + outputLoc +" #PBS -q queue\n\n"
+    job+="#PBS -o " + outputLoc + "\n#PBS -e " + outputLoc + "\n#PBS -q " + queue + "\n\n"
     
     job+= scriptPath + "/SNPcontext "
     job+= "-i " + inputFile + " "
@@ -1256,7 +1251,7 @@ def bashImport():
     ma=str(os.environ['ma'])
     nbrs=str(os.environ['nbrs'])
     symas=str(os.environ['symas'])
-    queue=str(os.environ["queue"])
+    queue=str(os.environ['queue'])
 
     s3=str(os.environ['s3'])
     msi=str(os.environ['msi'])
@@ -1306,6 +1301,7 @@ qsub <<EndofSubmission
     #PBS -o "${projectDic["outputLoc"]}"
     #PBS -e "${projectDic["outputLoc"]}"
     #PBS -m abe
+    #PBS -q "${projectDic["queue"]}"
 
     "${scriptPath}"/SNPcontext -i "${projectDic["inputFile"]}" -o "${projectDic["outputLoc"]}" -w "${projectDic["windowLength"]}" -f "${projectDic["flanks"]}" -p "${projectDic["projectName"]}" -r "${projectDic["referenceGenome"]}" -ad "${projectDic["allData"]}" -n "${projectDic["nMax"]}" -JOB THIS_IS_A_JOB -msi "${projectDic["msi"]}" -dpb "${projectDic["dropbox"]}" -dpba "${projectDic["dropboxAuth"]}" -gh "${projectDic["github"]}" -ghu "${projectDic["gitUser"]}" -ghp "${projectDic["gitPass"]}" -gho "${projectDic["owner"]}" -s3 "${projectDic["s3"]}" -ghr "${projectDic["Myrepository"]}" -CONFIGLOC "${config}"
     
