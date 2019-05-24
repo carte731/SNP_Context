@@ -577,9 +577,13 @@ fileConverter(){
             mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS
             cd "${projectDic[outputLoc]}"MUTATION_ANALYSIS
             if [[ "${projectDic["graphs"]}" == 1 ]] || [[ "${projectDic["graphs"]}" == 2 ]]; then
-                for 
-                mutation_analysis "${nOrS}" -1 "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${projectDic[filename]}"_combined_counts.txt -o . "${sOrA}"
-            elif [[ "${projectDic["graphs"]}" == 1 ]] || [[ "${projectDic["graphs"]}" == 3 ]]; then
+                for geneDirection in "${active[@]}"; do
+                    ## mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/"${geneDirection}"
+                    mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/"${geneDirection}"
+                    mutation_analysis "${nOrS}" -1 "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"_"${projectDic[filename]}".txt -o "${projectDic[outputLoc]}"MUTATION_ANALYSIS/"${geneDirection}" "${sOrA}"
+                done
+            fi
+            if [[ "${projectDic["graphs"]}" == 1 ]] || [[ "${projectDic["graphs"]}" == 3 ]]; then
                 mutation_analysis "${nOrS}" -1 "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${projectDic[filename]}"_combined_counts.txt -o . "${sOrA}"
             fi
             echo -e "Mutation Analysis complete...\n"
