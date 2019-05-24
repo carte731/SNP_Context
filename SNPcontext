@@ -580,7 +580,9 @@ fileConverter(){
                 for geneDirection in "${active[@]}"; do
                     ## mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/"${geneDirection}"
                     mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/"${geneDirection}"
-                    mutation_analysis "${nOrS}" -1 "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"_"${projectDic[filename]}".txt -o "${projectDic[outputLoc]}"MUTATION_ANALYSIS/"${geneDirection}" "${sOrA}"
+                    ## No --strand_symmetry unless all_counts is called
+                    ## mutation_analysis "${nOrS}" -1 "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"_"${projectDic[filename]}".txt -o "${projectDic[outputLoc]}"MUTATION_ANALYSIS/"${geneDirection}" "${sOrA}"
+                    mutation_analysis "${nOrS}" -1 "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"_"${projectDic[filename]}".txt -o "${projectDic[outputLoc]}"MUTATION_ANALYSIS/"${geneDirection}"
                 done
             fi
             if [[ "${projectDic["graphs"]}" == 1 ]] || [[ "${projectDic["graphs"]}" == 3 ]]; then
