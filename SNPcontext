@@ -587,7 +587,7 @@ fileConverter(){
             fi
             if [[ "${projectDic["graphs"]}" == 1 ]] || [[ "${projectDic["graphs"]}" == 3 ]]; then
                 mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/COMBINED_COUNTS
-                mutation_analysis "${nOrS}" -1 "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${projectDic[filename]}"_combined_counts.txt -o . "${sOrA}"
+                mutation_analysis "${nOrS}" -1 "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${projectDic[filename]}"_combined_counts.txt -o "${projectDic[outputLoc]}"MUTATION_ANALYSIS/COMBINED_COUNTS "${sOrA}"
             fi
             echo -e "Mutation Analysis complete...\n"
             projectDic["OperationalStage"]="DONE..."
