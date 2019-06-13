@@ -930,7 +930,7 @@ END_OF_TRANSFER
 #    A "Type One overlap" is another SNP within immediate contextual sequence
 #    A "Type Two overlap" is another SNP within the expanded flanking contextual sequencing
 pythonBEDScanner(){
-    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" interval="${projectDic["windowLength"]}" geneDir="$geneDir" sndMode="${projectDic["sndMode"]}" pypy3.6 - <<END_OF_PYTHON
+    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" interval="${projectDic["windowLength"]}" geneDir="$geneDir" sndMode="$sndLocal" pypy3.6 - <<END_OF_PYTHON
     
 import os
 import re
@@ -1455,9 +1455,13 @@ main(){
         local geneDir="${gene%.*}"
         geneDir="${geneDir##*/}"
         geneDir=${geneDir:0:4} ##BASH IS BASE 1
-        pythonBEDScanner "$geneDir" & ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
+	sndLocal=0
+        pythonBEDScanner "$geneDir" "$sndLocal" & ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
     done
     wait
+    if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
+    	local temp="${projectDic["tempOut"]}"BED_SPLIT/SND_BED                                                                                                                                                                                              local splitDir=("${temp}"*_split_"${projectDic[filename]}".bed*)                                                                                                                                                                             for gene in "${splitDir[@]}"; do                                                                                                                                                                                                                 local geneDir="${gene%.*}"                                                                                                                                                                                                                   geneDir="${geneDir##*/}"                                                                                                                                                                                                                     geneDir=${geneDir:0:4} ##BASH IS BASE 1                                                                                                                                                                                                      sndLocal=0                                                                                                                                                                                                                                   pythonBEDScanner "$geneDir" "$sndLocal" & ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP                                                                                                                                             done                                                                                                                                                                                                                                         wait
+    fi
     echo -e "\nOverlap checks completed..."
     echo -e "See overlap results located in 'WindowOverlap.txt' in your main output directory.\n"
     fileConverter ##CREATES FASTA FILE
