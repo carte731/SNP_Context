@@ -518,7 +518,7 @@ fileConverter(){
         wait
         if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
             local temp="${projectDic["tempOut"]}"SPLITVCF/SND_VCF
-            local splitDir=("${temp}"*_splitSND_"${projectDic[filename]}".vcf*)
+            local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
             mkdir "${projectDic[outputLoc]}"BED_SPLIT/SND_BED/
             for gene in "${splitDir[@]}"; do
                 local targetVCF="${gene%.*}"
@@ -541,7 +541,7 @@ fileConverter(){
         wait
         if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
             local temp="${projectDic["tempOut"]}"BED_SPLIT/SND_BED
-            local splitDir=("${temp}"*"${projectDic[filename]}"_newSND_interval.bed*)
+            local splitDir=("${temp}"*"${projectDic[filename]}"_new_interval.bed*)
             mkdir "${projectDic[outputLoc]}"FASTA_SPLIT/SND_FASFA/
             for gene in "${splitDir[@]}"; do
                 local targetBED="${gene%.*}"
@@ -570,7 +570,7 @@ fileConverter(){
         done
         if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
             local tempSND="${projectDic["tempOut"]}"FASTA_SPLIT/SND_FASFA
-            local splitDir=("${tempSND}"*_SND_"${projectDic[filename]}".fasta*)
+            local splitDir=("${tempSND}"*_"${projectDic[filename]}".fasta*)
             mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/SND_ANALYSIS
             mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/SND_ANALYSIS/LOGS
             for gene in "${splitDir[@]}"; do
