@@ -45,6 +45,7 @@ declare -A projectDic=(
     ["allData"]='' #-ad
     ["msi"]='' #-msi
     ["s3"]=-9091 #-s3
+    ["sndMode"]=-9091 #-snd
     ["dropbox"]='' #-dpb
     ["dropboxAuth"]='' #-dpba
     ["github"]='' #-gh
@@ -65,9 +66,13 @@ declare -A projectDic=(
 
 #     A bash list of all possible nucleotide state changes
 #     List will be used for iteration and to create output directories and files
-declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
+##declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
+
+##declare -a sndDirL=('AtoT' 'CtoT' 'GtoT' 'TtoA')
 
 declare -a active=()
+
+declare -a activeSND=()
 
 help_display(){ ## UPDATE TO INCLUDE ALL CMDS AND MENTION THE CONFIG FILE IS THE PREFERRED WAY OF OPERATING
     local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
@@ -114,6 +119,7 @@ config_check(){
                         ${input_email}
                         ${MSI_Mode}
 			            ${queue}
+                        ${sndMode}
                         ${job_specs}
                         ${mutation_analysis}
                         ${nbr_or_spectra}
@@ -373,6 +379,15 @@ starter(){ #grabs the arguments
                 echo -e "No valid entry for graphing (1 to 3), defaulting to graphing both direction tables and combined counts table."
                 projectDic["graphs"]=1
             fi
+        elif [[ "${i,,}" == "-snd" ]] || [[ ${sndMode} == $i ]] && (( "${projectDic["sndMode"]}" == -9091 )); then #
+            if [[ "${var}" -ge 1 ]] && [[ "${var}" -le 2 ]]; then
+                projectDic["sndMode"]="${var,,}"
+                frontgate=1
+                unset graphs
+            else
+                echo -e "No valid entry for SND mode, defaulting to off.\n"
+                projectDic["sndMode"]=0
+            fi
         elif [[ "${i,,}" == "-dpba" ]] || [[ ${dropbox_auth} == $i ]] && [[ ${projectDic["dropboxAuth"]} == "" ]]; then # Set variable for Dropbox authorization
             projectDic["dropboxAuth"]="${var}"
             frontgate=1
@@ -501,6 +516,16 @@ fileConverter(){
             vcf2bed < "${gene}" > "${projectDic["tempOut"]}"BED_SPLIT/"${targetVCF}".bed & ##sort later
         done
         wait
+        if [[ "${projectDic["sndMode"]}" == 1 ]]; then
+            local temp="${projectDic["tempOut"]}"SPLITVCF/SND_VCF
+            local splitDir=("${temp}"*_splitSND_"${projectDic[filename]}".vcf*)
+            for gene in "${splitDir[@]}"; do
+                local targetVCF="${gene%.*}"
+                targetVCF="${targetVCF##*/}"
+                vcf2bed < "${gene}" > "${projectDic["tempOut"]}"BED_SPLIT/SND_BED/"${targetVCF}".bed & ##sort later
+            done
+            wait
+        fi
         projectDic[OperationalStage]="bedTOfasta"
     #    Takes a reference genome and bed file and generates small fasta files from reference genome intervals
     elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
@@ -513,6 +538,18 @@ fileConverter(){
             bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${gene}" -fo "${projectDic["tempOut"]}"FASTA_SPLIT/"${targetBED}"_"${projectDic[filename]}".fasta &
         done
         wait
+        if [[ "${projectDic["sndMode"]}" == 1 ]]; then
+            local temp="${projectDic["tempOut"]}"BED_SPLIT/SND_BED
+            local splitDir=("${temp}"*"${projectDic[filename]}"_newSND_interval.bed*)
+            mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/SND_ANALYSIS
+            for gene in "${splitDir[@]}"; do
+                local targetBED="${gene%.*}"
+                targetBED="${targetBED##*/}"
+                targetBED=${targetBED:0:4}
+                bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${gene}" -fo "${projectDic["tempOut"]}"FASTA_SPLIT/SND_FASFA/"${targetBED}"_"${projectDic[filename]}".fasta &
+            done
+            wait
+        fi
         projectDic[OperationalStage]="alnToCounts"
     elif [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
         local temp="${projectDic["tempOut"]}"FASTA_SPLIT/
@@ -530,8 +567,20 @@ fileConverter(){
             mv "${projectDic[outputLoc]}"COUNTS_TABLES/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS/"${geneDirection}"_"${projectDic[filename]}".log ##FIX Unique Log ID'S    
             active+=("${geneDirection}")
         done
-
-
+        if [[ "${projectDic["sndMode"]}" == 1 ]]; then
+            local tempSND="${projectDic["tempOut"]}"FASTA_SPLIT/SND_FASFA
+            local splitDir=("${tempSND}"*_SND_"${projectDic[filename]}".fasta*)
+            mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/SND_ANALYSIS
+            mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/SND_ANALYSIS/LOGS
+            for gene in "${splitDir[@]}"; do
+                local countfile="${gene%.*}"
+                countfile="${countfile##*/}"
+                local geneDirection=${countfile:0:4}
+                aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES/SND_ANALYSIS/ --flank_size "${projectDic[flanks]}" --direction "${geneDirection}" -F > /dev/null
+                mv "${projectDic[outputLoc]}"COUNTS_TABLES/SND_ANALYSIS*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/SND_ANALYSIS/LOGS/"${geneDirection}"_"${projectDic[filename]}".log ##FIX Unique Log ID'S
+                activeSND+=("${geneDirection}")
+            done  
+        fi
         # for gene in "${splitDir[@]}"; do
         #     local countfile="${gene%.*}"
         #     countfile="${countfile##*/}"
@@ -584,6 +633,13 @@ fileConverter(){
                     ## mutation_analysis "${nOrS}" -1 "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"_"${projectDic[filename]}".txt -o "${projectDic[outputLoc]}"MUTATION_ANALYSIS/"${geneDirection}" "${sOrA}"
                     mutation_analysis nbr -1 "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"_"${projectDic[filename]}".txt -o "${projectDic[outputLoc]}"MUTATION_ANALYSIS/"${geneDirection}"
                 done
+                if [[ "${projectDic["sndMode"]}" == 1 ]]; then
+                    mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/SND_ANALYSIS
+                    for geneDirection in "${activeSND[@]}"; do
+                        mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/SND_ANALYSIS/"${geneDirection}"
+                        mutation_analysis nbr -1 "${projectDic[outputLoc]}"COUNTS_TABLES/SND_ANALYSIS/"${geneDirection}"_"${projectDic[filename]}".txt -o "${projectDic[outputLoc]}"MUTATION_ANALYSIS/SND_ANALYSIS/"${geneDirection}"
+                    done
+                fi
             fi
             if [[ "${projectDic["graphs"]}" == 1 ]] || [[ "${projectDic["graphs"]}" == 3 ]]; then
                 mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/COMBINED_COUNTS
@@ -609,12 +665,18 @@ dirStructure(){
         mkdir "${projectDic[outputLoc]}"SPLITVCF
         mkdir "${projectDic[outputLoc]}"FASTA_SPLIT
         mkdir "${projectDic[outputLoc]}"BED_SPLIT
+        if [[ "${projectDic[sndMode]}" -eq 1 ]]; then
+            mkdir "${projectDic[outputLoc]}"SPLITVCF/SND_VCF
+        fi
         projectDic["tempOut"]="${projectDic[outputLoc]}"
     elif [[ ${projectDic["allData"]} == "false" ]]; then
         projectDic["TempLoc"]+=$(mktemp -d)
         mkdir "${projectDic[TempLoc]}"/SPLITVCF
         mkdir "${projectDic[TempLoc]}"/FASTA_SPLIT
         mkdir "${projectDic[TempLoc]}"/BED_SPLIT
+        if [[ "${projectDic[sndMode]}" -eq 1 ]]; then
+            mkdir "${projectDic[TempLoc]}"SPLITVCF/SND_VCF
+        fi
         projectDic["tempOut"]="${projectDic["TempLoc"]}"/
     fi
 }
@@ -867,7 +929,7 @@ END_OF_TRANSFER
 #    A "Type One overlap" is another SNP within immediate contextual sequence
 #    A "Type Two overlap" is another SNP within the expanded flanking contextual sequencing
 pythonBEDScanner(){
-    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" interval="${projectDic["windowLength"]}" geneDir="$geneDir" pypy3.6 - <<END_OF_PYTHON
+    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" interval="${projectDic["windowLength"]}" geneDir="$geneDir" sndMode="${projectDic["sndMode"]}" pypy3.6 - <<END_OF_PYTHON
     
 import os
 import re
@@ -875,8 +937,8 @@ import subprocess
 from itertools import chain
 import datetime
 
-def bedMapper(interval, outputLoc, projectName, filename, geneDir):
-    output = str(subprocess.check_output(['wc', '-m', outputLoc + "BED_SPLIT/" + geneDir + "_split_" + filename + ".bed"]))
+def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedType):
+    output = str(subprocess.check_output(['wc', '-m', outputLoc + bedType + geneDir + "_split_" + filename + ".bed"]))
     length = re.findall(r'\d+', output)
     length = int(length[0])
     bedMapper=bytearray()
@@ -884,7 +946,7 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
     sub=[] ##FOR BEDMAPPER
     temp=[] ##FOR MASTERLIST
     final=''
-    with open(outputLoc + "BED_SPLIT/" + geneDir + "_split_" + filename + ".bed", "rb") as bed_test: ##Change to input variables
+    with open(outputLoc + bedType + geneDir + "_split_" + filename + ".bed", "rb") as bed_test: ##Change to input variables
         for i in range(length):
             element = bed_test.read(1).decode("ascii")
             if((element != '\t') and (element != '\n')):
@@ -908,9 +970,10 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir):
                 final=''
                 sub=[] ## was sub=[]
                 temp=[] ## was sub=[]
-        with open(outputLoc + "BED_SPLIT/" + geneDir + "_" + filename + "_new_interval.bed", "wb") as newBed: ##Change to input variables
-            newBed.write(bedMapper)
-        return(masterList)
+    with open(outputLoc + bedType + geneDir + "_" + filename + "_new_interval.bed", "wb") as newBed: ##Change to input variables ## Moved indent in
+        newBed.write(bedMapper)
+    
+    return(masterList)
 
 def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, geneDir, baseOut):
     gateA=True
@@ -983,11 +1046,14 @@ def bashInputs():
     projectName=str(os.environ['projectName'])
     geneDir=str(os.environ['geneDir'])
     baseOut=str(os.environ['baseOut'])
-    return(outputLoc, filename, interval, inputFile, projectName, geneDir, baseOut)
+    sndMode=int(os.environ["sndMode"])
+    return(outputLoc, filename, interval, inputFile, projectName, geneDir, baseOut, sndMode)
 
 def main():
-    outputLoc, filename, interval, inputFile, projectName, geneDir, baseOut=bashInputs()
-    masterList=bedMapper(interval, outputLoc, projectName, filename, geneDir) 
+    outputLoc, filename, interval, inputFile, projectName, geneDir, baseOut, sndMode=bashInputs()
+    masterList=bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, "BED_SPLIT/")
+    if(sndMode == 1):
+        masterList=bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, "BED_SPLIT/SND_BED/")
     binaryIntersect(masterList, interval, outputLoc, projectName, filename, geneDir, baseOut)
 main()
 
@@ -996,7 +1062,7 @@ END_OF_PYTHON
 }
 #    Split up file based on mutation direction
 vcfSplit(){
-    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" pypy3.6 - <<VCF_SPLIT_END
+    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" sndMode="${projectDic["sndMode"]}" pypy3.6 - <<VCF_SPLIT_END
 
 import os
 
@@ -1019,9 +1085,18 @@ def geneDirCreate():
         'header':bytearray(),
         
     }
-    return(geneDir)
 
-def vcfSegments(inputFile, geneDir):
+    SNDGeneDir={
+
+        'AtoT':bytearray(),
+        'CtoT':bytearray(),
+        'GtoT':bytearray(),
+        'TtoA':bytearray(),
+
+    }
+    return(geneDir, SNDGeneDir)
+
+def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
     with open(inputFile, "rb") as raw:
         sub=[]
         counter=0
@@ -1049,16 +1124,30 @@ def vcfSegments(inputFile, geneDir):
                             sub.clear()
                             gate=False
                         else:
-                            geneDir['rejected'].extend(readLine)
-                            sub.clear()
-                            gate=False
+                            if((sndMode == True) and (len(sub[6]) >= 2)):
+                                if(sub[6][1] != "T"):
+                                    sub[6] = sub[6][1]
+                                    sub[8] = "T"
+                                    sub[2] = str(int(sub[2]) + 1)
+                                else:
+                                    sub[6] = sub[6][1]
+                                    sub[8] = "A"
+                                    sub[2] = str(int(sub[2]) + 1)
+                                gene = str(sub[6]) + "to" + str(sub[8])
+                                sub.append(results)
+                                sub.append(element)
+                                SNDGeneDir[gene].extend(''.join(sub).encode("utf-8"))
+                            else:
+                                geneDir['rejected'].extend(readLine)
+                                sub.clear()
+                                gate=False
                 else:
                     geneDir['header'].extend(readLine)
                     gate=False
                 counter+=1
-    return(geneDir)
+    return(geneDir, SNDGeneDir)
 
-def vcfSpliter(geneDir, outputLoc, filename, baseOut):
+def vcfSpliter(outputLoc, filename, baseOut, geneDir, SNDGeneDir, sndMode):
     for key in geneDir:
         if(geneDir[key]):
             if((key != "rejected") and (key != "header")):
@@ -1070,6 +1159,12 @@ def vcfSpliter(geneDir, outputLoc, filename, baseOut):
                     with open(baseOut + "REJECTEDVCFs_" + filename + ".vcf","ab") as vcfOut:
                         vcfOut.write(geneDir['header'])
                         vcfOut.write(geneDir[key])
+    if(sndMode):
+        for sndKey in SNDGeneDir:
+            if(SNDGeneDir[sndKey]):
+                with open(outputLoc + "SNDVCF/" + sndKey + "_split_" + filename + ".vcf","ab") as vcfOut:
+                    vcfOut.write(geneDir['header'])
+                    vcfOut.write(SNDGeneDir[sndKey])
 
 def bashImport():
     outputLoc=str(os.environ['outputLoc'])
@@ -1077,13 +1172,14 @@ def bashImport():
     filename=str(os.environ['filename'])
     projectName=str(os.environ['projectName'])
     baseOut=str(os.environ['baseOut'])
-    return(projectName, inputFile, outputLoc, filename, baseOut)
+    sndMode=str(os.environ['sndMode'])
+    return(projectName, inputFile, outputLoc, filename, baseOut, sndMode)
 
 def main():
     projectName, inputFile, outputLoc, filename, baseOut=bashImport()
-    geneDir=geneDirCreate()
-    geneDir=vcfSegments(inputFile, geneDir)
-    vcfSpliter(geneDir, outputLoc, filename, baseOut)
+    geneDir, SNDGeneDir=geneDirCreate()
+    geneDir, SNDGeneDir=vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode)
+    vcfSpliter(outputLoc, filename, baseOut, geneDir, SNDGeneDir, sndMode)
 
 main()
 
@@ -1218,13 +1314,13 @@ jobCreator(){
     myEmail="${projectDic["email"]}" job_specs="${job_specs}" scriptPath="${scriptPath}" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" \
     outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" \
     s3="${projectDic["s3"]}" msi="${projectDic["msi"]}" dpb="${projectDic["dropbox"]}" dpba="${projectDic["dropboxAuth"]}" gh="${projectDic["github"]}" ghu="${projectDic["gitUser"]}" ghp="${projectDic["gitPass"]}" \
-    gho="${projectDic["owner"]}" ghr="${projectDic["Myrepository"]}" config="${config}" ma="${projectDic["mutationAnalysis"]}" nbrs="${projectDic["nbrOrSpec"]}" \
+    gho="${projectDic["owner"]}" ghr="${projectDic["Myrepository"]}" config="${config}" ma="${projectDic["mutationAnalysis"]}" nbrs="${projectDic["nbrOrSpec"]}" sndMode="${projectDic["sndMode"]}"\
     symas="${projectDic["symOrAsy"]}" queue="${projectDic["queue"]}" graphs="${projectDic["graphs"]}" python3.6 - <<JOB_CREATED
 
 
 import os
 
-def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas, queue, graphs):
+def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas, queue, graphs, sndMode):
     job="#!/bin/bash -l\n\n#PBS -l " + job_specs + "\n#PBS -m abe\n#PBS -M " + email + "\n"
     job+="#PBS -N " + projectName + "\n"
     job+="#PBS -o " + outputLoc + "\n#PBS -e " + outputLoc + "\n#PBS -q " + queue + "\n\n"
@@ -1242,6 +1338,7 @@ def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, ema
     job+= "-nbrs " + nbrs + " "
     job+= "-symas " + symas + " "
     job+= "-graphs " + graphs + " "
+    jobs+= "-snd " + sndMode + " "
 
     job+= "-s3 " + s3 + " "
     job+= "-msi " + msi + " "
@@ -1277,6 +1374,7 @@ def bashImport():
     symas=str(os.environ['symas'])
     queue=str(os.environ['queue'])
     graphs=str(os.environ['graphs'])
+    sndMode=int(os.environ["sndMode"])
 
     s3=str(os.environ['s3'])
     msi=str(os.environ['msi'])
@@ -1288,11 +1386,11 @@ def bashImport():
     gho=str(os.environ['gho'])
     ghr=str(os.environ['ghr'])
 
-    return(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas, queue, graphs)
+    return(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas, queue, graphs, sndMode)
 
 def main():
-    projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas, queue, graphs = bashImport()
-    jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas, queue, graphs)
+    projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas, queue, graphs, sndMode= bashImport()
+    jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, job_specs, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas, queue, graphs, , sndMode)
 
 main()
     
