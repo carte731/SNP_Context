@@ -1138,6 +1138,7 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
                                 sub.append(results)
                                 sub.append(element)
                                 SNDGeneDir[gene].extend(''.join(sub).encode("utf-8"))
+                                gate=False
                             else:
                                 geneDir['rejected'].extend(readLine)
                                 sub.clear()
@@ -1173,7 +1174,7 @@ def bashImport():
     filename=str(os.environ['filename'])
     projectName=str(os.environ['projectName'])
     baseOut=str(os.environ['baseOut'])
-    sndMode=str(os.environ['sndMode'])
+    sndMode=int(os.environ['sndMode'])
     return(projectName, inputFile, outputLoc, filename, baseOut, sndMode)
 
 def main():
