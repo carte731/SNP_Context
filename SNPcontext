@@ -1162,7 +1162,7 @@ def vcfSpliter(outputLoc, filename, baseOut, geneDir, SNDGeneDir, sndMode):
     if(sndMode == 1):
         for sndKey in SNDGeneDir:
             if(SNDGeneDir[sndKey]):
-                with open(outputLoc + "SNDVCF/" + sndKey + "_split_" + filename + ".vcf","ab") as vcfOut:
+                with open(outputLoc + "SPLITVCF/SND_VCF/" + sndKey + "_split_" + filename + ".vcf","ab") as vcfOut:
                     vcfOut.write(geneDir['header'])
                     vcfOut.write(SNDGeneDir[sndKey])
 
@@ -1176,7 +1176,7 @@ def bashImport():
     return(projectName, inputFile, outputLoc, filename, baseOut, sndMode)
 
 def main():
-    projectName, inputFile, outputLoc, filename, baseOut=bashImport()
+    projectName, inputFile, outputLoc, filename, baseOut, sndMode=bashImport()
     geneDir, SNDGeneDir=geneDirCreate()
     geneDir, SNDGeneDir=vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode)
     vcfSpliter(outputLoc, filename, baseOut, geneDir, SNDGeneDir, sndMode)
