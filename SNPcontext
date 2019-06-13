@@ -939,6 +939,7 @@ from itertools import chain
 import datetime
 
 def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedType):
+    print(outputLoc + bedType + geneDir + "_split_" + filename + ".bed")
     output = str(subprocess.check_output(['wc', '-m', outputLoc + bedType + geneDir + "_split_" + filename + ".bed"]))
     length = re.findall(r'\d+', output)
     length = int(length[0])
