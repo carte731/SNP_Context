@@ -1338,7 +1338,7 @@ def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, ema
     job+= "-nbrs " + nbrs + " "
     job+= "-symas " + symas + " "
     job+= "-graphs " + graphs + " "
-    jobs+= "-snd " + sndMode + " "
+    job+= "-snd " + sndMode + " "
 
     job+= "-s3 " + s3 + " "
     job+= "-msi " + msi + " "
