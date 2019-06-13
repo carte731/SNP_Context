@@ -516,7 +516,7 @@ fileConverter(){
             vcf2bed < "${gene}" > "${projectDic["tempOut"]}"BED_SPLIT/"${targetVCF}".bed & ##sort later
         done
         wait
-        if [[ "${projectDic["sndMode"]}" == 1 ]]; then
+        if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
             local temp="${projectDic["tempOut"]}"SPLITVCF/SND_VCF
             local splitDir=("${temp}"*_splitSND_"${projectDic[filename]}".vcf*)
             for gene in "${splitDir[@]}"; do
@@ -538,7 +538,7 @@ fileConverter(){
             bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${gene}" -fo "${projectDic["tempOut"]}"FASTA_SPLIT/"${targetBED}"_"${projectDic[filename]}".fasta &
         done
         wait
-        if [[ "${projectDic["sndMode"]}" == 1 ]]; then
+        if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
             local temp="${projectDic["tempOut"]}"BED_SPLIT/SND_BED
             local splitDir=("${temp}"*"${projectDic[filename]}"_newSND_interval.bed*)
             mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/SND_ANALYSIS
@@ -567,7 +567,7 @@ fileConverter(){
             mv "${projectDic[outputLoc]}"COUNTS_TABLES/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS/"${geneDirection}"_"${projectDic[filename]}".log ##FIX Unique Log ID'S    
             active+=("${geneDirection}")
         done
-        if [[ "${projectDic["sndMode"]}" == 1 ]]; then
+        if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
             local tempSND="${projectDic["tempOut"]}"FASTA_SPLIT/SND_FASFA
             local splitDir=("${tempSND}"*_SND_"${projectDic[filename]}".fasta*)
             mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/SND_ANALYSIS
@@ -633,7 +633,7 @@ fileConverter(){
                     ## mutation_analysis "${nOrS}" -1 "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"_"${projectDic[filename]}".txt -o "${projectDic[outputLoc]}"MUTATION_ANALYSIS/"${geneDirection}" "${sOrA}"
                     mutation_analysis nbr -1 "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"_"${projectDic[filename]}".txt -o "${projectDic[outputLoc]}"MUTATION_ANALYSIS/"${geneDirection}"
                 done
-                if [[ "${projectDic["sndMode"]}" == 1 ]]; then
+                if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
                     mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/SND_ANALYSIS
                     for geneDirection in "${activeSND[@]}"; do
                         mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/SND_ANALYSIS/"${geneDirection}"
@@ -1124,7 +1124,7 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
                             sub.clear()
                             gate=False
                         else:
-                            if((sndMode == True) and (len(sub[6]) >= 2)):
+                            if((sndMode == 1) and (len(sub[6]) >= 2)):
                                 if(sub[6][1] != "T"):
                                     sub[6] = sub[6][1]
                                     sub[8] = "T"
@@ -1159,7 +1159,7 @@ def vcfSpliter(outputLoc, filename, baseOut, geneDir, SNDGeneDir, sndMode):
                     with open(baseOut + "REJECTEDVCFs_" + filename + ".vcf","ab") as vcfOut:
                         vcfOut.write(geneDir['header'])
                         vcfOut.write(geneDir[key])
-    if(sndMode):
+    if(sndMode == 1):
         for sndKey in SNDGeneDir:
             if(SNDGeneDir[sndKey]):
                 with open(outputLoc + "SNDVCF/" + sndKey + "_split_" + filename + ".vcf","ab") as vcfOut:
@@ -1374,7 +1374,7 @@ def bashImport():
     symas=str(os.environ['symas'])
     queue=str(os.environ['queue'])
     graphs=str(os.environ['graphs'])
-    sndMode=int(os.environ["sndMode"])
+    sndMode=str(os.environ["sndMode"])
 
     s3=str(os.environ['s3'])
     msi=str(os.environ['msi'])
