@@ -675,7 +675,7 @@ dirStructure(){
         mkdir "${projectDic[TempLoc]}"/FASTA_SPLIT
         mkdir "${projectDic[TempLoc]}"/BED_SPLIT
         if [[ "${projectDic[sndMode]}" -eq 1 ]]; then
-            mkdir "${projectDic[TempLoc]}"SPLITVCF/SND_VCF
+            mkdir "${projectDic[TempLoc]}"/SPLITVCF/SND_VCF
         fi
         projectDic["tempOut"]="${projectDic["TempLoc"]}"/
     fi
