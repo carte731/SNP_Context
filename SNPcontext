@@ -509,13 +509,13 @@ moduleLoader(){ #Load modules needed for operations
 fileConverter(){
     if [ "${projectDic[OperationalStage]}" == "vcfTObed" ]; then ##Key and new input LOCATION
         # local temp="${projectDic["tempOut"]}"SPLITVCF/
-        local temp="${projectDic["tempOut"]}""${fileConverterMode}"
+        local temp="${projectDic["tempOut"]}""${1}"
         local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
         for gene in "${splitDir[@]}"; do
             local targetVCF="${gene%.*}"
             targetVCF="${targetVCF##*/}"
             # vcf2bed < "${gene}" > "${projectDic["tempOut"]}"BED_SPLIT/"${targetVCF}".bed & ##sort later
-            vcf2bed < "${gene}" > "${projectDic["tempOut"]}""${fileConverterMode}""${targetVCF}".bed & ##sort later
+            vcf2bed < "${gene}" > "${projectDic["tempOut"]}""${1}""${targetVCF}".bed & ##sort later
         done
         wait
         # if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
@@ -533,14 +533,14 @@ fileConverter(){
     #    Takes a reference genome and bed file and generates small fasta files from reference genome intervals
     elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
         # local temp="${projectDic["tempOut"]}"BED_SPLIT/
-        local temp="${projectDic["tempOut"]}""${fileConverterMode}"
+        local temp="${projectDic["tempOut"]}""${1}"
         local splitDir=("${temp}"*"${projectDic[filename]}"_new_interval.bed*)
         for gene in "${splitDir[@]}"; do
             local targetBED="${gene%.*}"
             targetBED="${targetBED##*/}"
             targetBED=${targetBED:0:4}
             # bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${gene}" -fo "${projectDic["tempOut"]}"FASTA_SPLIT/"${targetBED}"_"${projectDic[filename]}".fasta &
-            bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${gene}" -fo "${projectDic["tempOut"]}""${fileConverterMode}""${targetBED}"_"${projectDic[filename]}".fasta &
+            bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${gene}" -fo "${projectDic["tempOut"]}""${1}""${targetBED}"_"${projectDic[filename]}".fasta &
         done
         wait
         # if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
@@ -558,7 +558,7 @@ fileConverter(){
         projectDic[OperationalStage]="alnToCounts"
     elif [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
         # local temp="${projectDic["tempOut"]}"FASTA_SPLIT/
-        local temp="${projectDic["tempOut"]}""${fileConverterMode}"
+        local temp="${projectDic["tempOut"]}""${1}"
         local splitDir=("${temp}"*_"${projectDic[filename]}".fasta*)
         echo -e "Creating counts tables..."
 
@@ -568,9 +568,9 @@ fileConverter(){
             local countfile="${gene%.*}"
             countfile="${countfile##*/}"
             local geneDirection=${countfile:0:4}
-            aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}""${fileConverterTemp}" --flank_size "${projectDic[flanks]}" --direction "${geneDirection}" -F > /dev/null
+            aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}""${2}" --flank_size "${projectDic[flanks]}" --direction "${geneDirection}" -F > /dev/null
             # mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"_"${projectDic[filename]}".txt
-            mv "${projectDic[outputLoc]}""${fileConverterTemp}"*.log* "${projectDic[outputLoc]}""${fileConverterTemp}"/LOGS/"${geneDirection}"_"${projectDic[filename]}".log ##FIX Unique Log ID'S    
+            mv "${projectDic[outputLoc]}""${2}"*.log* "${projectDic[outputLoc]}""${2}"/LOGS/"${geneDirection}"_"${projectDic[filename]}".log ##FIX Unique Log ID'S    
             active+=("${geneDirection}")
         done
         # if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
@@ -632,14 +632,14 @@ fileConverter(){
                 sOrA="--strand_symmetry"
 		
             fi
-            mkdir "${projectDic[outputLoc]}""${fileConverterMode}"
-            cd "${projectDic[outputLoc]}""${fileConverterMode}"
+            mkdir "${projectDic[outputLoc]}""${1}"
+            cd "${projectDic[outputLoc]}""${1}"
             if [[ "${projectDic["graphs"]}" == 1 ]] || [[ "${projectDic["graphs"]}" == 2 ]]; then
                 for geneDirection in "${active[@]}"; do
                     ## mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/"${geneDirection}"
                     mkdir "${projectDic[outputLoc]}""${fileConverterTemp}""${geneDirection}"
                     ## No "--strand_symmetry" unless "all_counts" is called
-                    mutation_analysis nbr -1 "${projectDic[outputLoc]}""${fileConverterMode}""${geneDirection}"_"${projectDic[filename]}".txt -o "${projectDic[outputLoc]}""${fileConverterTemp}""${geneDirection}"
+                    mutation_analysis nbr -1 "${projectDic[outputLoc]}""${1}""${geneDirection}"_"${projectDic[filename]}".txt -o "${projectDic[outputLoc]}""${fileConverterTemp}""${geneDirection}"
                 done
                 # if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
                 #     mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/SND_ANALYSIS
