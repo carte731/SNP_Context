@@ -517,7 +517,7 @@ fileConverter(){
         done
         wait
         if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
-            local temp="${projectDic["tempOut"]}"SPLITVCF/SND_VCF
+            local temp="${projectDic["tempOut"]}"SPLITVCF/SND_VCF/
             local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
             mkdir "${projectDic[outputLoc]}"BED_SPLIT/SND_BED/
             for gene in "${splitDir[@]}"; do
