@@ -371,7 +371,7 @@ starter(){ #grabs the arguments
                 unset strand_symmetry_or_asymmetry                
             fi
         elif [[ "${i,,}" == "-graphs" ]] || [[ ${graphs} == $i ]] && (( "${projectDic["graphs"]}" == -9091 )); then #
-            if [[ "${var}" -gt 0 ]] && [[ "${var}" -le 3 ]]; then
+            if [[ "${var}" -ge 0 ]] && [[ "${var}" -le 3 ]]; then
                 projectDic["graphs"]="${var,,}"
                 frontgate=1
                 unset graphs
@@ -734,7 +734,7 @@ def s3sentit(inputLoc, project, isCmd, config):
     for file, path in allFiles.items():
         with open(path[0], "rb") as fileIO:
             myPath = path[1] + "/" + file
-            s3.Object(newFolder, myPath).upload_fileobj(fileIO)                     
+            s3.Object(newFolder, myPath).upload_fileobj(fileIO)                  
     if(config != "none"):
         out=''
         with open(config, "r") as configScanner:
@@ -939,7 +939,7 @@ from itertools import chain
 import datetime
 
 def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedType):
-    print(outputLoc + bedType + geneDir + "_split_" + filename + ".bed")
+    print(outputLoc + bedType + geneDir + "_split_" + filename + ".bed -- TEST")
     output = str(subprocess.check_output(['wc', '-m', outputLoc + bedType + geneDir + "_split_" + filename + ".bed"]))
     length = re.findall(r'\d+', output)
     length = int(length[0])
@@ -1452,16 +1452,16 @@ main(){
     dirStructure
     vcfSplit
     fileConverter ##MAKES BED FILE
-    local temp="${projectDic["tempOut"]}"BED_SPLIT/
-    local splitDir=("${temp}"*_split_"${projectDic[filename]}".bed*)
-    for gene in "${splitDir[@]}"; do
-        local geneDir="${gene%.*}"
-        geneDir="${geneDir##*/}"
-        geneDir=${geneDir:0:4} ##BASH IS BASE 1
-	    sndLocal=0
-        pythonBEDScanner "$geneDir" "$sndLocal" & ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
-    done
-    wait
+    # local temp="${projectDic["tempOut"]}"BED_SPLIT/
+    # local splitDir=("${temp}"*_split_"${projectDic[filename]}".bed*)
+    # for gene in "${splitDir[@]}"; do
+    #     local geneDir="${gene%.*}"
+    #     geneDir="${geneDir##*/}"
+    #     geneDir=${geneDir:0:4} ##BASH IS BASE 1
+	#     sndLocal=0
+    #     pythonBEDScanner "$geneDir" "$sndLocal" & ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
+    # done
+    # wait
     if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
     	local temp="${projectDic["tempOut"]}"BED_SPLIT/SND_BED   
         local splitDir=("${temp}"*_split_"${projectDic[filename]}".bed*)
