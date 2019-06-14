@@ -380,7 +380,7 @@ starter(){ #grabs the arguments
                 projectDic["graphs"]=1
             fi
         elif [[ "${i,,}" == "-snd" ]] || [[ ${sndMode} == $i ]] && (( "${projectDic["sndMode"]}" == -9091 )); then #
-            if (( "${var}" -ge 1 )) && (( "${var}" -le 2 )); then
+            if [[ "${var}" -eq 1 ]] || [[ "${var}" -eq 2 ]]; then
                 projectDic["sndMode"]="${var,,}"
                 frontgate=1
                 unset graphs
