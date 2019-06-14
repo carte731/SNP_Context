@@ -1543,39 +1543,39 @@ main(){
     dirStructure
     vcfSplit
 
-    fileConverterMode="SPLITVCF/"
-    fileConverter "${fileConverterMode}" ##MAKES BED FILE
-    local temp="${projectDic["tempOut"]}"BED_SPLIT/
-    local splitDir=("${temp}"*_split_"${projectDic[filename]}".bed*)
-    for gene in "${splitDir[@]}"; do
-        local geneDir="${gene%.*}"
-        geneDir="${geneDir##*/}"
-        geneDir=${geneDir:0:4} ##BASH IS BASE 1
-	    sndLocal=0
-        pythonBEDScanner "$geneDir" "$sndLocal" & ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
-    done
-    wait
-    echo -e "\nOverlap checks completed..."
-    echo -e "See overlap results located in 'WindowOverlap.txt' in your main output directory.\n"
-    fileConverterMode="BED_SPLIT/"
-    fileConverter "${fileConverterMode}" ##CREATES FASTA FILE
-    local tempTwo="${projectDic["tempOut"]}"FASTA_SPLIT/
-    local fastalisting=("${tempTwo}"*_"${projectDic[filename]}".fasta*)
-    for geneTwo in "${fastalisting[@]}"; do
-        local geneDirTwo="${geneTwo%.*}"
-        geneDirTwo="${geneDirTwo##*/}"
-        geneDirTwo=${geneDirTwo:0:4}
-        fastaScanner "${geneDirTwo}" "${geneTwo}" & ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
-    done
-    wait
-    fileConverterMode="FASTA_SPLIT/"
-    fileConverterTemp="COUNTS_TABLES/"
-    fileConverter "${fileConverterMode}" "${fileConverterTemp}" ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
-    fileConverter ##ALL_COUNTS
-    fileConverterMode="COUNTS_TABLES/"
-    fileConverterTemp="MUTATION_ANALYSIS/"
-    fileConverter "${fileConverterMode}" "${fileConverterTemp}" ## MUTATION GRAPHING
-    fileConverter ## MUTATION GRAPHING COMBINED
+    # fileConverterMode="SPLITVCF/"
+    # fileConverter "${fileConverterMode}" ##MAKES BED FILE
+    # local temp="${projectDic["tempOut"]}"BED_SPLIT/
+    # local splitDir=("${temp}"*_split_"${projectDic[filename]}".bed*)
+    # for gene in "${splitDir[@]}"; do
+    #     local geneDir="${gene%.*}"
+    #     geneDir="${geneDir##*/}"
+    #     geneDir=${geneDir:0:4} ##BASH IS BASE 1
+	#     sndLocal=0
+    #     pythonBEDScanner "$geneDir" "$sndLocal" & ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
+    # done
+    # wait
+    # echo -e "\nOverlap checks completed..."
+    # echo -e "See overlap results located in 'WindowOverlap.txt' in your main output directory.\n"
+    # fileConverterMode="BED_SPLIT/"
+    # fileConverter "${fileConverterMode}" ##CREATES FASTA FILE
+    # local tempTwo="${projectDic["tempOut"]}"FASTA_SPLIT/
+    # local fastalisting=("${tempTwo}"*_"${projectDic[filename]}".fasta*)
+    # for geneTwo in "${fastalisting[@]}"; do
+    #     local geneDirTwo="${geneTwo%.*}"
+    #     geneDirTwo="${geneDirTwo##*/}"
+    #     geneDirTwo=${geneDirTwo:0:4}
+    #     fastaScanner "${geneDirTwo}" "${geneTwo}" & ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
+    # done
+    # wait
+    # fileConverterMode="FASTA_SPLIT/"
+    # fileConverterTemp="COUNTS_TABLES/"
+    # fileConverter "${fileConverterMode}" "${fileConverterTemp}" ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
+    # fileConverter ##ALL_COUNTS
+    # fileConverterMode="COUNTS_TABLES/"
+    # fileConverterTemp="MUTATION_ANALYSIS/"
+    # fileConverter "${fileConverterMode}" "${fileConverterTemp}" ## MUTATION GRAPHING
+    # fileConverter ## MUTATION GRAPHING COMBINED
 
     if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
         projectDic[OperationalStage]="vcfTObed"
