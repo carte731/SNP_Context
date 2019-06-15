@@ -978,7 +978,7 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
                 temp.append(int(b))
                 temp.sort()
                 ## Adding this conditional to remove duplicates in the bed file
-                if(temp not in masterList)):
+                if(temp not in masterList):
                     bedMapper.extend(''.join(sub).encode("utf-8"))
                     masterList.append(temp)
                 else:
