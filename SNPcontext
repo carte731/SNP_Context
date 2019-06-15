@@ -371,7 +371,7 @@ starter(){ #grabs the arguments
                 unset strand_symmetry_or_asymmetry                
             fi
         elif [[ "${i,,}" == "-graphs" ]] || [[ ${graphs} == $i ]] && (( "${projectDic["graphs"]}" == -9091 )); then #
-            if [[ "${var}" -eq 0 ]] || [[ "${var}" -eq 2 ]] || [[ "${var}" -eq 3 ]]; then
+            if [[ "${var}" -eq 1 ]] || [[ "${var}" -eq 2 ]] || [[ "${var}" -eq 3 ]]; then
                 projectDic["graphs"]="${var,,}"
                 frontgate=1
                 unset graphs
