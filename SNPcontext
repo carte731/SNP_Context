@@ -671,7 +671,7 @@ dirStructure(){
     projectDic["outputLoc"]="${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
     mkdir "${projectDic[outputLoc]}"COUNTS_TABLES
     mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS
-    mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS
+    mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS
     if [[ ${projectDic["allData"]} == "true" ]]; then
         mkdir "${projectDic[outputLoc]}"SPLITVCF
         mkdir "${projectDic[outputLoc]}"FASTA_SPLIT
