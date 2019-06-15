@@ -632,7 +632,7 @@ fileConverter(){
                 sOrA="--strand_symmetry"
 		
             fi
-            mkdir "${projectDic[outputLoc]}""${2}"
+            # mkdir "${projectDic[outputLoc]}""${2}"
             cd "${projectDic[outputLoc]}""${2}"
             if [[ "${projectDic["graphs"]}" == 1 ]] || [[ "${projectDic["graphs"]}" == 2 ]]; then
                 for geneDirection in "${active[@]}"; do
@@ -670,6 +670,7 @@ dirStructure(){
     mkdir "${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
     projectDic["outputLoc"]="${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
     mkdir "${projectDic[outputLoc]}"COUNTS_TABLES
+    mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS
     mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS
     if [[ ${projectDic["allData"]} == "true" ]]; then
         mkdir "${projectDic[outputLoc]}"SPLITVCF
@@ -1617,6 +1618,7 @@ main(){
         fileConverter "${fileConverterMode}" "${fileConverterTemp}" ## ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
         fileConverterMode="COUNTS_TABLES/SND_TABLES/"
         fileConverterTemp="MUTATION_ANALYSIS/SND_ANALYSIS/"
+        mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/SND_ANALYSIS/
         projectDic["OperationalStage"]="graphSingle"
         fileConverter "${fileConverterMode}" "${fileConverterTemp}" ## MUTATION GRAPHING
 
