@@ -1578,7 +1578,7 @@ main(){
     # fileConverter ## MUTATION GRAPHING COMBINED
     # active=()
 
-    sndAmount=$(ls "${projectDic["TempLoc"]}" | wc -l)
+    sndAmount=$(ls "${projectDic["TempLoc"]}"SPLITVCF/SND_VCF/ | wc -l)
     if [[ "${projectDic["sndMode"]}" -eq 1 ]] && [[ ${sndAmount} != 0 ]]; then
         projectDic[OperationalStage]="vcfTObed"
         fileConverterMode="SPLITVCF/SND_VCF/"
