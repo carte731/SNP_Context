@@ -949,7 +949,6 @@ from itertools import chain
 import datetime
 
 def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedType):
-    print(outputLoc + bedType + geneDir + "_split_" + filename + ".bed -- TEST")
     output = str(subprocess.check_output(['wc', '-m', outputLoc + bedType + geneDir + "_split_" + filename + ".bed"]))
     length = re.findall(r'\d+', output)
     length = int(length[0])
@@ -959,7 +958,6 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
     temp=[] ##FOR MASTERLIST
     final=''
     with open(outputLoc + bedType + geneDir + "_split_" + filename + ".bed", "rb") as bed_test: ##Change to input variables
-    #with open(outputLoc + "BED_SPLIT/" + geneDir + "_split_" + filename + ".bed", "rb") as bed_test: ##Change to input variables
         for i in range(length):
             element = bed_test.read(1).decode("ascii")
             if((element != '\t') and (element != '\n')):
@@ -988,7 +986,6 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
                 sub=[] ## was sub=[]
                 temp=[] ## was sub=[]
     with open(outputLoc + bedType + geneDir + "_" + filename + "_new_interval.bed", "wb") as newBed: ##Change to input variables ## Moved indent in
-        #with open(outputLoc + "BED_SPLIT/" + geneDir + "_" + filename + "_new_interval.bed", "wb") as newBed: ##Change to input variables ## Moved indent in
         newBed.write(bedMapper)
     
     return(masterList)
@@ -1581,7 +1578,8 @@ main(){
     # fileConverter ## MUTATION GRAPHING COMBINED
     # active=()
 
-    if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
+    sndAmount=$(ls "${projectDic["TempLoc"]}" | wc -l)
+    if [[ "${projectDic["sndMode"]}" -eq 1 ]] && [[ ${sndAmount} != 0 ]]; then
         projectDic[OperationalStage]="vcfTObed"
         fileConverterMode="SPLITVCF/SND_VCF/"
         fileConverterTemp="BED_SPLIT/SND_BED/"
