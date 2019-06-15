@@ -1576,6 +1576,7 @@ main(){
     # fileConverterTemp="MUTATION_ANALYSIS/"
     # fileConverter "${fileConverterMode}" "${fileConverterTemp}" ## MUTATION GRAPHING
     # fileConverter ## MUTATION GRAPHING COMBINED
+    # active=()
 
     if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
         projectDic[OperationalStage]="vcfTObed"
@@ -1608,13 +1609,13 @@ main(){
         done
         wait
         fileConverterMode="FASTA_SPLIT/SND_FASFA/"
-        fileConverterTemp="COUNTS_TABLES/"
+        fileConverterTemp="COUNTS_TABLES/SND_ANALYSIS/"
         mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/SND_ANALYSIS
         mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/SND_ANALYSIS/LOGS
         fileConverter "${fileConverterMode}" "${fileConverterTemp}" ## ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
         fileConverterMode="COUNTS_TABLES/SND_ANALYSIS/"
-        projectDic["OperationalStage"]="graphSingle"
         fileConverterTemp="MUTATION_ANALYSIS/SND_ANALYSIS/"
+        projectDic["OperationalStage"]="graphSingle"
         fileConverter "${fileConverterMode}" "${fileConverterTemp}" ## MUTATION GRAPHING
 
     fi
