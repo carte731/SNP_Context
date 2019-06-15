@@ -514,25 +514,12 @@ fileConverter(){
         for gene in "${splitDir[@]}"; do
             local targetVCF="${gene%.*}"
             targetVCF="${targetVCF##*/}"
-            # vcf2bed < "${gene}" > "${projectDic["tempOut"]}"BED_SPLIT/"${targetVCF}".bed & ##sort later
             vcf2bed < "${gene}" > "${projectDic["tempOut"]}""${2}""${targetVCF}".bed & ##sort later
         done
         wait
-        # if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
-        #     local temp="${projectDic["tempOut"]}"SPLITVCF/SND_VCF/
-        #     local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
-        #     mkdir "${projectDic["tempOut"]}"BED_SPLIT/SND_BED/
-        #     for gene in "${splitDir[@]}"; do
-        #         local targetVCF="${gene%.*}"
-        #         targetVCF="${targetVCF##*/}"
-        #         vcf2bed < "${gene}" > "${projectDic["tempOut"]}"BED_SPLIT/SND_BED/"${targetVCF}".bed & ##sort later
-        #     done
-        #     wait
-        # fi
         projectDic[OperationalStage]="bedTOfasta"
     #    Takes a reference genome and bed file and generates small fasta files from reference genome intervals
     elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
-        # local temp="${projectDic["tempOut"]}"BED_SPLIT/
         local temp="${projectDic["tempOut"]}""${1}"
         local splitDir=("${temp}"*"${projectDic[filename]}"_new_interval.bed*)
         for gene in "${splitDir[@]}"; do
@@ -543,27 +530,12 @@ fileConverter(){
             bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${gene}" -fo "${projectDic["tempOut"]}""${2}""${targetBED}"_"${projectDic[filename]}".fasta &
         done
         wait
-        # if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
-        #     local temp="${projectDic["tempOut"]}"BED_SPLIT/SND_BED/
-        #     local splitDir=("${temp}"*"${projectDic[filename]}"_new_interval.bed*)
-        #     mkdir "${projectDic["tempOut"]}"FASTA_SPLIT/SND_FASFA/
-        #     for gene in "${splitDir[@]}"; do
-        #         local targetBED="${gene%.*}"
-        #         targetBED="${targetBED##*/}"
-        #         targetBED=${targetBED:0:4}
-        #         bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${gene}" -fo "${projectDic["tempOut"]}"FASTA_SPLIT/SND_FASFA/"${targetBED}"_"${projectDic[filename]}".fasta &
-        #     done
-        #     wait
-        # fi
         projectDic[OperationalStage]="alnToCounts"
     elif [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
         # local temp="${projectDic["tempOut"]}"FASTA_SPLIT/
         local temp="${projectDic["tempOut"]}""${1}"
         local splitDir=("${temp}"*_"${projectDic[filename]}".fasta*)
         echo -e "Creating counts tables..."
-
-        # mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/
-        # mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/LOGS
         for gene in "${splitDir[@]}"; do
             local countfile="${gene%.*}"
             countfile="${countfile##*/}"
@@ -573,34 +545,6 @@ fileConverter(){
             mv "${projectDic[outputLoc]}""${2}"*.log* "${projectDic[outputLoc]}""${2}"/LOGS/"${geneDirection}"_"${projectDic[filename]}".log ##FIX Unique Log ID'S    
             active+=("${geneDirection}")
         done
-        # if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
-        #     local tempSND="${projectDic["tempOut"]}"FASTA_SPLIT/SND_FASFA
-        #     local splitDir=("${tempSND}"*_"${projectDic[filename]}".fasta*)
-        #     mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/SND_ANALYSIS
-        #     mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/SND_ANALYSIS/LOGS
-        #     for gene in "${splitDir[@]}"; do
-        #         local countfile="${gene%.*}"
-        #         countfile="${countfile##*/}"
-        #         local geneDirection=${countfile:0:4}
-        #         aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES/SND_ANALYSIS/ --flank_size "${projectDic[flanks]}" --direction "${geneDirection}" -F > /dev/null
-        #         mv "${projectDic[outputLoc]}"COUNTS_TABLES/SND_ANALYSIS*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/SND_ANALYSIS/LOGS/"${geneDirection}"_"${projectDic[filename]}".log ##FIX Unique Log ID'S
-        #         activeSND+=("${geneDirection}")
-        #     done  
-        # fi
-
-        # for gene in "${splitDir[@]}"; do
-        #     local countfile="${gene%.*}"
-        #     countfile="${countfile##*/}"
-        #     local geneDirection=${countfile:0:4}
-        #     mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"
-        #     mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS
-        #     for loopGene in "${dirL[@]}"; do
-        #         aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/ --flank_size "${projectDic[flanks]}" --direction "${loopGene}" -F > /dev/null
-        #         mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".txt
-        #         mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".log ##FIX Unique Log ID'S            
-        #     done
-        #     active+=("${geneDirection}")
-        # done
         projectDic["OperationalStage"]="allCounts"
     elif [ "${projectDic[OperationalStage]}" == "allCounts" ]; then
         echo -e "Creating combined tables..."
@@ -610,12 +554,6 @@ fileConverter(){
         # all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/ --strand_symmetric
         mv "${projectDic[outputLoc]}"COUNTS_TABLES/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${projectDic[filename]}"_combined_counts.txt
         mv "${projectDic[outputLoc]}"COUNTS_TABLES/combined_counts.log "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${projectDic[filename]}"_combined_counts.log
-
-        # for loopGene in "${active[@]}"; do
-        #     cd "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/
-        #     all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/ --strand_symmetric > /dev/null 
-        #     mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${loopGene}"_combined_counts.txt
-        # done
         projectDic["OperationalStage"]="graphSingle"
     elif [ "${projectDic[OperationalStage]}" == "graphSingle" ]; then
         if [ "${projectDic["mutationAnalysis"]}" == "true" ]; then
@@ -632,22 +570,13 @@ fileConverter(){
                 sOrA="--strand_symmetry"
 		
             fi
-            # mkdir "${projectDic[outputLoc]}""${2}"
             cd "${projectDic[outputLoc]}""${2}"
             if [[ "${projectDic["graphs"]}" == 1 ]] || [[ "${projectDic["graphs"]}" == 2 ]]; then
                 for geneDirection in "${active[@]}"; do
-                    ## mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/"${geneDirection}"
                     mkdir "${projectDic[outputLoc]}""${2}""${geneDirection}"
                     ## No "--strand_symmetry" unless "all_counts" is called
                     mutation_analysis nbr -1 "${projectDic[outputLoc]}""${1}""${geneDirection}"_"${projectDic[filename]}".txt -o "${projectDic[outputLoc]}""${2}""${geneDirection}"
                 done
-                # if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
-                #     mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/SND_ANALYSIS
-                #     for geneDirection in "${activeSND[@]}"; do
-                #         mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/SND_ANALYSIS/"${geneDirection}"
-                #         mutation_analysis nbr -1 "${projectDic[outputLoc]}"COUNTS_TABLES/SND_ANALYSIS/"${geneDirection}"_"${projectDic[filename]}".txt -o "${projectDic[outputLoc]}"MUTATION_ANALYSIS/SND_ANALYSIS/"${geneDirection}"
-                #     done
-                # fi
             fi
             projectDic["OperationalStage"]="graphCombined"
         elif [ "${projectDic[OperationalStage]}" == "graphCombined" ]; then
