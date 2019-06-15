@@ -977,8 +977,12 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
                 temp.append(int(a))
                 temp.append(int(b))
                 temp.sort()
-                bedMapper.extend(''.join(sub).encode("utf-8"))
-                masterList.append(temp)
+                ## Adding this conditional to remove duplicates in the bed file
+                if(temp not in masterList)):
+                    bedMapper.extend(''.join(sub).encode("utf-8"))
+                    masterList.append(temp)
+                else:
+                    print("Duplicate interval found, removing from bed file. Duplicate positions prevents mutation analysis count tables.\n")
                 final=''
                 sub=[] ## was sub=[]
                 temp=[] ## was sub=[]
