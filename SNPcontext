@@ -632,14 +632,14 @@ fileConverter(){
                 sOrA="--strand_symmetry"
 		
             fi
-            mkdir "${projectDic[outputLoc]}""${1}"
-            cd "${projectDic[outputLoc]}""${1}"
+            mkdir "${projectDic[outputLoc]}""${2}"
+            cd "${projectDic[outputLoc]}""${2}"
             if [[ "${projectDic["graphs"]}" == 1 ]] || [[ "${projectDic["graphs"]}" == 2 ]]; then
                 for geneDirection in "${active[@]}"; do
                     ## mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/"${geneDirection}"
-                    mkdir "${projectDic[outputLoc]}""${fileConverterTemp}""${geneDirection}"
+                    mkdir "${projectDic[outputLoc]}""${2}""${geneDirection}"
                     ## No "--strand_symmetry" unless "all_counts" is called
-                    mutation_analysis nbr -1 "${projectDic[outputLoc]}""${1}""${geneDirection}"_"${projectDic[filename]}".txt -o "${projectDic[outputLoc]}""${fileConverterTemp}""${geneDirection}"
+                    mutation_analysis nbr -1 "${projectDic[outputLoc]}""${1}""${geneDirection}"_"${projectDic[filename]}".txt -o "${projectDic[outputLoc]}""${2}""${geneDirection}"
                 done
                 # if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
                 #     mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/SND_ANALYSIS
@@ -982,7 +982,7 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
                     bedMapper.extend(''.join(sub).encode("utf-8"))
                     masterList.append(temp)
                 else:
-                    print("Duplicate interval found, removing from bed file. Duplicate positions prevents mutation analysis count tables.\n")
+                    print("Duplicate intervals" + temp + "found, removing from bed file. Duplicate positions prevents mutation analysis count tables.\n")
                 final=''
                 sub=[] ## was sub=[]
                 temp=[] ## was sub=[]
@@ -1538,8 +1538,6 @@ mainOld(){
 main(){
     config_check "$@"
     if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]] && [[ "${projectDic["msi"]}" == 'true' ]]; then
-        # echo -e "${projectDic["JOB"]}"
-        # echo -e "${projectDic["msi"]}"
         module load python3_ML/3.6.4
         jobCreator "$@"
     fi
@@ -1613,11 +1611,11 @@ main(){
         done
         wait
         fileConverterMode="FASTA_SPLIT/SND_FASFA/"
-        fileConverterTemp="COUNTS_TABLES/SND_ANALYSIS/"
-        mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/SND_ANALYSIS
-        mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/SND_ANALYSIS/LOGS
+        fileConverterTemp="COUNTS_TABLES/SND_TABLES/"
+        mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/SND_TABLES
+        mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/SND_TABLES/LOGS
         fileConverter "${fileConverterMode}" "${fileConverterTemp}" ## ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
-        fileConverterMode="COUNTS_TABLES/SND_ANALYSIS/"
+        fileConverterMode="COUNTS_TABLES/SND_TABLES/"
         fileConverterTemp="MUTATION_ANALYSIS/SND_ANALYSIS/"
         projectDic["OperationalStage"]="graphSingle"
         fileConverter "${fileConverterMode}" "${fileConverterTemp}" ## MUTATION GRAPHING
