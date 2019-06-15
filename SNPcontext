@@ -957,8 +957,8 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
     sub=[] ##FOR BEDMAPPER
     temp=[] ##FOR MASTERLIST
     final=''
-    #with open(outputLoc + bedType + geneDir + "_split_" + filename + ".bed", "rb") as bed_test: ##Change to input variables
-    with open(outputLoc + "BED_SPLIT/" + geneDir + "_split_" + filename + ".bed", "rb") as bed_test: ##Change to input variables
+    with open(outputLoc + bedType + geneDir + "_split_" + filename + ".bed", "rb") as bed_test: ##Change to input variables
+    #with open(outputLoc + "BED_SPLIT/" + geneDir + "_split_" + filename + ".bed", "rb") as bed_test: ##Change to input variables
         for i in range(length):
             element = bed_test.read(1).decode("ascii")
             if((element != '\t') and (element != '\n')):
@@ -982,9 +982,9 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
                 final=''
                 sub=[] ## was sub=[]
                 temp=[] ## was sub=[]
-        #with open(outputLoc + bedType + geneDir + "_" + filename + "_new_interval.bed", "wb") as newBed: ##Change to input variables ## Moved indent in
-        with open(outputLoc + "BED_SPLIT/" + geneDir + "_" + filename + "_new_interval.bed", "wb") as newBed: ##Change to input variables ## Moved indent in
-            newBed.write(bedMapper)
+    with open(outputLoc + bedType + geneDir + "_" + filename + "_new_interval.bed", "wb") as newBed: ##Change to input variables ## Moved indent in
+        #with open(outputLoc + "BED_SPLIT/" + geneDir + "_" + filename + "_new_interval.bed", "wb") as newBed: ##Change to input variables ## Moved indent in
+        newBed.write(bedMapper)
     
     return(masterList)
 
