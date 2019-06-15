@@ -515,7 +515,7 @@ fileConverter(){
             local targetVCF="${gene%.*}"
             targetVCF="${targetVCF##*/}"
             # vcf2bed < "${gene}" > "${projectDic["tempOut"]}"BED_SPLIT/"${targetVCF}".bed & ##sort later
-            vcf2bed < "${gene}" > "${projectDic["tempOut"]}""${1}""${targetVCF}".bed & ##sort later
+            vcf2bed < "${gene}" > "${projectDic["tempOut"]}""${2}""${targetVCF}".bed & ##sort later
         done
         wait
         # if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
@@ -540,7 +540,7 @@ fileConverter(){
             targetBED="${targetBED##*/}"
             targetBED=${targetBED:0:4}
             # bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${gene}" -fo "${projectDic["tempOut"]}"FASTA_SPLIT/"${targetBED}"_"${projectDic[filename]}".fasta &
-            bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${gene}" -fo "${projectDic["tempOut"]}""${1}""${targetBED}"_"${projectDic[filename]}".fasta &
+            bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${gene}" -fo "${projectDic["tempOut"]}""${2}""${targetBED}"_"${projectDic[filename]}".fasta &
         done
         wait
         # if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
@@ -1580,8 +1580,9 @@ main(){
     if [[ "${projectDic["sndMode"]}" -eq 1 ]]; then
         projectDic[OperationalStage]="vcfTObed"
         fileConverterMode="SPLITVCF/SND_VCF/"
+        fileConverterTemp="BED_SPLIT/SND_BED/"
         mkdir "${projectDic["tempOut"]}"BED_SPLIT/SND_BED/
-        fileConverter "${fileConverterMode}" ##MAKES BED FILE
+        fileConverter "${fileConverterMode}" "${fileConverterTemp}" ##MAKES BED FILE
         local temp="${projectDic["tempOut"]}"BED_SPLIT/SND_BED/  
         local splitDir=("${temp}"*_split_"${projectDic[filename]}".bed*)
         for gene in "${splitDir[@]}"; do
@@ -1594,8 +1595,9 @@ main(){
         wait
         echo -e "\nOverlap checks on SNDs completed..."
         fileConverterMode="BED_SPLIT/SND_BED/"
+        fileConverterTemp="FASTA_SPLIT/SND_FASFA/"
         mkdir "${projectDic["tempOut"]}"FASTA_SPLIT/SND_FASFA/
-        fileConverter "${fileConverterMode}" ##CREATES FASTA FILE
+        fileConverter "${fileConverterMode}" "${fileConverterTemp}" ##CREATES FASTA FILE
         local tempTwo="${projectDic["tempOut"]}"FASTA_SPLIT/SND_FASFA/
         local fastalisting=("${tempTwo}"*_"${projectDic[filename]}".fasta*)
         for geneTwo in "${fastalisting[@]}"; do
