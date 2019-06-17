@@ -869,7 +869,7 @@ END_OF_TRANSFER
 #    A "Type One overlap" is another SNP within immediate contextual sequence
 #    A "Type Two overlap" is another SNP within the expanded flanking contextual sequencing
 pythonBEDScanner(){
-    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic[" "]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" interval="${projectDic["windowLength"]}" geneDir="$geneDir" sndMode="$sndLocal" pypy3.6 - <<END_OF_PYTHON
+    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" interval="${projectDic["windowLength"]}" geneDir="$geneDir" sndMode="$sndLocal" pypy3.6 - <<END_OF_PYTHON
     
 import os
 import re
@@ -1480,11 +1480,11 @@ main(){
         fileConverter "${fileConverterMode}"  "${fileConverterTemp}" ##MAKES BED FILE
         local temp="${projectDic["tempOut"]}"BED_SPLIT/
         local splitDir=("${temp}"*_split_"${projectDic[filename]}".bed*)
+        sndLocal=0
         for gene in "${splitDir[@]}"; do
             local geneDir="${gene%.*}"
             geneDir="${geneDir##*/}"
             geneDir=${geneDir:0:4} ##BASH IS BASE 1
-            sndLocal=0
             pythonBEDScanner "$geneDir" "$sndLocal" & ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
         done
         wait
@@ -1523,11 +1523,11 @@ main(){
         fileConverter "${fileConverterMode}" "${fileConverterTemp}" ##MAKES BED FILE
         local temp="${projectDic["tempOut"]}"BED_SPLIT/SND_BED/  
         local splitDir=("${temp}"*_split_"${projectDic[filename]}".bed*)
+        sndLocal=1
         for gene in "${splitDir[@]}"; do
             local geneDir="${gene%.*}"
             geneDir="${geneDir##*/}"
             geneDir=${geneDir:0:4} ##BASH IS BASE 1
-            sndLocal=1
             pythonBEDScanner "$geneDir" "$sndLocal" & ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
         done
         wait
