@@ -564,12 +564,6 @@ fileConverter(){
             else
                 nOrS="nbr"
             fi
-            if [[ "${projectDic["symOrAsy"]}" == "2" ]] && [[ "${projectDic["nbrOrSpec"]}" == "1" ]]; then
-                sOrA=" "
-            else
-                sOrA="--strand_symmetry"
-		
-            fi
             cd "${projectDic[outputLoc]}""${2}"
             if [[ "${projectDic["graphs"]}" == 1 ]] || [[ "${projectDic["graphs"]}" == 2 ]]; then
                 for geneDirection in "${active[@]}"; do
@@ -580,7 +574,20 @@ fileConverter(){
             fi
             projectDic["OperationalStage"]="graphCombined"
         elif [ "${projectDic[OperationalStage]}" == "graphCombined" ]; then
+            if [[ "${projectDic["nbrOrSpec"]}" == "1" ]]; then
+                nOrS="nbr"
+            elif [[ "${projectDic["nbrOrSpec"]}" == "2" ]]; then
+                nOrS="spectra"
+            else
+                nOrS="nbr"
+            fi
             if [[ "${projectDic["graphs"]}" == 1 ]] || [[ "${projectDic["graphs"]}" == 3 ]]; then
+                if [[ "${projectDic["symOrAsy"]}" == "2" ]] && [[ "${projectDic["nbrOrSpec"]}" == "1" ]]; then
+                    sOrA=" "
+                else
+                    sOrA="--strand_symmetry"
+            
+                fi
                 mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/COMBINED_COUNTS
                 mutation_analysis "${nOrS}" -1 "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${projectDic[filename]}"_combined_counts.txt -o "${projectDic[outputLoc]}"MUTATION_ANALYSIS/COMBINED_COUNTS "${sOrA}"
             fi
