@@ -869,7 +869,7 @@ END_OF_TRANSFER
 #    A "Type One overlap" is another SNP within immediate contextual sequence
 #    A "Type Two overlap" is another SNP within the expanded flanking contextual sequencing
 pythonBEDScanner(){
-    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" interval="${projectDic["windowLength"]}" geneDir="$geneDir" sndMode="$sndLocal" pypy3.6 - <<END_OF_PYTHON
+    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic[" "]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" interval="${projectDic["windowLength"]}" geneDir="$geneDir" sndMode="$sndLocal" pypy3.6 - <<END_OF_PYTHON
     
 import os
 import re
@@ -994,12 +994,12 @@ def bashInputs():
     return(outputLoc, filename, interval, inputFile, projectName, geneDir, baseOut, sndMode)
 
 def main():
-    outputLoc, filename, interval, inputFile, projectName, geneDir, baseOut, sndMode=bashInputs()
+    outputLoc, filename, interval, inputFile, projectName, geneDir, baseOut, sndMode = bashInputs()
     if(sndMode != 1):
         bedType="BED_SPLIT/"
     else:
         bedType="BED_SPLIT/SND_BED/"
-    masterList=bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedType)
+    masterList = bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedType)
     binaryIntersect(masterList, interval, outputLoc, projectName, filename, geneDir, baseOut)
 main()
 
@@ -1476,7 +1476,8 @@ main(){
     sndAmount=$(find . -maxdepth 1 -type f -name "*.vcf" | wc -l)
     if [[ ${sndAmount} != 0 ]]; then
         fileConverterMode="SPLITVCF/"
-        fileConverter "${fileConverterMode}" ##MAKES BED FILE
+        fileConverterTemp="BED_SPLIT/"
+        fileConverter "${fileConverterMode}"  "${fileConverterTemp}" ##MAKES BED FILE
         local temp="${projectDic["tempOut"]}"BED_SPLIT/
         local splitDir=("${temp}"*_split_"${projectDic[filename]}".bed*)
         for gene in "${splitDir[@]}"; do
@@ -1490,7 +1491,8 @@ main(){
         echo -e "\nOverlap checks completed..."
         echo -e "See overlap results located in 'WindowOverlap.txt' in your main output directory.\n"
         fileConverterMode="BED_SPLIT/"
-        fileConverter "${fileConverterMode}" ##CREATES FASTA FILE
+        fileConverterTemp="FASTA_SPLIT/"
+        fileConverter "${fileConverterMode}" "${fileConverterTemp}" ##CREATES FASTA FILE
         local tempTwo="${projectDic["tempOut"]}"FASTA_SPLIT/
         local fastalisting=("${tempTwo}"*_"${projectDic[filename]}".fasta*)
         for geneTwo in "${fastalisting[@]}"; do
