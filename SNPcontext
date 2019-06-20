@@ -1264,6 +1264,26 @@ main()
 FASTA_SWEEP
 
 }
+sniSuff(){}
+pypy3.6 << SNI_MODE
+
+    import os
+
+def bedScanner():
+    with("open bedFile", "r") as bedSNI:
+        line = bedSNI.readline()
+        gate = True
+        while((gate) and (line)):
+            if(line.startswith("#")):
+                line = testFile.readline()
+            else:
+                gate = False
+        for data in lines.readline():
+            dataList = data.split("\t")
+
+SNI_MODE
+}
+
 #    Creates the job on UMN MSI
 #    Demonstrates that Corey can write more verbose code than Paul! Quite a victory!
 jobCreator(){
