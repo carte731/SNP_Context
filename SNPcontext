@@ -46,6 +46,7 @@ declare -A projectDic=(
     ["msi"]='' #-msi
     ["s3"]=-9091 #-s3
     ["sndMode"]=-9091 #-snd
+    ["sniMode"]=-9091 #-sni
     ["dropbox"]='' #-dpb
     ["dropboxAuth"]='' #-dpba
     ["github"]='' #-gh
@@ -120,6 +121,7 @@ config_check(){
                         ${MSI_Mode}
 			            ${queue}
                         ${sndMode}
+                        ${sniMode}
                         ${job_specs}
                         ${mutation_analysis}
                         ${nbr_or_spectra}
@@ -386,7 +388,16 @@ starter(){ #grabs the arguments
                 unset graphs
             else
                 echo -e "No valid entry for SND mode, defaulting to off.\n"
-                projectDic["sndMode"]=0
+                projectDic["sndMode"]=2
+            fi
+        elif [[ "${i,,}" == "-sni" ]] || [[ ${sniMode} == $i ]] && (( "${projectDic["sniMode"]}" == -9091 )); then #
+            if [[ "${var}" -eq 1 ]] || [[ "${var}" -eq 2 ]]; then
+                projectDic["sniMode"]="${var,,}"
+                frontgate=1
+                unset graphs
+            else
+                echo -e "No valid entry for SNI mode, defaulting to off.\n"
+                projectDic["sniMode"]=2
             fi
         elif [[ "${i,,}" == "-dpba" ]] || [[ ${dropbox_auth} == $i ]] && [[ ${projectDic["dropboxAuth"]} == "" ]]; then # Set variable for Dropbox authorization
             projectDic["dropboxAuth"]="${var}"
@@ -615,6 +626,9 @@ dirStructure(){
         if [[ "${projectDic[sndMode]}" -eq 1 ]]; then
             mkdir "${projectDic[outputLoc]}"SPLITVCF/SND_VCF
         fi
+        if [[ "${projectDic[sndMode]}" -eq 1 ]]; then
+            mkdir "${projectDic[outputLoc]}"SPLITVCF/SNI_VCF
+        fi
         projectDic["tempOut"]="${projectDic[outputLoc]}"
     elif [[ ${projectDic["allData"]} == "false" ]]; then
         projectDic["TempLoc"]+=$(mktemp -d)
@@ -623,6 +637,9 @@ dirStructure(){
         mkdir "${projectDic[TempLoc]}"/BED_SPLIT
         if [[ "${projectDic[sndMode]}" -eq 1 ]]; then
             mkdir "${projectDic[TempLoc]}"/SPLITVCF/SND_VCF
+        fi
+        if [[ "${projectDic[sndMode]}" -eq 1 ]]; then
+            mkdir "${projectDic[outputLoc]}"SPLITVCF/SNI_VCF
         fi
         projectDic["tempOut"]="${projectDic["TempLoc"]}"/
     fi
@@ -1022,7 +1039,7 @@ END_OF_PYTHON
 
 #    Split up file based on mutation direction
 vcfSplit(){
-    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" sndMode="${projectDic["sndMode"]}" pypy3.6 - <<VCF_SPLIT_END
+    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" sndMode="${projectDic["sndMode"]}" sniMode="${projectDic["sniMode"]}" pypy3.6 - <<VCF_SPLIT_END
 
 import os
 
@@ -1054,9 +1071,19 @@ def geneDirCreate():
         'TtoA':bytearray(),
 
     }
-    return(geneDir, SNDGeneDir)
 
-def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
+    SNIGeneDir = {
+    
+        'A':bytearray(),
+        'C':bytearray(),
+        'G':bytearray(),
+        'T':bytearray(),
+    
+    }
+
+    return(geneDir, SNDGeneDir, SNIGeneDir)
+
+def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode, sniMode):
     with open(inputFile, "rb") as raw:
         sub=[]
         counter=0
@@ -1064,7 +1091,7 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
         results=''
         for readLine in raw:
             sub.clear()
-            gene=''
+            gene=''SNDGeneDir
             results=''
             gate=True
             counter=0
@@ -1098,6 +1125,12 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
                                 sub.append(element)
                                 SNDGeneDir[gene].extend(''.join(sub).encode("utf-8"))
                                 gate=False
+                            elif((sniMode == 1) and (len(sub[8]) == 2) and (len(sub[6]) == 1)):
+                                gene = str(sub[6]) + "to" + str(sub[8])
+                                sub.append(results)
+                                sub.append(element)
+                                SNDGeneDir[gene].extend(''.join(sub).encode("utf-8"))
+                                gate=False
                             else:
                                 geneDir['rejected'].extend(readLine)
                                 sub.clear()
@@ -1108,7 +1141,7 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
                 counter+=1
     return(geneDir, SNDGeneDir)
 
-def vcfSpliter(outputLoc, filename, baseOut, geneDir, SNDGeneDir, sndMode):
+def vcfSpliter(outputLoc, filename, baseOut, geneDir, SNDGeneDir, sndMode, sniMode):
     for key in geneDir:
         if(geneDir[key]):
             if((key != "rejected") and (key != "header")):
@@ -1126,6 +1159,12 @@ def vcfSpliter(outputLoc, filename, baseOut, geneDir, SNDGeneDir, sndMode):
                 with open(outputLoc + "SPLITVCF/SND_VCF/" + sndKey + "_split_" + filename + ".vcf","ab") as vcfOut:
                     vcfOut.write(geneDir['header'])
                     vcfOut.write(SNDGeneDir[sndKey])
+    if(sniMode == 1):
+        for sniKey in SNIGeneDir:
+            if(SNIGeneDir[sniKey]):
+                with open(outputLoc + "SPLITVCF/SNI_VCF/" + sniKey + "_split_" + filename + ".vcf","ab") as vcfOut:
+                    vcfOut.write(geneDir['header'])
+                    vcfOut.write(SNIGeneDir[sndKey])
 
 def bashImport():
     outputLoc=str(os.environ['outputLoc'])
@@ -1134,13 +1173,14 @@ def bashImport():
     projectName=str(os.environ['projectName'])
     baseOut=str(os.environ['baseOut'])
     sndMode=int(os.environ['sndMode'])
-    return(projectName, inputFile, outputLoc, filename, baseOut, sndMode)
+    sniMode=int(os.environ['sniMode'])
+    return(projectName, inputFile, outputLoc, filename, baseOut, sndMode, sniMode)
 
 def main():
-    projectName, inputFile, outputLoc, filename, baseOut, sndMode=bashImport()
-    geneDir, SNDGeneDir=geneDirCreate()
-    geneDir, SNDGeneDir=vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode)
-    vcfSpliter(outputLoc, filename, baseOut, geneDir, SNDGeneDir, sndMode)
+    projectName, inputFile, outputLoc, filename, baseOut, sndMode, sniMode = bashImport()
+    geneDir, SNDGeneDir, SNIGeneDir = geneDirCreate()
+    geneDir, SNDGeneDir=vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode, sniMode)
+    vcfSpliter(outputLoc, filename, baseOut, geneDir, SNDGeneDir, sndMode, sniMode)
 
 main()
 
@@ -1267,19 +1307,51 @@ FASTA_SWEEP
 sniSuff(){}
 pypy3.6 << SNI_MODE
 
-    import os
+import os
+
+positionDict = {}
 
 def bedScanner():
-    with("open bedFile", "r") as bedSNI:
+    with open("/panfs/roc/groups/9/morrellp/carte731/vcf_SND/inputFile/SNI.bed", "r") as bedSNI:
         line = bedSNI.readline()
         gate = True
         while((gate) and (line)):
             if(line.startswith("#")):
-                line = testFile.readline()
+                line = bedSNI.readline()
             else:
                 gate = False
-        for data in lines.readline():
-            dataList = data.split("\t")
+        while(line):
+            dataList = line.split("\t"):w
+            positionDict[">" + dataList[0] + ":" + dataList[1] + "-" + dataList[2]] = dataList[6]
+            line = bedSNI.readline()
+
+def fastaInserter(windowL):
+   output = ""
+   with open("/panfs/roc/groups/9/morrellp/carte731/vcf_SND/inputFile/fasfaSni.fasfa", "r") as fasfaFile:
+       line = fasfaFile.readline()
+       while(line):
+           if(line.strip('\n') in positionDict):
+               pos = line
+               output += line
+               line = fasfaFile.readline()
+               line = line[:windowL] + positionDict[pos.strip('\n')] + line[windowL + 1:]
+               line = line[1:]
+               output += line
+               line = fasfaFile.readline()
+           else:
+               line = fasfaFile.readline()
+               line = fasfaFile.readline()
+   with open("/panfs/roc/groups/9/morrellp/carte731/vcf_SND/inputFile/newFasfaSni.fasfa", "a+") as newFasfa:
+       newFasfa.write(output)
+
+def main():
+    windowL = 2
+    bedScanner()
+    for element in positionDict:
+        print("key: ", positionDict[element], "and ", element)
+    fastaInserter(windowL)
+
+main()
 
 SNI_MODE
 }
@@ -1561,7 +1633,7 @@ main(){
             local geneDir="${gene%.*}"
             geneDir="${geneDir##*/}"
             geneDir=${geneDir:0:4} ##BASH IS BASE 1
-            pythonBEDScanner "$geneDir" "$sndLocal" & ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
+            pythonBEDScanner "$geneDir" "$sndLocal" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
         done
         wait
         echo -e "\nOverlap checks on SNDs completed..."
@@ -1575,7 +1647,7 @@ main(){
             local geneDirTwo="${geneTwo%.*}"
             geneDirTwo="${geneDirTwo##*/}"
             geneDirTwo=${geneDirTwo:0:4}
-            fastaScanner "${geneDirTwo}" "${geneTwo}" & ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
+            fastaScanner "${geneDirTwo}" "${geneTwo}" ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
         done
         wait
         fileConverterMode="FASTA_SPLIT/SND_FASFA/"
@@ -1586,6 +1658,50 @@ main(){
         fileConverterMode="COUNTS_TABLES/SND_TABLES/"
         fileConverterTemp="MUTATION_ANALYSIS/SND_ANALYSIS/"
         mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/SND_ANALYSIS/
+        projectDic["OperationalStage"]="graphSingle"
+        fileConverter "${fileConverterMode}" "${fileConverterTemp}" ## MUTATION GRAPHING
+
+    fi
+
+    cd "${projectDic["tempOut"]}"SPLITVCF/SNI_VCF/
+    sniAmount=$(find . -type f -name "*.vcf" | wc -l)
+    if [[ "${projectDic["sniMode"]}" -eq 1 ]] && [[ ${sniAmount} != 0 ]]; then
+        projectDic[OperationalStage]="vcfTObed"
+        fileConverterMode="SPLITVCF/SNI_VCF/"
+        fileConverterTemp="BED_SPLIT/SNI_BED/"
+        mkdir "${projectDic["tempOut"]}"BED_SPLIT/SNI_BED/
+        fileConverter "${fileConverterMode}" "${fileConverterTemp}" ##MAKES BED FILE
+        local temp="${projectDic["tempOut"]}"BED_SPLIT/SNI_BED/  
+        local splitDir=("${temp}"*_split_"${projectDic[filename]}".bed*)
+        for gene in "${splitDir[@]}"; do
+            local geneDir="${gene%.*}"
+            geneDir="${geneDir##*/}"
+            geneDir=${geneDir:0:4} ##BASH IS BASE 1
+            pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
+        done
+        wait
+        echo -e "\nOverlap checks on SNIs completed..."
+        fileConverterMode="BED_SPLIT/SNI_BED/"
+        fileConverterTemp="FASTA_SPLIT/SNI_FASFA/"
+        mkdir "${projectDic["tempOut"]}"FASTA_SPLIT/SNI_FASFA/
+        fileConverter "${fileConverterMode}" "${fileConverterTemp}" ##CREATES FASTA FILE
+        local tempTwo="${projectDic["tempOut"]}"FASTA_SPLIT/SNI_FASFA/
+        local fastalisting=("${tempTwo}"*_"${projectDic[filename]}".fasta*)
+        for geneTwo in "${fastalisting[@]}"; do
+            local geneDirTwo="${geneTwo%.*}"
+            geneDirTwo="${geneDirTwo##*/}"
+            geneDirTwo=${geneDirTwo:0:4}
+            fastaScanner "${geneDirTwo}" "${geneTwo}" ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
+        done
+        wait
+        fileConverterMode="FASTA_SPLIT/SNI_FASFA/"
+        fileConverterTemp="COUNTS_TABLES/SNI_TABLES/"
+        mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/SNI_TABLES
+        mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/SNI_TABLES/LOGS
+        fileConverter "${fileConverterMode}" "${fileConverterTemp}" ## ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
+        fileConverterMode="COUNTS_TABLES/SNI_TABLES/"
+        fileConverterTemp="MUTATION_ANALYSIS/SNI_ANALYSIS/"
+        mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/SNI_ANALYSIS/
         projectDic["OperationalStage"]="graphSingle"
         fileConverter "${fileConverterMode}" "${fileConverterTemp}" ## MUTATION GRAPHING
 
