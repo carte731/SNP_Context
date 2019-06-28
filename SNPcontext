@@ -1173,7 +1173,7 @@ def bashImport():
     projectName=str(os.environ['projectName'])
     baseOut=str(os.environ['baseOut'])
     sndMode=int(os.environ['sndMode'])
-    sniMode=int(os.environ['sniMode'])
+    sniMode=2 # REMOVING
     return(projectName, inputFile, outputLoc, filename, baseOut, sndMode, sniMode)
 
 def main():
@@ -1663,50 +1663,6 @@ main(){
 
     fi
 
-    cd "${projectDic["tempOut"]}"SPLITVCF/SNI_VCF/
-    sniAmount=$(find . -type f -name "*.vcf" | wc -l)
-    if [[ "${projectDic["sniMode"]}" -eq 1 ]] && [[ ${sniAmount} != 0 ]]; then
-        projectDic[OperationalStage]="vcfTObed"
-        fileConverterMode="SPLITVCF/SNI_VCF/"
-        fileConverterTemp="BED_SPLIT/SNI_BED/"
-        mkdir "${projectDic["tempOut"]}"BED_SPLIT/SNI_BED/
-        fileConverter "${fileConverterMode}" "${fileConverterTemp}" ##MAKES BED FILE
-        local temp="${projectDic["tempOut"]}"BED_SPLIT/SNI_BED/  
-        local splitDir=("${temp}"*_split_"${projectDic[filename]}".bed*)
-        for gene in "${splitDir[@]}"; do
-            local geneDir="${gene%.*}"
-            geneDir="${geneDir##*/}"
-            geneDir=${geneDir:0:4} ##BASH IS BASE 1
-            pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
-        done
-        wait
-        echo -e "\nOverlap checks on SNIs completed..."
-        fileConverterMode="BED_SPLIT/SNI_BED/"
-        fileConverterTemp="FASTA_SPLIT/SNI_FASFA/"
-        mkdir "${projectDic["tempOut"]}"FASTA_SPLIT/SNI_FASFA/
-        fileConverter "${fileConverterMode}" "${fileConverterTemp}" ##CREATES FASTA FILE
-        local tempTwo="${projectDic["tempOut"]}"FASTA_SPLIT/SNI_FASFA/
-        local fastalisting=("${tempTwo}"*_"${projectDic[filename]}".fasta*)
-        for geneTwo in "${fastalisting[@]}"; do
-            local geneDirTwo="${geneTwo%.*}"
-            geneDirTwo="${geneDirTwo##*/}"
-            geneDirTwo=${geneDirTwo:0:4}
-            fastaScanner "${geneDirTwo}" "${geneTwo}" ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
-        done
-        wait
-        fileConverterMode="FASTA_SPLIT/SNI_FASFA/"
-        fileConverterTemp="COUNTS_TABLES/SNI_TABLES/"
-        mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/SNI_TABLES
-        mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/SNI_TABLES/LOGS
-        fileConverter "${fileConverterMode}" "${fileConverterTemp}" ## ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
-        fileConverterMode="COUNTS_TABLES/SNI_TABLES/"
-        fileConverterTemp="MUTATION_ANALYSIS/SNI_ANALYSIS/"
-        mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/SNI_ANALYSIS/
-        projectDic["OperationalStage"]="graphSingle"
-        fileConverter "${fileConverterMode}" "${fileConverterTemp}" ## MUTATION GRAPHING
-
-    fi
-
     if [[ "${projectDic["allData"]}" == "false"  ]]; then
         local templocation="${projectDic["TempLoc"]}"
         rm -rf "${templocation}"
@@ -1724,6 +1680,17 @@ main(){
     fi
     echo -e "Operations completed...\n"
     exit 0
+}
+
+newMain(){
+    config_check "$@"
+    if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]] && [[ "${projectDic["msi"]}" == 'true' ]]; then
+        module load python3_ML/3.6.4
+        jobCreator "$@"
+    fi
+    moduleLoader ##LOADS CORRECT MODULES        
+    dirStructure
+    vcfSplit
 }
 
 main "$@"
