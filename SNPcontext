@@ -18,7 +18,7 @@ set -e
 
 # set -eE
 
-# error_catch(){
+# error_catch(){ ## GET THIS WORKING!!!!!!
 #     echo -e "There has been an error, The error message has been saved to: ${1} as SNP_CONTEXT_ERROR_LOG.txt\n"
 #     exec 2>>"${1}"/SNP_CONTEXT_ERROR_LOG.txt
 #     exit 1
@@ -46,7 +46,7 @@ declare -A projectDic=(
     ["msi"]='' #-msi
     ["s3"]=-9091 #-s3
     ["sndMode"]=-9091 #-snd
-    ["sniMode"]=-9091 #-sni
+    ["sniMode"]=-9091 #-sni REMOVE FROM DICTIONARY
     ["dropbox"]='' #-dpb
     ["dropboxAuth"]='' #-dpba
     ["github"]='' #-gh
@@ -75,7 +75,7 @@ declare -a active=()
 
 declare -a activeSND=()
 
-help_display(){ ## UPDATE TO INCLUDE ALL CMDS AND MENTION THE CONFIG FILE IS THE PREFERRED WAY OF OPERATING
+help_display(){ ## UPDATE
     local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
     helpPrintOut+=$'\n\tSNPcontext -i <input VCF> -o <output> -r <reference genome> -w <window size> -f <flank size> -p <project name> -n <acceptable indel %> -ad <save all data>\n'
     helpPrintOut+=$'\n\t------------------------\n'
@@ -93,7 +93,7 @@ help_display(){ ## UPDATE TO INCLUDE ALL CMDS AND MENTION THE CONFIG FILE IS THE
 
 #     Checks for the use of config file
 #     The other option is specify all arguments on the command line
-config_check(){
+config_check(){ ## UPDATE
     local args=($@)
     if (( "$#" >= 1 )); then # If there is at least one argument
         if (( "$#" == 1 )); then # If there is exactly one argument
@@ -121,7 +121,7 @@ config_check(){
                         ${MSI_Mode}
 			            ${queue}
                         ${sndMode}
-                        ${sniMode}
+                        ${sniMode} ## REMOVE
                         ${job_specs}
                         ${mutation_analysis}
                         ${nbr_or_spectra}
@@ -164,7 +164,7 @@ config_check(){
 }
 
 #     Takes user arguments from command line and assigns values to dictionary keys in 'projectDic'
-starter(){ #grabs the arguments
+starter(){ #grabs the arguments - CLEAN THIS 'CONFIG' loader up
     local frontgate=0
     local indexPos=0
     for i in ${startList[@]}; do # Loop over every argument
@@ -488,8 +488,8 @@ moduleLoader(){ #Load modules needed for operations
         module load python3_ML/3.6.4
         module load bedops_ML/2.4.35 
         module load bedtools_ML/2.23.0
-	module load pypy_ML/3.6
-    else
+	    module load pypy_ML/3.6 ## CREATE ALIUS OF 'PYPY' and 'Python'
+    else  ##Update commands below
         declare -A testlisting=( ["python3"]=3.6.4 ["bedops"]=2.4.35 ["bedtools"]=2.23.0 )
         for inProgram in ${!testlisting[@]}; do # Make sure that all dependencies are functional
             if [[ -x $(command -v "${inProgram}") ]]; then
@@ -517,7 +517,7 @@ moduleLoader(){ #Load modules needed for operations
 }
 
 #    Performing vcf to bed conversion using bedops 'vcf2bed' function
-fileConverter(){
+fileConverter(){ # BREAK THIS APART
     if [ "${projectDic[OperationalStage]}" == "vcfTObed" ]; then ##Key and new input LOCATION
         # local temp="${projectDic["tempOut"]}"SPLITVCF/
         local temp="${projectDic["tempOut"]}""${1}"
@@ -528,7 +528,7 @@ fileConverter(){
             vcf2bed < "${gene}" > "${projectDic["tempOut"]}""${2}""${targetVCF}".bed & ##sort later
         done
         wait
-        projectDic[OperationalStage]="bedTOfasta"
+        projectDic[OperationalStage]="bedTOfasta" ## REMOVE OPERATIONAL STAGE DICTIONARY
     #    Takes a reference genome and bed file and generates small fasta files from reference genome intervals
     elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
         local temp="${projectDic["tempOut"]}""${1}"
@@ -912,7 +912,7 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
     final=''
     with open(outputLoc + bedType + geneDir + "_split_" + filename + ".bed", "rb") as bed_test: ##Change to input variables
         for i in range(length):
-            element = bed_test.read(1).decode("ascii")
+            element = bed_test.read(1).decode("ascii") # POSSIBLELY USE 'readline()' and then use 'list.split()''
             if((element != '\t') and (element != '\n')):
                 final = final + element
             elif((element == '\t') and (element != '\n')):
@@ -930,7 +930,7 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
                 temp.append(int(b))
                 temp.sort()
 
-                ## Adding this conditional to remove duplicates in the bed file
+                ## Adding this conditional to remove duplicates in the bed file - REMOVE
                 # if(temp not in masterList):
                 #     bedMapper.extend(''.join(sub).encode("utf-8"))
                 #     masterList.append(temp)
@@ -963,7 +963,7 @@ def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, ge
             subTB=expandedList[i+1][1]+(interval) ##TYPE ONE SWITCHED FROM - TO +
             subMA=expandedList[i+1][0] ##TYPE TWO
             subMB=expandedList[i+1][1] ##TYPE TWO
-            binary=[0,0,0,0]
+            binary=[0,0,0,0] ## Either us binary position values instead and/or use bytearray()
             binaryMB=[0,0,0,0]
             if(a <= subTA):
                 binary[0]=1
@@ -1058,7 +1058,7 @@ def geneDirCreate():
         'TtoA':bytearray(),
         'TtoC':bytearray(),
         'TtoG':bytearray(),
-        'rejected':bytearray(),
+        'rejected':bytearray(), ## SERERATE HEADER AND REJECTED FROM GENEDIR, OR AND SND POSITIONS
         'header':bytearray(),
         
     }
@@ -1072,7 +1072,7 @@ def geneDirCreate():
 
     }
 
-    SNIGeneDir = {
+    SNIGeneDir = { # REMMOVE SNI STUFF
     
         'A':bytearray(),
         'C':bytearray(),
@@ -1089,7 +1089,7 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode, sniMode):
         counter=0
         gene=''
         results=''
-        for readLine in raw:
+        for readLine in raw: ## Break apart nested loops, one loope for saving head and other is the vcf body
             sub.clear()
             gene=''SNDGeneDir
             results=''
@@ -1196,7 +1196,7 @@ fastaScanner(){
 from itertools import chain
 import os
 
-def fastaMapper(gene):
+def fastaMapper(gene): ## RE_WRITE THIS, Either read a byte at a time or by line
     with open(gene ,"rb") as fasta:
         fastafile=fasta.read()
         totalN=0
@@ -1229,7 +1229,7 @@ def fastaMapper(gene):
                 master.append(sub)
     return(master)
 
-def fastaNpop(subMaster, allRejected, nMax):
+def fastaNpop(subMaster, allRejected, nMax): # Use list.count() and count/remove it that way
     maxP=nMax/100
     newsubMaster=[]
     nMaxList=[]
@@ -1242,7 +1242,7 @@ def fastaNpop(subMaster, allRejected, nMax):
             newsubMaster.append(subListing)
     return(newsubMaster, nMaxList)
 
-def fastaBasePop(master, interval, flank):
+def fastaBasePop(master, interval, flank): 
     allRejected=False
     subMaster=[]
     nList=[]
@@ -1304,7 +1304,7 @@ main()
 FASTA_SWEEP
 
 }
-sniSuff(){}
+sniSuff(){} ## REMOVE FROM SCRIPT
 pypy3.6 << SNI_MODE
 
 import os
@@ -1458,6 +1458,9 @@ exit 2
 }
 
 jobCreatorTest(){
+    
+    ## Try and get this working
+
     if [[ ${projectDic["isCmd"]} == "false" ]]; then
         local config="$@"
     else
@@ -1682,6 +1685,9 @@ main(){
     exit 0
 }
 
+subMain():
+    ## Add flat code for execution here. Input parameter is the individual path for that VCF file
+
 newMain(){
     config_check "$@"
     if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]] && [[ "${projectDic["msi"]}" == 'true' ]]; then
@@ -1691,6 +1697,11 @@ newMain(){
     moduleLoader ##LOADS CORRECT MODULES        
     dirStructure
     vcfSplit
+
+    ## Find vcf files in main and SND directory
+    ## Move vcf paths to master array
+    ## Loop through each element in list and run unique thread on each one in a function called 'subMain()'
+
 }
 
 main "$@"
