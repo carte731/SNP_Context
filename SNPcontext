@@ -972,6 +972,8 @@ import subprocess
 from itertools import chain
 import datetime
 
+## REMOVE SNDMODE STUFF
+
 def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedType):
     output = str(subprocess.check_output(['wc', '-m', outputLoc + bedType + geneDir + "_split_" + filename + ".bed"]))
     length = re.findall(r'\d+', output)
@@ -1018,6 +1020,21 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
     with open(outputLoc + bedType + geneDir + "_" + filename + "_new_interval.bed", "wb") as newBed: ##Change to input variables ## Moved indent in
         newBed.write(bedMapper)
     
+    return(masterList)
+
+def bedMapperNew(interval, outputLoc, projectName, filename, geneDir, sndMode, bedType):
+    bedMapper = bytearray()
+    masterList = bytearray()
+    with open(outputLoc + bedType + geneDir + "_split_" + filename + ".bed", "rb") as bed_test: ##Change to input variables
+        for i in bed_test.readlines():
+            inputList = i.split()
+            inputList[2] = int(chr(inputList[2])) - interval)
+            inputList[4] = int(chr(inputList[4])) + interval)
+            masterList.append(sub[2])
+            masterList.append(sub[4])
+            bedMapper.extend(inputList)
+    with open(outputLoc + bedType + geneDir + "_" + filename + "_new_interval.bed", "wb") as newBed: ##Change to input variables ## Moved indent in
+        newBed.write(bedMapper)   
     return(masterList)
 
 def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, geneDir, baseOut):
@@ -1083,6 +1100,60 @@ def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, ge
     with open(baseOut + projectName + "_" + "WindowOverlap.txt", 'a+') as window:
         window.write(results)
         
+def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, geneDir, baseOut):
+    gateA=True
+    gateB=True
+    now = datetime.datetime.now()
+    results = '\n**********************\nTYPE ONE and TYPE TWO CHECKS FOR: ' + geneDir + " ON " + now.strftime("%Y-%m-%d, %H:%M") + '\n----------------------------------------------------\n' ##ADD PROJECT NAME TO THIS
+    resultsA = '\n**' + geneDir + ' TYPE ONE: OVERLAPS INTO ORIGINAL SNPs**\n------------------------------------\n'
+    resultsB = '\n**' + geneDir + ' TYPE TWO: OVERLAPS INTO SNP EXPANSION WINDOWS**\n-------------------------------------\n'
+    for i in range(len(expandedList)-1): #Checks for Type One SNP overlaps (ORIGINAL INTERVAL CHECK)
+            a=expandedList[i][0] ##A= left side
+            b=expandedList[i][1] ##B= right side
+            binary = 0
+            binaryMB = 0
+
+            binary += 16 if(a <= expandedList[i+1][0]-(interval)) ##TYPE ONE SWITCHED FROM - TO +
+            binary += 8 if(a <= expandedList[i+1][1]+(interval))
+            binary += 2 if(b <= expandedList[i+1][0]-(interval))
+            binary += 1 if(b <= expandedList[i+1][1]+(interval))
+
+            binaryMB += 16 if(a <= expandedList[i+1][0]) ##TYPE TWO
+            binaryMB += 8 if(b <= subMB=expandedList[i+1][1])
+            binaryMB += 2 if(a <= expandedList[i+1][0])
+            binaryMB += 1 if(b <= subMB=expandedList[i+1][1])
+
+            if((binary != 24) and (binary != 3)):
+                gateA=False
+                if(binary == [0,1,1,0]):
+                    resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " SNP is encapsulated within " + str(subTA) + "-" + str(subTB) + '.'
+                elif(binary == [1,1,1,1]):
+                    resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " is equal or encapsulating " + str(subTA) + "-" + str(subTB) + '.'
+                elif((binary == [1,1,1,0]) or (binary == [0,1,1,1])):
+                    if(binary == [1,1,1,0]):
+                        resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subTA) + "-" + str(subTB) + ". on the right, between " + str(b) + " and " + str(subTA) + '.'
+                    elif(binary == [0,1,1,1]):
+                        resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subTA) + "-" + str(subTB) + ". on the left, between " + str(a) + " and " + str(subTB) + '.' 
+            if((binaryMB != [1,1,0,0]) and (binaryMB != [0,0,1,1])):
+                gateB=False
+                if(binaryMB == [0,1,1,0]):
+                    resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " SNP is encapsulated within " + str(subMA) + "-" + str(subMB) + '.'
+                elif(binaryMB == [1,1,1,1]):
+                    resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is equal or encapsulating " + str(subMA) + "-" + str(subMB) + '.'
+                elif((binaryMB == [1,1,1,0]) or (binaryMB == [0,1,1,1])):
+                    if(binaryMB == [1,1,1,0]):
+                        resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subMA) + "-" + str(subMB) + ". on the right, between " + str(b) + " and " + str(subMA) + '.'
+                    elif(binaryMB == [0,1,1,1]):
+                        resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subMA) + "-" + str(subMB) + ". on the left, between " + str(a) + " and " + str(subMB) + '.' 
+    if(gateA):
+        resultsA+="\nNo Type ONE window overlaps detected.\n"
+    if(gateB):
+        resultsB+="\nNo Type TWO window overlaps detected.\n"
+    results += resultsA + "\n" + resultsB + "\n"
+    results += "\nEND OF INTERVAL CHECKS.\nXXXXXXXXXXXXXXXXXXXXXX\n"
+    with open(baseOut + projectName + "_" + "WindowOverlap.txt", 'a+') as window:
+        window.write(results)
+
 def bashInputs():
     outputLoc=str(os.environ['outputLoc'])
     filename=str(os.environ['filename'])
@@ -1145,7 +1216,7 @@ def geneDirCreate():
 
     return(geneDir, SNDGeneDir)
 
-def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode, sniMode):
+def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
     with open(inputFile, "rb") as raw:
         sub=[]
         counter=0
@@ -1195,39 +1266,38 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode, sniMode):
                     geneDir['header'].extend(readLine)
                     gate=False
                 counter+=1
-    return(geneDir, SNDGeneDir)
+        return(geneDir, SNDGeneDir)
 
-def vcfSegmentsNew(inputFile, geneDir, SNDGeneDir, sndMode, sniMode):
+def vcfSegmentsNew(inputFile, geneDir, SNDGeneDir, sndMode):
     with open(inputFile, "rb") as dataLine:
-        for line in dataLine.readline():
+        for line in dataLine.readlines():
             inputList = line.split()
-            if(inputList[0] == "#"):
+            if(chr(inputList[0]) == "#"):
                 geneDir['header'].extend(readLine)
             else:
-                gene= str(inputList[6]) + "to" + str(inputList[8])
+                gene= str(chr(inputList[6])) + "to" + str(chr(inputList[8]))
                 if gene in geneDir:
                     geneDir[gene].extend(line)
                 else:
                     if((sndMode == 1) and (len(inputList[6]) >= 2)):
-                        if(inputList[6][1] != "T"):
+                        if(chr(inputList[6][1]) != "T"):
                                 inputList[6] = inputList[6][1]
-                                inputList[8] = "T"
+                                # inputList[8] = "T"
+                                inputList[8] = b'T'
                                 inputList[2] = str(int(inputList[2]) + 1)
                         else:
-                            sub[6] = sub[6][1]
-                            sub[8] = "A"
-                            sub[2] = str(int(sub[2]) + 1)
-                        gene = str(sub[6]) + "to" + str(sub[8])
-                        sub.append(results)
-                        sub.append(element)
-                        SNDGeneDir[gene].extend(line)
+                            inputList[6] = inputList[6][1]
+                            # inputList[8] = "A"
+                            inputList[8] = b'A'
+                            inputList[2] = str(int(inputList[2]) + 1)
+                        gene = str(chr(inputList[6])) + "to" + str(chr(inputList[8]))
+                        SNDGeneDir[gene].extend(''.join(inputList).encode("utf-8"))
                     else:
-                        geneDir['rejected'].extend(readLine)
-
+                        geneDir['rejected'].extend(line)
 
 return(geneDir, SNDGeneDir)
 
-def vcfSpliter(outputLoc, filename, baseOut, geneDir, SNDGeneDir, sndMode, sniMode):
+def vcfSpliter(outputLoc, filename, baseOut, geneDir, SNDGeneDir, sndMode):
     for key in geneDir:
         if(geneDir[key]):
             if((key != "rejected") and (key != "header")):
