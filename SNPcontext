@@ -1143,16 +1143,7 @@ def geneDirCreate():
 
     }
 
-    SNIGeneDir = { # REMMOVE SNI STUFF
-    
-        'A':bytearray(),
-        'C':bytearray(),
-        'G':bytearray(),
-        'T':bytearray(),
-    
-    }
-
-    return(geneDir, SNDGeneDir, SNIGeneDir)
+    return(geneDir, SNDGeneDir)
 
 def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode, sniMode):
     with open(inputFile, "rb") as raw:
@@ -1162,7 +1153,7 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode, sniMode):
         results=''
         for readLine in raw: ## Break apart nested loops, one loope for saving head and other is the vcf body
             sub.clear()
-            gene=''SNDGeneDir
+            gene=''
             results=''
             gate=True
             counter=0
@@ -1196,12 +1187,6 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode, sniMode):
                                 sub.append(element)
                                 SNDGeneDir[gene].extend(''.join(sub).encode("utf-8"))
                                 gate=False
-                            elif((sniMode == 1) and (len(sub[8]) == 2) and (len(sub[6]) == 1)):
-                                gene = str(sub[6]) + "to" + str(sub[8])
-                                sub.append(results)
-                                sub.append(element)
-                                SNDGeneDir[gene].extend(''.join(sub).encode("utf-8"))
-                                gate=False
                             else:
                                 geneDir['rejected'].extend(readLine)
                                 sub.clear()
@@ -1211,6 +1196,36 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode, sniMode):
                     gate=False
                 counter+=1
     return(geneDir, SNDGeneDir)
+
+def vcfSegmentsNew(inputFile, geneDir, SNDGeneDir, sndMode, sniMode):
+    with open(inputFile, "rb") as dataLine:
+        for line in dataLine.readline():
+            inputList = line.split()
+            if(inputList[0] == "#"):
+                geneDir['header'].extend(readLine)
+            else:
+                gene= str(inputList[6]) + "to" + str(inputList[8])
+                if gene in geneDir:
+                    geneDir[gene].extend(line)
+                else:
+                    if((sndMode == 1) and (len(inputList[6]) >= 2)):
+                        if(inputList[6][1] != "T"):
+                                inputList[6] = inputList[6][1]
+                                inputList[8] = "T"
+                                inputList[2] = str(int(inputList[2]) + 1)
+                        else:
+                            sub[6] = sub[6][1]
+                            sub[8] = "A"
+                            sub[2] = str(int(sub[2]) + 1)
+                        gene = str(sub[6]) + "to" + str(sub[8])
+                        sub.append(results)
+                        sub.append(element)
+                        SNDGeneDir[gene].extend(line)
+                    else:
+                        geneDir['rejected'].extend(readLine)
+
+
+return(geneDir, SNDGeneDir)
 
 def vcfSpliter(outputLoc, filename, baseOut, geneDir, SNDGeneDir, sndMode, sniMode):
     for key in geneDir:
@@ -1227,15 +1242,9 @@ def vcfSpliter(outputLoc, filename, baseOut, geneDir, SNDGeneDir, sndMode, sniMo
     if(sndMode == 1):
         for sndKey in SNDGeneDir:
             if(SNDGeneDir[sndKey]):
-                with open(outputLoc + "SPLITVCF/SND_VCF/" + sndKey + "_split_" + filename + ".vcf","ab") as vcfOut:
+                with open(outputLoc + "SPLITVCF/SND/" + sndKey + "_split_" + filename + ".vcf","ab") as vcfOut:
                     vcfOut.write(geneDir['header'])
                     vcfOut.write(SNDGeneDir[sndKey])
-    if(sniMode == 1):
-        for sniKey in SNIGeneDir:
-            if(SNIGeneDir[sniKey]):
-                with open(outputLoc + "SPLITVCF/SNI_VCF/" + sniKey + "_split_" + filename + ".vcf","ab") as vcfOut:
-                    vcfOut.write(geneDir['header'])
-                    vcfOut.write(SNIGeneDir[sndKey])
 
 def bashImport():
     outputLoc=str(os.environ['outputLoc'])
@@ -1244,14 +1253,13 @@ def bashImport():
     projectName=str(os.environ['projectName'])
     baseOut=str(os.environ['baseOut'])
     sndMode=int(os.environ['sndMode'])
-    sniMode=2 # REMOVING
-    return(projectName, inputFile, outputLoc, filename, baseOut, sndMode, sniMode)
+    return(projectName, inputFile, outputLoc, filename, baseOut, sndMode)
 
 def main():
-    projectName, inputFile, outputLoc, filename, baseOut, sndMode, sniMode = bashImport()
-    geneDir, SNDGeneDir, SNIGeneDir = geneDirCreate()
-    geneDir, SNDGeneDir=vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode, sniMode)
-    vcfSpliter(outputLoc, filename, baseOut, geneDir, SNDGeneDir, sndMode, sniMode)
+    projectName, inputFile, outputLoc, filename, baseOut, sndMode = bashImport()
+    geneDir, SNDGeneDir = geneDirCreate()
+    geneDir, SNDGeneDir=vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode)
+    vcfSpliter(outputLoc, filename, baseOut, geneDir, SNDGeneDir, sndMode)
 
 main()
 
@@ -1267,7 +1275,7 @@ fastaScanner(){
 from itertools import chain
 import os
 
-def fastaMapper(gene): ## RE_WRITE THIS, Either read a byte at a time or by line
+def fastaMapper(gene): ## RE_WRITE THIS, Either read a byte at a time or by line, NOT SURE THAT I NEED THIS
     with open(gene ,"rb") as fasta:
         fastafile=fasta.read()
         totalN=0
@@ -1300,7 +1308,15 @@ def fastaMapper(gene): ## RE_WRITE THIS, Either read a byte at a time or by line
                 master.append(sub)
     return(master)
 
-def fastaNpop(subMaster, allRejected, nMax): # Use list.count() and count/remove it that way
+def fastaMapperNew(gene): ## RE_WRITE THIS, Either read a byte at a time or by line, NOT SURE THAT I NEED THIS
+    with open(gene ,"rb") as fasta:
+        # master=[]
+        # for line in fasta.readline():
+            # master.append(line)
+        master = [x for x in fasta.readline()]
+    return(master)
+
+def fastaNpop(subMaster, allRejected, nMax): # Use list.count() and count/remove it that way, REMOVE AND INTEGRATE WITH FASTABASEPOP
     maxP=nMax/100
     newsubMaster=[]
     nMaxList=[]
@@ -1312,6 +1328,7 @@ def fastaNpop(subMaster, allRejected, nMax): # Use list.count() and count/remove
         else:
             newsubMaster.append(subListing)
     return(newsubMaster, nMaxList)
+
 
 def fastaBasePop(master, interval, flank): 
     allRejected=False
@@ -1757,69 +1774,38 @@ main(){
 }
 
 subMain():
-    ## Add flat code for execution here. Input parameter is the individual path for that VCF file
-    # if [[  ]]; then
-
-    # fi
-    # fileConverterMode="SPLITVCF/{2}"
-    # fileConverterTemp="BED_SPLIT/"
     
     local geneDir="${1%.*}"
     geneDir="${1##*/}"
     geneDir=${1:0:4} ##BASH IS BASE 1
 
     fileName = "${projectDic["tempOut"]}BED_SPLIT/${2}${geneDir}.bed"
-    fileConverter "${1}" "${fileName}" ##MAKES BED FILE
+    bed_FileConverter "${1}" "${fileName}" ##MAKES BED FILE
 
-    # local temp="${projectDic["tempOut"]}"BED_SPLIT/
-    # local splitDir=("${temp}"*_split_"${projectDic[filename]}".bed*)
-    # sndLocal=0
-    # for gene in "${splitDir[@]}"; do
-    #     local geneDir="${gene%.*}"
-    #     geneDir="${geneDir##*/}"
-    #     geneDir=${geneDir:0:4} ##BASH IS BASE 1
-        # pythonBEDScanner "$geneDir" "$sndLocal" & ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
     pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
-    # done
-    # wait
 
-    # echo -e "\nOverlap checks completed..."
-    # echo -e "See overlap results located in 'WindowOverlap.txt' in your main output directory.\n"
-    
-    # fileConverterMode="BED_SPLIT/${2}"
     fileConverterTemp="FASTA_SPLIT/${2}"
-    fileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ##CREATES FASTA FILE
+    fasfa_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ##CREATES FASTA FILE
     fileName = "${projectDic["tempOut"]}FASTA_SPLIT/${2}${geneDir}_${projectDic[filename]}.fasta"
 
-    # local tempTwo="${projectDic["tempOut"]}"FASTA_SPLIT/
-    # local fastalisting=("${tempTwo}"*_"${projectDic[filename]}".fasta*)
-    # for geneTwo in "${fastalisting[@]}"; do
-    #     local geneDirTwo="${geneTwo%.*}"
-    #     geneDirTwo="${geneDirTwo##*/}"
-    #     geneDirTwo=${geneDirTwo:0:4}
-        # fastaScanner "${geneDirTwo}" "${geneTwo}" & ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
     fastaScanner "${geneDir}" "${fileName}" ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
-    # done
-    # wait
 
-    # fileConverterMode="FASTA_SPLIT/"
     fileConverterTemp="COUNTS_TABLES/${2}"
-    # fileConverter "${fileConverterMode}" "${fileConverterTemp}" ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
-    fileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
-    
 
+    alnToCounts_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
     
     fileName = "${projectDic[outputLoc]}COUNTS_TABLES/${2}${geneDir}_${projectDic[filename]}.txt"
-    # fileConverterMode="COUNTS_TABLES/${2}"
+
     fileConverterTemp="MUTATION_ANALYSIS/${2}"
-    fileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ## MUTATION GRAPHING
+    graphSingle_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ## MUTATION GRAPHING
     
     ## if for snd mode
-    [[ "${projectDic["1"]}" -eq 1 ]]
-        fileConverter ##ALL_COUNTS
-        fileConverter ## MUTATION GRAPHING COMBINED
+    [[ "${2}" -eq 1 ]] ## Checks if SND mode is on
+        allCounts_FileConverter ##ALL_COUNTS
+        graphCombined_FileConverter ## MUTATION GRAPHING COMBINED
     fi
 
+}
 
 
 
@@ -1835,8 +1821,11 @@ newMain(){
 
     ## GOT TO MAKE COMPLETE LIST OF VCF FILES TO ITERATE OVER AND FEED INTO FOR LOOP
     cd "${projectDic["tempOut"]}"SPLITVCF/
-    sndAmount=$(find . -maxdepth 1 -type f -name "*.vcf" | wc -l)
-    for normalMode in sndAmount; then
+    local sndAmount=$(find . -maxdepth 1 -type f -name "*.vcf" | wc -l)
+    
+    local temp="${projectDic["tempOut"]}""${1}"
+    local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
+    for normalMode in ${splitDir[@]}; then
         sndExtension = ""
         subMain "${normalMode}" "${sndExtension}"
     done
@@ -1844,8 +1833,11 @@ newMain(){
 
     cd "${projectDic["tempOut"]}"SPLITVCF/SND_VCF/
     sndAmount=$(find . -type f -name "*.vcf" | wc -l)
+
+    local temp="${projectDic["tempOut"]}SPLITVCF/SND"
+    local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
     if [[ "${projectDic["sndMode"]}" -eq 1 ]] && [[ ${sndAmount} != 0 ]]; then
-        for sndMode in sndAmount; then
+        for sndMode in ${splitDir[@]}; then
             sndExtension = "SND/"
             subMain "${sndMode}" "${sndExtension}"
         done
