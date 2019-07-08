@@ -1110,40 +1110,44 @@ def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, ge
     for i in range(len(expandedList)-1): #Checks for Type One SNP overlaps (ORIGINAL INTERVAL CHECK)
             a=expandedList[i][0] ##A= left side
             b=expandedList[i][1] ##B= right side
+            subTA=expandedList[i+1][0]-(interval) ##TYPE ONE SWITCHED FROM - TO +
+            subTB=expandedList[i+1][1]+(interval)
+            subMA=expandedList[i+1][0] ##TYPE TWO
+            subMB=expandedList[i+1][1]=
             binary = 0
             binaryMB = 0
 
-            binary += 16 if(a <= expandedList[i+1][0]-(interval)) ##TYPE ONE SWITCHED FROM - TO +
-            binary += 8 if(a <= expandedList[i+1][1]+(interval))
-            binary += 2 if(b <= expandedList[i+1][0]-(interval))
-            binary += 1 if(b <= expandedList[i+1][1]+(interval))
+            binary += 16 if(a <= subTA)
+            binary += 8 if(a <= subTB)
+            binary += 2 if(b <= subTA)
+            binary += 1 if(b <= subTB)
 
-            binaryMB += 16 if(a <= expandedList[i+1][0]) ##TYPE TWO
-            binaryMB += 8 if(b <= subMB=expandedList[i+1][1])
-            binaryMB += 2 if(a <= expandedList[i+1][0])
-            binaryMB += 1 if(b <= subMB=expandedList[i+1][1])
+            binaryMB += 16 if(a <= subMA)
+            binaryMB += 8 if(b <= subMB)
+            binaryMB += 2 if(a <= subMA)
+            binaryMB += 1 if(b <= subMB)
 
             if((binary != 24) and (binary != 3)):
                 gateA=False
-                if(binary == [0,1,1,0]):
+                if(binary == 10):
                     resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " SNP is encapsulated within " + str(subTA) + "-" + str(subTB) + '.'
-                elif(binary == [1,1,1,1]):
+                elif(binary == 27):
                     resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " is equal or encapsulating " + str(subTA) + "-" + str(subTB) + '.'
-                elif((binary == [1,1,1,0]) or (binary == [0,1,1,1])):
-                    if(binary == [1,1,1,0]):
+                elif((binary == 26) or (binary == 11)):
+                    if(binary == 26):
                         resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subTA) + "-" + str(subTB) + ". on the right, between " + str(b) + " and " + str(subTA) + '.'
-                    elif(binary == [0,1,1,1]):
+                    elif(binary == 11):
                         resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subTA) + "-" + str(subTB) + ". on the left, between " + str(a) + " and " + str(subTB) + '.' 
-            if((binaryMB != [1,1,0,0]) and (binaryMB != [0,0,1,1])):
+            if((binaryMB != 24) and (binaryMB != 3)):
                 gateB=False
-                if(binaryMB == [0,1,1,0]):
+                if(binaryMB == 10):
                     resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " SNP is encapsulated within " + str(subMA) + "-" + str(subMB) + '.'
-                elif(binaryMB == [1,1,1,1]):
+                elif(binaryMB == 27):
                     resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is equal or encapsulating " + str(subMA) + "-" + str(subMB) + '.'
-                elif((binaryMB == [1,1,1,0]) or (binaryMB == [0,1,1,1])):
-                    if(binaryMB == [1,1,1,0]):
+                elif((binaryMB == 26) or (binaryMB == 11)):
+                    if(binaryMB == 26):
                         resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subMA) + "-" + str(subMB) + ". on the right, between " + str(b) + " and " + str(subMA) + '.'
-                    elif(binaryMB == [0,1,1,1]):
+                    elif(binaryMB == 11):
                         resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subMA) + "-" + str(subMB) + ". on the left, between " + str(a) + " and " + str(subMB) + '.' 
     if(gateA):
         resultsA+="\nNo Type ONE window overlaps detected.\n"
@@ -1648,6 +1652,42 @@ EndofSubmission
     exit 2
 }
 
+jobCreatorTest2(){
+    
+    ## Try and get this working
+
+    if [[ ${projectDic["isCmd"]} == "false" ]]; then
+        local config="$@"
+    else
+        local config="none"
+    fi
+
+    # echo -e "Whats my Price?"
+    # echo -e "${scriptPath}"
+
+    echo -e ""
+
+    #PBS -l "${job_specs}"
+    #PBS -M "${projectDic["email"]}"
+    #PBS -N "${projectDic["projectName"]}"
+    #PBS -o "${projectDic["outputLoc"]}"
+    #PBS -e "${projectDic["outputLoc"]}"
+    #PBS -m abe
+    #PBS -q "${projectDic["queue"]}"
+
+    ## CALL NORMAL QSUB WITH ARGUMENTS
+
+qsub <<EndofSubmission
+    
+
+    "${scriptPath}"/SNPcontext -i "${projectDic["inputFile"]}" -o "${projectDic["outputLoc"]}" -w "${projectDic["windowLength"]}" -f "${projectDic["flanks"]}" -p "${projectDic["projectName"]}" -r "${projectDic["referenceGenome"]}" -ad "${projectDic["allData"]}" -n "${projectDic["nMax"]}" -JOB THIS_IS_A_JOB -msi "${projectDic["msi"]}" -dpb "${projectDic["dropbox"]}" -dpba "${projectDic["dropboxAuth"]}" -gh "${projectDic["github"]}" -ghu "${projectDic["gitUser"]}" -ghp "${projectDic["gitPass"]}" -gho "${projectDic["owner"]}" -s3 "${projectDic["s3"]}" -ghr "${projectDic["Myrepository"]}" -CONFIGLOC "${config}"
+    
+EndofSubmission
+
+    echo -e "Job submitted...\nEXITING...\n"
+    exit 2
+}
+
 #    This is the primary function
 mainOld(){
     config_check "$@"
@@ -1870,7 +1910,7 @@ subMain():
     graphSingle_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ## MUTATION GRAPHING
     
     ## if for snd mode
-    [[ "${2}" -eq 1 ]] ## Checks if SND mode is on
+    [[ "${2}" -eq 2 ]] ## Checks if SND mode is on
         allCounts_FileConverter ##ALL_COUNTS
         graphCombined_FileConverter ## MUTATION GRAPHING COMBINED
     fi
