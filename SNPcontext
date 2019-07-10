@@ -1182,7 +1182,7 @@ def main():
     if(sndMode != 1):
         bedType="BED_SPLIT/"
     else:
-        bedType="BED_SPLIT/SND_BED/"
+        bedType="BED_SPLIT/SND/"
     masterList = bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedType)
     binaryIntersect(masterList, interval, outputLoc, projectName, filename, geneDir, baseOut)
 main()
@@ -1903,7 +1903,7 @@ subMain(){
     fileName="${projectDic["tempOut"]}BED_SPLIT/${2}${geneDir}.bed"
     bed_FileConverter "${1}" "${fileName}" ##MAKES BED FILE
 
-    pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
+    pythonBEDScanner "$geneDir" "$3" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
 
     fileConverterTemp="FASTA_SPLIT/${2}"
     fasfa_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ##CREATES FASTA FILE
@@ -1942,8 +1942,9 @@ newMain(){
     local temp="${projectDic["tempOut"]}""${1}"
     local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
     if [[ ${sndAmount} != 0 ]]; then
+        local sndLocal=0
         for normalMode in "${splitDir[@]}"; do
-            subMain "${normalMode}" "${sndExtension}"
+            subMain "${normalMode}" "${sndExtension}" "$sndLocal"
         done
     else
         echo -e "No VCF files found..."
@@ -1957,9 +1958,9 @@ newMain(){
     local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
     local sndExtension="SND/"
     if [[ "${projectDic["sndMode"]}" -eq 1 ]] && [[ ${sndAmount} != 0 ]]; then
+        local sndLocal=1
         for sndMode in ${splitDir[@]}; do
-            
-            subMain "${sndMode}" "${sndExtension}"
+            subMain "${sndMode}" "${sndExtension}" "$sndLocal"
         done
     fi
 
