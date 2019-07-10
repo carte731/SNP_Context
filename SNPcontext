@@ -1687,11 +1687,13 @@ jobCreatorTest2(){
 
     qsub "${scriptPath}/SNPcontext" -i "${projectDic["inputFile"]}" -o "${projectDic["outputLoc"]}" \
     -w "${projectDic["windowLength"]}" -f "${projectDic["flanks"]}" -p "${projectDic["projectName"]}" \
-    -r "${projectDic["referenceGenome"]}" -ad "${projectDic["allData"]}" -n "${projectDic["nMax"]}" \
+    -sni "${projectDic[""]}" -graphs "${projectDic[""]}" -symas "${projectDic[""]}" \
+    -nbrs "${projectDic[""]}" -ma "${projectDic[""]}" -r "${projectDic["referenceGenome"]}" \
+    -ad "${projectDic["allData"]}" -n "${projectDic["nMax"]}" -CONFIGLOC "${config}" \
     -JOB THIS_IS_A_JOB -msi "${projectDic["msi"]}" -dpb "${projectDic["dropbox"]}" -dpba "${projectDic["dropboxAuth"]}" \
     -gh "${projectDic["github"]}" -ghu "${projectDic["gitUser"]}" -ghp "${projectDic["gitPass"]}" \
     -gho "${projectDic["owner"]}" -s3 "${projectDic["s3"]}" -ghr "${projectDic["Myrepository"]}" \
-    -CONFIGLOC "${config}"
+    
 
     echo -e "Job submitted...\nEXITING...\n"
     exit 2
@@ -1938,11 +1940,14 @@ newMain(){
     
     local temp="${projectDic["tempOut"]}""${1}"
     local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
-    for normalMode in "${splitDir[@]}"; do
-
-        sndExtension = ""
-        subMain "${normalMode}" "${sndExtension}"
-    done
+    if [[ ${sndAmount} != 0 ]]; then
+        for normalMode in "${splitDir[@]}"; do
+            sndExtension = " "
+            subMain "${normalMode}" "${sndExtension}"
+        done
+    else
+        echo -e "No VCF files found..."
+    fi
     active=()
 
     cd "${projectDic["tempOut"]}"SPLITVCF/SND_VCF/
