@@ -524,6 +524,7 @@ bed_FileConverter(){
 }
 
 fasfa_FileConverter(){
+    echo -e "TESTING BREAK"
     # local targetBED="${1%.*}"
     # targetBED="${targetBED##*/}"
     # targetBED=${targetBED:0:4}
