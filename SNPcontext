@@ -1909,13 +1909,13 @@ subMain(){
     pythonBEDScanner "$geneDir" "$3" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
 
     fileConverterTemp="FASTA_SPLIT/${2}"
+    fileName="${projectDic["tempOut"]}BED_SPLIT/${projectDic[filename]}"_new_interval.bed
     fasfa_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ##CREATES FASTA FILE
-    fileName="${projectDic["tempOut"]}FASTA_SPLIT/${2}${geneDir}_${projectDic[filename]}.fasta"
 
     fastaScanner "${geneDir}" "${fileName}" ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
 
     fileConverterTemp="COUNTS_TABLES/${2}"
-
+    fileName="${projectDic["tempOut"]}FASTA_SPLIT/${2}${geneDir}_${projectDic[filename]}.fasta"
     alnToCounts_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
     
     fileName="${projectDic[outputLoc]}COUNTS_TABLES/${2}${geneDir}_${projectDic[filename]}.txt"
