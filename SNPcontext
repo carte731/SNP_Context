@@ -1125,15 +1125,15 @@ def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, ge
             binary = 0
             binaryMB = 0
 
-            binary += 16 if(a <= subTA)
-            binary += 8 if(a <= subTB)
-            binary += 2 if(b <= subTA)
-            binary += 1 if(b <= subTB)
+            if(a <= subTA): binary += 16
+            if(a <= subTB): binary += 8
+            if(b <= subTA): binary += 2
+            if(b <= subTB): binary += 1
 
-            binaryMB += 16 if(a <= subMA)
-            binaryMB += 8 if(b <= subMB)
-            binaryMB += 2 if(a <= subMA)
-            binaryMB += 1 if(b <= subMB)
+            if(a <= subMA): binaryMB += 16
+            if(b <= subMB): binaryMB += 8
+            if(a <= subMA): binaryMB += 2
+            if(b <= subMB): binaryMB += 1
 
             if((binary != 24) and (binary != 3)):
                 gateA=False
