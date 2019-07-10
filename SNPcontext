@@ -1892,7 +1892,7 @@ main(){
     exit 0
 }
 
-subMain():
+subMain(){
     
     local geneDir="${1%.*}"
     geneDir="${1##*/}"
