@@ -516,20 +516,22 @@ moduleLoader(){ #Load modules needed for operations
 
 }
 
-bed_FileConverter():
+bed_FileConverter(){
     # local targetVCF="${1%.*}"
     # targetVCF="${targetVCF##*/}"
     # vcf2bed < "${1}" > "${projectDic["tempOut"]}""${2}""${3}".bed & ##sort later
     vcf2bed < "${1}" > ${2} ##sort later
+}
 
-fasfa_FileConverter():
+fasfa_FileConverter(){
     # local targetBED="${1%.*}"
     # targetBED="${targetBED##*/}"
     # targetBED=${targetBED:0:4}
     # bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${gene}" -fo "${projectDic["tempOut"]}""${2}""${targetBED}"_"${projectDic[filename]}".fasta &
     bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${1}" -fo "${projectDic["tempOut"]}""${2}""${3}"_"${projectDic[filename]}".fasta
+}
 
-alnToCounts_FileConverter():
+alnToCounts_FileConverter(){
     # local countfile="${1%.*}"
     # countfile="${countfile##*/}"
     # local geneDirection=${countfile:0:4}
@@ -538,16 +540,18 @@ alnToCounts_FileConverter():
     # mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"_"${projectDic[filename]}".txt
     mv "${projectDic[outputLoc]}""${2}"*.log* "${projectDic[outputLoc]}""${2}"/LOGS/"${geneDirection}"_"${projectDic[filename]}".log ##FIX Unique Log ID'S    
     # active+=("${geneDirection}")
+}
 
-allCounts_FileConverter():
+allCounts_FileConverter(){
     # cd "${projectDic[outputLoc]}"COUNTS_TABLES/
     # mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS
     all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/ --strand_symmetric > /dev/null
     # all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/ --strand_symmetric
     mv "${projectDic[outputLoc]}"COUNTS_TABLES/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${projectDic[filename]}"_combined_counts.txt
     mv "${projectDic[outputLoc]}"COUNTS_TABLES/combined_counts.log "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${projectDic[filename]}"_combined_counts.log
+}
 
-graphSingle_FileConverter():
+graphSingle_FileConverter(){
     if [[ "${projectDic["nbrOrSpec"]}" == "1" ]]; then ## Later, assign this in Config loader
         nOrS="nbr"
     elif [[ "${projectDic["nbrOrSpec"]}" == "2" ]]; then
@@ -562,7 +566,9 @@ graphSingle_FileConverter():
         mutation_analysis nbr -1 "${1}" -o "${projectDic[outputLoc]}${2}${3}"
     fi
 
-graphCombined_FileConverter():
+}
+
+graphCombined_FileConverter(){
     if [[ "${projectDic["nbrOrSpec"]}" == "1" ]]; then ## Later, assign this in Config loader
         nOrS="nbr"
     elif [[ "${projectDic["nbrOrSpec"]}" == "2" ]]; then
@@ -580,6 +586,8 @@ graphCombined_FileConverter():
         mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS/COMBINED_COUNTS
         mutation_analysis "${nOrS}" -1 "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${projectDic[filename]}"_combined_counts.txt -o "${projectDic[outputLoc]}"MUTATION_ANALYSIS/COMBINED_COUNTS "${sOrA}"
     fi
+
+}
 
 #    Performing vcf to bed conversion using bedops 'vcf2bed' function
 fileConverter(){ # BREAK THIS APART
