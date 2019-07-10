@@ -1909,12 +1909,6 @@ subMain():
     fileConverterTemp="MUTATION_ANALYSIS/${2}"
     graphSingle_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ## MUTATION GRAPHING
     
-    ## if for snd mode
-    [[ "${2}" -eq 2 ]] ## Checks if SND mode is on
-        allCounts_FileConverter ##ALL_COUNTS
-        graphCombined_FileConverter ## MUTATION GRAPHING COMBINED
-    fi
-
 }
 
 
@@ -1952,6 +1946,13 @@ newMain(){
             subMain "${sndMode}" "${sndExtension}"
         done
     fi
+
+    ## if for snd mode
+    [[ "${2}" -eq 2 ]] ## Checks if SND mode is on
+        allCounts_FileConverter ##ALL_COUNTS
+        graphCombined_FileConverter ## MUTATION GRAPHING COMBINED
+    fi
+
     active=()
 
     ## Find vcf files in main and SND directory
@@ -1978,4 +1979,5 @@ newMain(){
 
 }
 
-main "$@"
+# main "$@"
+newMain "$@"
