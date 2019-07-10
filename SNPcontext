@@ -1938,7 +1938,7 @@ newMain(){
     
     local temp="${projectDic["tempOut"]}""${1}"
     local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
-    for normalMode in ${splitDir[@]}; then
+    for normalMode in "${splitDir[@]}"; then
         sndExtension = ""
         subMain "${normalMode}" "${sndExtension}"
     done
