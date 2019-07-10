@@ -1950,7 +1950,7 @@ newMain(){
     fi
     active=()
 
-    cd "${projectDic["tempOut"]}"SPLITVCF/SND_VCF/
+    cd "${projectDic["tempOut"]}"SPLITVCF/SND/
     sndAmount=$(find . -type f -name "*.vcf" | wc -l)
 
     local temp="${projectDic["tempOut"]}SPLITVCF/SND"
