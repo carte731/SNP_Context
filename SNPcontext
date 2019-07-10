@@ -1004,7 +1004,7 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
                 sub.append(final)
                 sub.append(element)
                 sub[2] = str(int(sub[2]) - interval)
-                sub[4] = str(int(sub[4]) + interval)         
+                sub[4] = str(int(sub[4]) + interval)    
                 a = sub[2]
                 b = sub[4]
                 temp.append(int(a))
@@ -1036,8 +1036,8 @@ def bedMapperNew(interval, outputLoc, projectName, filename, geneDir, sndMode, b
     with open(outputLoc + bedType + geneDir + "_split_" + filename + ".bed", "rb") as bed_test: ##Change to input variables
         for i in bed_test.readlines():
             inputList = i.split()
-            inputList[2] = int(chr(inputList[2])) - interval)
-            inputList[4] = int(chr(inputList[4])) + interval)
+            inputList[2] = int(chr(inputList[2]) - interval)
+            inputList[4] = int(chr(inputList[4]) + interval)
             masterList.append(sub[2])
             masterList.append(sub[4])
             bedMapper.extend(inputList)
