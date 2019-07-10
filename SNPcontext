@@ -1182,7 +1182,7 @@ def main():
     if(sndMode != 1):
         bedType="BED_SPLIT/"
     else:
-        bedType="BED_SPLIT/SND/"
+        bedType="BED_SPLIT/SND"
     masterList = bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedType)
     binaryIntersect(masterList, interval, outputLoc, projectName, filename, geneDir, baseOut)
 main()
@@ -1896,9 +1896,11 @@ main(){
 
 subMain(){
     
+    echo -e "${1}"
     local geneDir="${1%.*}"
     geneDir="${1##*/}"
     geneDir=${1:0:4} ##BASH IS BASE 1
+    echo -e "${geneDir}"
 
     fileName="${projectDic["tempOut"]}BED_SPLIT/${2}${geneDir}.bed"
     bed_FileConverter "${1}" "${fileName}" ##MAKES BED FILE
