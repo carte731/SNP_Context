@@ -1474,57 +1474,58 @@ main()
 FASTA_SWEEP
 
 }
-sniSuff(){} ## REMOVE FROM SCRIPT
-pypy3.6 << SNI_MODE
 
-import os
+# sniSuff(){} ## REMOVE FROM SCRIPT
+# pypy3.6 << SNI_MODE
 
-positionDict = {}
+# import os
 
-def bedScanner():
-    with open("/panfs/roc/groups/9/morrellp/carte731/vcf_SND/inputFile/SNI.bed", "r") as bedSNI:
-        line = bedSNI.readline()
-        gate = True
-        while((gate) and (line)):
-            if(line.startswith("#")):
-                line = bedSNI.readline()
-            else:
-                gate = False
-        while(line):
-            dataList = line.split("\t"):w
-            positionDict[">" + dataList[0] + ":" + dataList[1] + "-" + dataList[2]] = dataList[6]
-            line = bedSNI.readline()
+# positionDict = {}
 
-def fastaInserter(windowL):
-   output = ""
-   with open("/panfs/roc/groups/9/morrellp/carte731/vcf_SND/inputFile/fasfaSni.fasfa", "r") as fasfaFile:
-       line = fasfaFile.readline()
-       while(line):
-           if(line.strip('\n') in positionDict):
-               pos = line
-               output += line
-               line = fasfaFile.readline()
-               line = line[:windowL] + positionDict[pos.strip('\n')] + line[windowL + 1:]
-               line = line[1:]
-               output += line
-               line = fasfaFile.readline()
-           else:
-               line = fasfaFile.readline()
-               line = fasfaFile.readline()
-   with open("/panfs/roc/groups/9/morrellp/carte731/vcf_SND/inputFile/newFasfaSni.fasfa", "a+") as newFasfa:
-       newFasfa.write(output)
+# def bedScanner():
+#     with open("/panfs/roc/groups/9/morrellp/carte731/vcf_SND/inputFile/SNI.bed", "r") as bedSNI:
+#         line = bedSNI.readline()
+#         gate = True
+#         while((gate) and (line)):
+#             if(line.startswith("#")):
+#                 line = bedSNI.readline()
+#             else:
+#                 gate = False
+#         while(line):
+#             dataList = line.split("\t"):w
+#             positionDict[">" + dataList[0] + ":" + dataList[1] + "-" + dataList[2]] = dataList[6]
+#             line = bedSNI.readline()
 
-def main():
-    windowL = 2
-    bedScanner()
-    for element in positionDict:
-        print("key: ", positionDict[element], "and ", element)
-    fastaInserter(windowL)
+# def fastaInserter(windowL):
+#    output = ""
+#    with open("/panfs/roc/groups/9/morrellp/carte731/vcf_SND/inputFile/fasfaSni.fasfa", "r") as fasfaFile:
+#        line = fasfaFile.readline()
+#        while(line):
+#            if(line.strip('\n') in positionDict):
+#                pos = line
+#                output += line
+#                line = fasfaFile.readline()
+#                line = line[:windowL] + positionDict[pos.strip('\n')] + line[windowL + 1:]
+#                line = line[1:]
+#                output += line
+#                line = fasfaFile.readline()
+#            else:
+#                line = fasfaFile.readline()
+#                line = fasfaFile.readline()
+#    with open("/panfs/roc/groups/9/morrellp/carte731/vcf_SND/inputFile/newFasfaSni.fasfa", "a+") as newFasfa:
+#        newFasfa.write(output)
 
-main()
+# def main():
+#     windowL = 2
+#     bedScanner()
+#     for element in positionDict:
+#         print("key: ", positionDict[element], "and ", element)
+#     fastaInserter(windowL)
 
-SNI_MODE
-}
+# main()
+
+# SNI_MODE
+# }
 
 #    Creates the job on UMN MSI
 #    Demonstrates that Corey can write more verbose code than Paul! Quite a victory!
