@@ -1942,7 +1942,7 @@ newMain(){
     local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
     if [[ ${sndAmount} != 0 ]]; then
         for normalMode in "${splitDir[@]}"; do
-            sndExtension = " "
+            sndExtension=""
             subMain "${normalMode}" "${sndExtension}"
         done
     else
@@ -1957,7 +1957,7 @@ newMain(){
     local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
     if [[ "${projectDic["sndMode"]}" -eq 1 ]] && [[ ${sndAmount} != 0 ]]; then
         for sndMode in ${splitDir[@]}; do
-            sndExtension = "SND/"
+            sndExtension="SND/"
             subMain "${sndMode}" "${sndExtension}"
         done
     fi
