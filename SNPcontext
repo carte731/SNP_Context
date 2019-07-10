@@ -1900,14 +1900,14 @@ subMain(){
     geneDir="${1##*/}"
     geneDir=${1:0:4} ##BASH IS BASE 1
 
-    fileName = "${projectDic["tempOut"]}BED_SPLIT/${2}${geneDir}.bed"
+    fileName="${projectDic["tempOut"]}BED_SPLIT/${2}${geneDir}.bed"
     bed_FileConverter "${1}" "${fileName}" ##MAKES BED FILE
 
     pythonBEDScanner "$geneDir" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
 
     fileConverterTemp="FASTA_SPLIT/${2}"
     fasfa_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ##CREATES FASTA FILE
-    fileName = "${projectDic["tempOut"]}FASTA_SPLIT/${2}${geneDir}_${projectDic[filename]}.fasta"
+    fileName="${projectDic["tempOut"]}FASTA_SPLIT/${2}${geneDir}_${projectDic[filename]}.fasta"
 
     fastaScanner "${geneDir}" "${fileName}" ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
 
@@ -1915,7 +1915,7 @@ subMain(){
 
     alnToCounts_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
     
-    fileName = "${projectDic[outputLoc]}COUNTS_TABLES/${2}${geneDir}_${projectDic[filename]}.txt"
+    fileName="${projectDic[outputLoc]}COUNTS_TABLES/${2}${geneDir}_${projectDic[filename]}.txt"
 
     fileConverterTemp="MUTATION_ANALYSIS/${2}"
     graphSingle_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ## MUTATION GRAPHING
