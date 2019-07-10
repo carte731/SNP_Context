@@ -1958,7 +1958,7 @@ newMain(){
     fi
 
     ## if for snd mode
-    [[ "${2}" -eq 2 ]] ## Checks if SND mode is on
+    if [[ "${2}" -eq 2 ]]; then ## Checks if SND mode is on
         allCounts_FileConverter ##ALL_COUNTS
         graphCombined_FileConverter ## MUTATION GRAPHING COMBINED
     fi
