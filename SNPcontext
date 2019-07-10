@@ -524,12 +524,12 @@ bed_FileConverter(){
 }
 
 fasfa_FileConverter(){
-    echo -e "TESTING BREAK"
     # local targetBED="${1%.*}"
     # targetBED="${targetBED##*/}"
     # targetBED=${targetBED:0:4}
     # bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${gene}" -fo "${projectDic["tempOut"]}""${2}""${targetBED}"_"${projectDic[filename]}".fasta &
     bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${1}" -fo "${projectDic["tempOut"]}""${2}""${3}"_"${projectDic[filename]}".fasta
+    echo -e "TESTING BREAK"
 }
 
 alnToCounts_FileConverter(){
@@ -1909,9 +1909,10 @@ subMain(){
     pythonBEDScanner "$geneDir" "$3" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
 
     fileConverterTemp="FASTA_SPLIT/${2}"
-    fileName="${projectDic["tempOut"]}BED_SPLIT/${projectDic[filename]}"_new_interval.bed
+    fileName="${projectDic["tempOut"]}BED_SPLIT/${2}${geneDir}_${projectDic[filename]}"_new_interval.bed
     fasfa_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ##CREATES FASTA FILE
 
+    echo -e "Text, graphics and NPCs"
     fastaScanner "${geneDir}" "${fileName}" ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
 
     fileConverterTemp="COUNTS_TABLES/${2}"
