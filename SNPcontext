@@ -529,7 +529,10 @@ fasfa_FileConverter(){
     # targetBED=${targetBED:0:4}
     # bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${gene}" -fo "${projectDic["tempOut"]}""${2}""${targetBED}"_"${projectDic[filename]}".fasta &
     echo -e "TESTING BREAK 1"
-    bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${1}" -fo "${projectDic["tempOut"]}""${2}""${3}"_"${projectDic[filename]}".fasfa
+    echo -e "${1}"
+    echo -e "${2}"
+    echo -e "${3}"
+    bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${1}" -fo "${projectDic["tempOut"]}""${2}""${3}"_"${projectDic[filename]}".fasta
     echo -e "TESTING BREAK 2"
 }
 
