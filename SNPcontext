@@ -1938,11 +1938,11 @@ newMain(){
     cd "${projectDic["tempOut"]}"SPLITVCF/
     local sndAmount=$(find . -maxdepth 1 -type f -name "*.vcf" | wc -l)
     
+    local sndExtension=""
     local temp="${projectDic["tempOut"]}""${1}"
     local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
     if [[ ${sndAmount} != 0 ]]; then
         for normalMode in "${splitDir[@]}"; do
-            sndExtension=""
             subMain "${normalMode}" "${sndExtension}"
         done
     else
@@ -1953,11 +1953,12 @@ newMain(){
     cd "${projectDic["tempOut"]}"SPLITVCF/SND/
     sndAmount=$(find . -type f -name "*.vcf" | wc -l)
 
-    local temp="${projectDic["tempOut"]}SPLITVCF/SND"
+    local temp="${projectDic["tempOut"]}"SPLITVCF/SND/
     local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
+    local sndExtension="SND/"
     if [[ "${projectDic["sndMode"]}" -eq 1 ]] && [[ ${sndAmount} != 0 ]]; then
         for sndMode in ${splitDir[@]}; do
-            sndExtension="SND/"
+            
             subMain "${sndMode}" "${sndExtension}"
         done
     fi
