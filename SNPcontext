@@ -1794,7 +1794,7 @@ main(){
     if [[ ${sndAmount} != 0 ]]; then
         fileConverterMode="SPLITVCF/"
         fileConverterTemp="BED_SPLIT/"
-        fileConverter "${fileConverterMode}"  "${fileConverterTemp}" ##MAKES BED FILE
+        fileConverter "${fileConverterMode}" "${fileConverterTemp}" ##MAKES BED FILE
         local temp="${projectDic["tempOut"]}"BED_SPLIT/
         local splitDir=("${temp}"*_split_"${projectDic[filename]}".bed*)
         sndLocal=0
@@ -1896,13 +1896,13 @@ main(){
 
 subMain(){
     
-    echo -e "${1}"
     local geneDir="${1%.*}"
     geneDir="${geneDir##*/}"
     geneDir=${geneDir:0:4} ##BASH IS BASE 1
-    echo -e "${geneDir}"
 
-    fileName="${projectDic["tempOut"]}BED_SPLIT/${2}${geneDir}.bed"
+    local targetVCF="${1%.*}"
+    targetVCF="${targetVCF##*/}"
+    local fileName="${projectDic["tempOut"]}BED_SPLIT/${2}${targetVCF}.bed"
     bed_FileConverter "${1}" "${fileName}" ##MAKES BED FILE
 
     pythonBEDScanner "$geneDir" "$3" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
