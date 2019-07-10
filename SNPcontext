@@ -1898,8 +1898,8 @@ subMain(){
     
     echo -e "${1}"
     local geneDir="${1%.*}"
-    geneDir="${1##*/}"
-    geneDir=${1:0:4} ##BASH IS BASE 1
+    geneDir="${geneDir##*/}"
+    geneDir=${geneDir:0:4} ##BASH IS BASE 1
     echo -e "${geneDir}"
 
     fileName="${projectDic["tempOut"]}BED_SPLIT/${2}${geneDir}.bed"
