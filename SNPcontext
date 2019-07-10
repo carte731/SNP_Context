@@ -1278,7 +1278,7 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
                     geneDir['header'].extend(readLine)
                     gate=False
                 counter+=1
-        return(geneDir, SNDGeneDir)
+    return(geneDir, SNDGeneDir)
 
 def vcfSegmentsNew(inputFile, geneDir, SNDGeneDir, sndMode):
     with open(inputFile, "rb") as dataLine:
@@ -1306,8 +1306,7 @@ def vcfSegmentsNew(inputFile, geneDir, SNDGeneDir, sndMode):
                         SNDGeneDir[gene].extend(''.join(inputList).encode("utf-8"))
                     else:
                         geneDir['rejected'].extend(line)
-
-return(geneDir, SNDGeneDir)
+    return(geneDir, SNDGeneDir)
 
 def vcfSpliter(outputLoc, filename, baseOut, geneDir, SNDGeneDir, sndMode):
     for key in geneDir:
@@ -1686,12 +1685,13 @@ jobCreatorTest2(){
 
     ## CALL NORMAL QSUB WITH ARGUMENTS
 
-qsub <<EndofSubmission
-    
-
-    "${scriptPath}"/SNPcontext -i "${projectDic["inputFile"]}" -o "${projectDic["outputLoc"]}" -w "${projectDic["windowLength"]}" -f "${projectDic["flanks"]}" -p "${projectDic["projectName"]}" -r "${projectDic["referenceGenome"]}" -ad "${projectDic["allData"]}" -n "${projectDic["nMax"]}" -JOB THIS_IS_A_JOB -msi "${projectDic["msi"]}" -dpb "${projectDic["dropbox"]}" -dpba "${projectDic["dropboxAuth"]}" -gh "${projectDic["github"]}" -ghu "${projectDic["gitUser"]}" -ghp "${projectDic["gitPass"]}" -gho "${projectDic["owner"]}" -s3 "${projectDic["s3"]}" -ghr "${projectDic["Myrepository"]}" -CONFIGLOC "${config}"
-    
-EndofSubmission
+    qsub "${scriptPath}/SNPcontext" -i "${projectDic["inputFile"]}" -o "${projectDic["outputLoc"]}" \
+    -w "${projectDic["windowLength"]}" -f "${projectDic["flanks"]}" -p "${projectDic["projectName"]}" \
+    -r "${projectDic["referenceGenome"]}" -ad "${projectDic["allData"]}" -n "${projectDic["nMax"]}" \
+    -JOB THIS_IS_A_JOB -msi "${projectDic["msi"]}" -dpb "${projectDic["dropbox"]}" -dpba "${projectDic["dropboxAuth"]}" \
+    -gh "${projectDic["github"]}" -ghu "${projectDic["gitUser"]}" -ghp "${projectDic["gitPass"]}" \
+    -gho "${projectDic["owner"]}" -s3 "${projectDic["s3"]}" -ghr "${projectDic["Myrepository"]}" \
+    -CONFIGLOC "${config}"
 
     echo -e "Job submitted...\nEXITING...\n"
     exit 2
