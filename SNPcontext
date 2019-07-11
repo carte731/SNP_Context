@@ -1354,7 +1354,7 @@ VCF_SPLIT_END
 #    If indel percentage is greater than desired, fasta entry is removed
 fastaScanner(){
 
-    inputFile="${projectDic["inputFile"]}" flank="${projectDic["flanks"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" geneTwo=${geneTwo} geneDirTwo="${geneDirTwo}" nMax="${projectDic["nMax"]}" windowLength="${projectDic["windowLength"]}" pypy3.6 - <<FASTA_SWEEP
+    inputFile="${projectDic["inputFile"]}" flank="${projectDic["flanks"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" geneTwo=${1} geneDirTwo="${2}" nMax="${projectDic["nMax"]}" windowLength="${projectDic["windowLength"]}" pypy3.6 - <<FASTA_SWEEP
     
 from itertools import chain
 import os
