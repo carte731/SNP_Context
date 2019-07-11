@@ -531,8 +531,8 @@ fasfa_FileConverter(){
     echo -e "TESTING BREAK 1"
     echo -e "${1}"
     # echo -e "${projectDic["tempOut"]}""${2}""${3}"_"${projectDic[filename]}".fasta
-    # bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${1}" -fo "${projectDic["tempOut"]}""${2}""${3}"_"${projectDic[filename]}".fasta
-    bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${1}" -fo "${projectDic["tempOut"]}"test.fasta
+    bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${1}" -fo "${projectDic["tempOut"]}""${2}""${3}"_"${projectDic[filename]}".fasta
+    # bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${1}" -fo "${projectDic["tempOut"]}"test.fasta
     echo -e "TESTING BREAK 2"
 }
 
@@ -699,11 +699,11 @@ dirStructure(){
     mkdir "${projectDic[outputLoc]}"MUTATION_ANALYSIS
     if [[ ${projectDic["allData"]} == "true" ]]; then
         mkdir "${projectDic[outputLoc]}"SPLITVCF
-        mkdir "${projectDic[outputLoc]}"FASFA_SPLIT
+        mkdir "${projectDic[outputLoc]}"FASTA_SPLIT
         mkdir "${projectDic[outputLoc]}"BED_SPLIT
         if [[ "${projectDic[sndMode]}" -eq 1 ]]; then
             mkdir "${projectDic[outputLoc]}"SPLITVCF/SND
-            mkdir "${projectDic[outputLoc]}"FASFA_SPLIT/SND
+            mkdir "${projectDic[outputLoc]}"FASTA_SPLIT/SND
             mkdir "${projectDic[outputLoc]}"BED_SPLIT/SND
             mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/SND
             mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/SND/LOGS
@@ -713,11 +713,11 @@ dirStructure(){
     elif [[ ${projectDic["allData"]} == "false" ]]; then
         projectDic["TempLoc"]+=$(mktemp -d)
         mkdir "${projectDic[TempLoc]}"/SPLITVCF
-        mkdir "${projectDic[TempLoc]}"/FASFA_SPLIT
+        mkdir "${projectDic[TempLoc]}"/FASTA_SPLIT
         mkdir "${projectDic[TempLoc]}"/BED_SPLIT
         if [[ "${projectDic[sndMode]}" -eq 1 ]]; then
             mkdir "${projectDic[TempLoc]}"SPLITVCF/SND
-            mkdir "${projectDic[TempLoc]}"FASFA_SPLIT/SND
+            mkdir "${projectDic[TempLoc]}"FASTA_SPLIT/SND
             mkdir "${projectDic[TempLoc]}"BED_SPLIT/SND
             mkdir "${projectDic[TempLoc]}"COUNTS_TABLES/SND
             mkdir "${projectDic[TempLoc]}"COUNTS_TABLES/SND/LOGS
