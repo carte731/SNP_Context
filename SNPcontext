@@ -531,7 +531,7 @@ fasfa_FileConverter(){
     echo -e "TESTING BREAK 1"
     # echo -e "${projectDic["tempOut"]}""${2}""${3}"_"${projectDic[filename]}".fasta
     # bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${1}" -fo "${projectDic["tempOut"]}""${2}""${3}"_"${projectDic[filename]}".fasta
-    bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${1}" -fo test.fasta
+    bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${1}" -fo "${projectDic["tempOut"]}""${2}"test.fasta
     echo -e "TESTING BREAK 2"
 }
 
