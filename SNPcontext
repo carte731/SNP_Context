@@ -1944,7 +1944,7 @@ newMain(){
     local sndAmount=$(find . -maxdepth 1 -type f -name "*.vcf" | wc -l)
     
     local sndExtension=""
-    local temp="${projectDic["tempOut"]}""${1}"
+    local temp="${projectDic["tempOut"]}"SPLITVCF/
     local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
     if [[ ${sndAmount} != 0 ]]; then
         local sndLocal=0
