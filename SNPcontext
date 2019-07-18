@@ -1971,7 +1971,7 @@ newMain(){
         for sndMode in ${splitDir[@]}; do
             # subMain "${sndMode}" "${sndExtension}" "$sndLocal"
             # subMain "${sndMode}" "${sndExtension}" "$sndLocal" &
-            parallel -q subMain "${sndMode}" ::: "${sndExtension}" ::: "$sndLocal"
+            parallel -q subMain ::: "${sndMode}" ::: "${sndExtension}" ::: "$sndLocal"
         done
         # wait
     fi
