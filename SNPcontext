@@ -489,6 +489,7 @@ moduleLoader(){ #Load modules needed for operations
         module load bedops_ML/2.4.35 
         module load bedtools_ML/2.23.0
 	    module load pypy_ML/3.6 ## CREATE ALIUS OF 'PYPY' and 'Python'
+        module load parallel
     else  ##Update commands below
         declare -A testlisting=( ["python3"]=3.6.4 ["bedops"]=2.4.35 ["bedtools"]=2.23.0 )
         for inProgram in ${!testlisting[@]}; do # Make sure that all dependencies are functional
@@ -1949,8 +1950,11 @@ newMain(){
     if [[ ${sndAmount} != 0 ]]; then
         local sndLocal=0
         for normalMode in "${splitDir[@]}"; do
-            subMain "${normalMode}" "${sndExtension}" "$sndLocal"
+            # subMain "${normalMode}" "${sndExtension}" "$sndLocal"
+            # subMain "${normalMode}" "${sndExtension}" "$sndLocal" &
+            parallel -q subMain ::: "${normalMode}" ::: "${sndExtension}" ::: "$sndLocal"
         done
+        # wait
     else
         echo -e "No VCF files found..."
     fi
@@ -1965,8 +1969,11 @@ newMain(){
     if [[ "${projectDic["sndMode"]}" -eq 1 ]] && [[ ${sndAmount} != 0 ]]; then
         local sndLocal=1
         for sndMode in ${splitDir[@]}; do
-            subMain "${sndMode}" "${sndExtension}" "$sndLocal"
+            # subMain "${sndMode}" "${sndExtension}" "$sndLocal"
+            # subMain "${sndMode}" "${sndExtension}" "$sndLocal" &
+            parallel -q subMain "${sndMode}" ::: "${sndExtension}" ::: "$sndLocal"
         done
+        # wait
     fi
 
     ## if for snd mode
