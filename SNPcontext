@@ -1232,7 +1232,7 @@ def geneDirCreate():
 
     return(geneDir, SNDGeneDir)
 
-def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
+def vcfSegmentsOld(inputFile, geneDir, SNDGeneDir, sndMode):
     with open(inputFile, "rb") as raw:
         sub=[]
         counter=0
@@ -1284,7 +1284,7 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
                 counter+=1
     return(geneDir, SNDGeneDir)
 
-def vcfSegmentsNew(inputFile, geneDir, SNDGeneDir, sndMode):
+def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
     with open(inputFile, "rb") as dataLine:
         for line in dataLine.readlines():
             inputList = line.split()
@@ -1950,9 +1950,9 @@ newMain(){
     if [[ ${sndAmount} != 0 ]]; then
         local sndLocal=0
         for normalMode in "${splitDir[@]}"; do
-            # subMain "${normalMode}" "${sndExtension}" "$sndLocal"
+            subMain "${normalMode}" "${sndExtension}" "$sndLocal"
             # subMain "${normalMode}" "${sndExtension}" "$sndLocal" &
-            parallel -q subMain ::: "${normalMode}" ::: "${sndExtension}" ::: "$sndLocal"
+            # parallel -q subMain ::: "${normalMode}" ::: "${sndExtension}" ::: "$sndLocal"
         done
         # wait
     else
@@ -1969,9 +1969,9 @@ newMain(){
     if [[ "${projectDic["sndMode"]}" -eq 1 ]] && [[ ${sndAmount} != 0 ]]; then
         local sndLocal=1
         for sndMode in ${splitDir[@]}; do
-            # subMain "${sndMode}" "${sndExtension}" "$sndLocal"
+            subMain "${sndMode}" "${sndExtension}" "$sndLocal"
             # subMain "${sndMode}" "${sndExtension}" "$sndLocal" &
-            parallel -q subMain ::: "${sndMode}" ::: "${sndExtension}" ::: "$sndLocal"
+            # parallel -q subMain ::: "${sndMode}" ::: "${sndExtension}" ::: "$sndLocal"
         done
         # wait
     fi
