@@ -1043,6 +1043,7 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
             # inputList[2] = int(chr(inputList[2]) - interval)
             # inputList[4] = int(chr(inputList[4]) + interval)
             inputList = line.decode().split()
+            print(inputList)
             inputList[1] = int(inputList[1] - interval)
             inputList[2] = int(inputList[2] + interval)
             masterList.append(int(inputList[1]))
