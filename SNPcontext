@@ -1296,7 +1296,7 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
                 # inputList = line.split()
                 inputList = line.decode().split()
                 print(inputList)
-                gene = str(inputList[6]) + "to" + str(inputList[8])
+                gene = str(inputList[3]) + "to" + str(inputList[4])
                 print(gene)
                 # gene = str(chr(inputList[6])) + "to" + str(chr(inputList[8]))
                 # gene = inputList[6].decode() + "to" + inputList[8].decode()
@@ -1305,18 +1305,23 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
                 else:
                     if((sndMode == 1) and (len(inputList[6]) >= 2)):
                         # if(chr(inputList[6][1]) != "T"):
-                        if(inputList[6][1] != "T"):
-                                inputList[6] = inputList[6][1]
-                                inputList[8] = "T"
+                        if(inputList[3][1] != "T"):
+                                inputList[3] = inputList[3][1]
+                                inputList[4] = "T"
                                 # inputList[8] = b'T'
-                                inputList[2] = str(int(inputList[2]) + 1)
+                                # inputList[2] = str(int(inputList[2]) + 1)
+                                inputList[1] = str(int(inputList[1]) + 1)
                         else:
-                            inputList[6] = inputList[6][1]
-                            inputList[8] = "A"
+                            # inputList[6] = inputList[6][1]
+                            inputList[3] = inputList[3][1]
+                            # inputList[8] = "A"
+                            inputList[4] = "A"
                             # inputList[8] = b'A'
-                            inputList[2] = str(int(inputList[2]) + 1)
+                            # inputList[2] = str(int(inputList[2]) + 1)
+                            inputList[1] = str(int(inputList[1]) + 1)
                         # gene = str(chr(inputList[6])) + "to" + str(chr(inputList[8]))
-                        gene = str(inputList[6]) + "to" + str(inputList[8])
+                        # gene = str(inputList[6]) + "to" + str(inputList[8])
+                        gene = str(inputList[3]) + "to" + str(inputList[4])
                         SNDGeneDir[gene].extend(''.join(inputList).encode("utf-8"))
                     else:
                         geneDir['rejected'].extend(line)
