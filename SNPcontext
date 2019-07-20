@@ -1046,8 +1046,9 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
             print(inputList)
             inputList[1] = str(int(inputList[1]) - interval)
             inputList[2] = str(int(inputList[2]) + interval)
-            masterList.append(int(inputList[1]))
-            masterList.append(int(inputList[2]))
+            # masterList.append(int(inputList[1]))
+            # masterList.append(int(inputList[2]))
+            masterList.append([int(inputList[1]), int(inputList[2])])
             bedMapper.extend(('\t'.join(inputList) + "\n").encode("utf-8"))
     with open(outputLoc + bedType + geneDir + "_" + filename + "_new_interval.bed", "wb") as newBed: ##Change to input variables ## Moved indent in
         newBed.write(bedMapper)   
