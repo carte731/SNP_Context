@@ -1289,7 +1289,7 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
         for line in dataLine.readlines():
             inputList = line.split()
             if(chr(inputList[0]) == "#"):
-                geneDir['header'].extend(readLine)
+                geneDir['header'].extend(line)
             else:
                 gene= str(chr(inputList[6])) + "to" + str(chr(inputList[8]))
                 if gene in geneDir:
