@@ -1415,10 +1415,10 @@ def fastaMapperOld(gene): ## RE_WRITE THIS, Either read a byte at a time or by l
 
 def fastaMapper(gene): ## RE_WRITE THIS, Either read a byte at a time or by line, NOT SURE THAT I NEED THIS
     with open(gene ,"rb") as fasta:
-        # master=[]
-        # for line in fasta.readline():
-            # master.append(line)
-        master = [x for x in fasta.readline()]
+        master=[]
+        for line in fasta.readlines():
+            master.append([line])
+        # master = [x for x in fasta.readlines()]
     return(master)
 
 def fastaNpop(subMaster, allRejected, nMax): # Use list.count() and count/remove it that way, REMOVE AND INTEGRATE WITH FASTABASEPOP
