@@ -1285,7 +1285,7 @@ def vcfSegmentsOld(inputFile, geneDir, SNDGeneDir, sndMode):
     return(geneDir, SNDGeneDir)
 
 def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
-    inputList = bytearray()
+    # inputList = bytearray()
     with open(inputFile, "rb") as dataLine:
         for line in dataLine.readlines():
             # print(inputList)
