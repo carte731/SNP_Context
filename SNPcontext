@@ -1380,7 +1380,7 @@ fastaScanner(){
 from itertools import chain
 import os
 
-def fastaMapperOld(gene): ## RE_WRITE THIS, Either read a byte at a time or by line, NOT SURE THAT I NEED THIS
+def fastaMapper(gene): ## RE_WRITE THIS, Either read a byte at a time or by line, NOT SURE THAT I NEED THIS
     with open(gene ,"rb") as fasta:
         fastafile=fasta.read()
         totalN=0
@@ -1413,7 +1413,7 @@ def fastaMapperOld(gene): ## RE_WRITE THIS, Either read a byte at a time or by l
                 master.append(sub)
     return(master)
 
-def fastaMapper(gene): ## RE_WRITE THIS, Either read a byte at a time or by line, NOT SURE THAT I NEED THIS
+def fastaMapperNew(gene): ## RE_WRITE THIS, Either read a byte at a time or by line, NOT SURE THAT I NEED THIS
     # with open(gene ,"rb") as fasta:
     with open(gene ,"r") as fasta:
         master=[]
