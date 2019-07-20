@@ -1302,7 +1302,8 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
                     geneDir[gene].extend(line)
                 else:
                     if((sndMode == 1) and (len(inputList[6]) >= 2)):
-                        if(chr(inputList[6][1]) != "T"):
+                        # if(chr(inputList[6][1]) != "T"):
+                        if(inputList[6][1] != "T"):
                                 inputList[6] = inputList[6][1]
                                 inputList[8] = "T"
                                 # inputList[8] = b'T'
