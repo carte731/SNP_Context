@@ -1237,7 +1237,7 @@ def geneDirCreate():
 
     return(geneDir, SNDGeneDir)
 
-def vcfSegmentsOld(inputFile, geneDir, SNDGeneDir, sndMode):
+def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
     with open(inputFile, "rb") as raw:
         sub=[]
         counter=0
@@ -1289,7 +1289,7 @@ def vcfSegmentsOld(inputFile, geneDir, SNDGeneDir, sndMode):
                 counter+=1
     return(geneDir, SNDGeneDir)
 
-def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
+def vcfSegmentsBUSTED(inputFile, geneDir, SNDGeneDir, sndMode):
     # inputList = bytearray()
     with open(inputFile, "rb") as dataLine:
         for line in dataLine.readlines():
