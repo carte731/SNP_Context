@@ -986,7 +986,7 @@ import datetime
 
 ## REMOVE SNDMODE STUFF
 
-def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedType):
+def bedMapperOld(interval, outputLoc, projectName, filename, geneDir, sndMode, bedType):
     output = str(subprocess.check_output(['wc', '-m', outputLoc + bedType + geneDir + "_split_" + filename + ".bed"]))
     length = re.findall(r'\d+', output)
     length = int(length[0])
@@ -1034,7 +1034,7 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
     
     return(masterList)
 
-def bedMapperNew(interval, outputLoc, projectName, filename, geneDir, sndMode, bedType):
+def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedType):
     bedMapper = bytearray()
     masterList = bytearray()
     with open(outputLoc + bedType + geneDir + "_split_" + filename + ".bed", "rb") as bed_test: ##Change to input variables
@@ -1049,7 +1049,7 @@ def bedMapperNew(interval, outputLoc, projectName, filename, geneDir, sndMode, b
         newBed.write(bedMapper)   
     return(masterList)
 
-def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, geneDir, baseOut):
+def binaryIntersectOld(expandedList, interval, outputLoc, projectName, filename, geneDir, baseOut):
     gateA=True
     gateB=True
     now = datetime.datetime.now()
@@ -1295,9 +1295,9 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
             else:
                 # inputList = line.split()
                 inputList = line.decode().split()
-                print(inputList)
+                # print(inputList)
                 gene = str(inputList[3]) + "to" + str(inputList[4])
-                print(gene)
+                # print(gene)
                 # gene = str(chr(inputList[6])) + "to" + str(chr(inputList[8]))
                 # gene = inputList[6].decode() + "to" + inputList[8].decode()
                 if gene in geneDir:
