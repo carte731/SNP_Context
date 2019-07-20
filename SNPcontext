@@ -1414,7 +1414,8 @@ def fastaMapperOld(gene): ## RE_WRITE THIS, Either read a byte at a time or by l
     return(master)
 
 def fastaMapper(gene): ## RE_WRITE THIS, Either read a byte at a time or by line, NOT SURE THAT I NEED THIS
-    with open(gene ,"rb") as fasta:
+    # with open(gene ,"rb") as fasta:
+    with open(gene ,"r") as fasta:
         master=[]
         for line in fasta.readlines():
             master.append([line])
