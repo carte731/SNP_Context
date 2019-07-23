@@ -1058,7 +1058,7 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
             elif(tabDelimter > 2):
                 leftNum = str(int(leftNum) - interval)
                 rightNum = str(int(rightNum) + interval)
-                masterList.append([leftNum, rightNum])
+                masterList.append([int(leftNum), int(rightNum)])
                 newBed.write(finalOut + b'\t' + leftNum.encode() + b'\t' + rightNum.encode() + b'\t' + bed_test.readline())
                 tabDelimter = 0
                 finalOut = b''
