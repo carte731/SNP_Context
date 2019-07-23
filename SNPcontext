@@ -1040,8 +1040,8 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
         gate = True
         tabDelimter = 0
         finalOut = b''
-        leftNum = b''
-        rightNum = b''
+        leftNum = ""
+        rightNum = ""
         while(gate):
             element = bed_test.read(1)
             if(not element):
@@ -1052,9 +1052,9 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
             if(tabDelimter == 0):
                 finalOut += element
             elif(tabDelimter == 1):
-                leftNum += element
+                leftNum += chr(ord(element))
             elif(tabDelimter == 2):
-                rightNum += element
+                rightNum += chr(ord(element))
             elif(tabDelimter > 2):
                 leftNum = str(int(leftNum) - interval)
                 rightNum = str(int(rightNum) + interval)
@@ -1062,8 +1062,8 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
                 newBed.write(finalOut + b'\t' + leftNum.encode() + b'\t' + rightNum.encode() + b'\t' + newBed.write(bed_test.readline()))
                 tabDelimter = 0
                 finalOut = b''
-                leftNum = b''
-                rightNum = b''
+                leftNum = ""
+                rightNum = ""
     return(masterList)
 
 
