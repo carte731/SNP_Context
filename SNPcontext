@@ -1993,11 +1993,11 @@ newMain(){
     if [[ ${sndAmount} != 0 ]]; then
         local sndLocal=0
         for normalMode in "${splitDir[@]}"; do
-            subMain "${normalMode}" "${sndExtension}" "$sndLocal"
-            # subMain "${normalMode}" "${sndExtension}" "$sndLocal" &
+            # subMain "${normalMode}" "${sndExtension}" "$sndLocal"
+            subMain "${normalMode}" "${sndExtension}" "$sndLocal" &
             # parallel -q subMain ::: "${normalMode}" ::: "${sndExtension}" ::: "$sndLocal"
         done
-        # wait
+        wait
     else
         echo -e "No VCF files found..."
     fi
@@ -2012,11 +2012,11 @@ newMain(){
     if [[ "${projectDic["sndMode"]}" -eq 1 ]] && [[ ${sndAmount} != 0 ]]; then
         local sndLocal=1
         for sndMode in ${splitDir[@]}; do
-            subMain "${sndMode}" "${sndExtension}" "$sndLocal"
-            # subMain "${sndMode}" "${sndExtension}" "$sndLocal" &
+            # subMain "${sndMode}" "${sndExtension}" "$sndLocal"
+            subMain "${sndMode}" "${sndExtension}" "$sndLocal" &
             # parallel -q subMain ::: "${sndMode}" ::: "${sndExtension}" ::: "$sndLocal"
         done
-        # wait
+        wait
     fi
 
     ## if for snd mode
