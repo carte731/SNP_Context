@@ -542,7 +542,7 @@ alnToCounts_FileConverter(){
     # aln_to_counts --align_path "${3}" --output_path "${projectDic[outputLoc]}""${2}" --flank_size "${projectDic[flanks]}" --direction "${geneDirection}" -F > /dev/null
     aln_to_counts --align_path "${1}" --output_path "${projectDic[outputLoc]}""${2}" --flank_size "${projectDic[flanks]}" --direction "${3}" -F > /dev/null
     # mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"_"${projectDic[filename]}".txt
-    mv "${projectDic[outputLoc]}""${2}"*.log* "${projectDic[outputLoc]}""${2}"/LOGS/"${geneDirection}"_"${projectDic[filename]}".log ##FIX Unique Log ID'S    
+    mv "${projectDic[outputLoc]}""${2}"*.log* "${projectDic[outputLoc]}""${2}"LOGS/"${geneDirection}"_"${projectDic[filename]}".log ##FIX Unique Log ID'S    
     # active+=("${geneDirection}")
 }
 
@@ -1998,6 +1998,8 @@ newMain(){
             # parallel -q subMain ::: "${normalMode}" ::: "${sndExtension}" ::: "$sndLocal"
         done
         wait
+        allCounts_FileConverter ##ALL_COUNTS
+        graphCombined_FileConverter ## MUTATION GRAPHING COMBINED
     else
         echo -e "No VCF files found..."
     fi
@@ -2020,10 +2022,10 @@ newMain(){
     fi
 
     ## if for snd mode
-    if [[ "${2}" -eq 2 ]]; then ## Checks if SND mode is on
-        allCounts_FileConverter ##ALL_COUNTS
-        graphCombined_FileConverter ## MUTATION GRAPHING COMBINED
-    fi
+    # if [[ "${2}" -eq 2 ]]; then ## Checks if SND mode is on
+    #     allCounts_FileConverter ##ALL_COUNTS
+    #     graphCombined_FileConverter ## MUTATION GRAPHING COMBINED
+    # fi
 
     active=()
 
