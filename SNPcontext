@@ -1322,6 +1322,7 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
                     sub.append(element)
                     results=''
                 if(len(sub) >= 4):
+                    print(sub)
                     gene = str(sub[3]) + "to" + str(sub[4])
                     if gene in geneDir:
                         # geneDir[gene].extend(readLine)
