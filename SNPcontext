@@ -1319,7 +1319,7 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
                     results = results + element
                 elif((element == '\t') and (element != '\n')):
                     sub.append(results)
-                    sub.append(element)
+                    # sub.append(element)
                     results=''
                 if(len(sub) >= 4):
                     print(sub)
