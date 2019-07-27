@@ -1252,7 +1252,7 @@ def geneDirCreate():
 
     return(geneDir, SNDGeneDir)
 
-def vcfSegmentsOLD(inputFile, geneDir, SNDGeneDir, sndMode):
+def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
     with open(inputFile, "rb") as raw:
         sub=[]
         counter=0
@@ -1304,7 +1304,7 @@ def vcfSegmentsOLD(inputFile, geneDir, SNDGeneDir, sndMode):
                 counter+=1
     return(geneDir, SNDGeneDir)
 
-def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
+def vcfSegmentsBUSTED(inputFile, geneDir, SNDGeneDir, sndMode):
     output = str(subprocess.check_output(['wc', '-m', inputFile]))
     length = re.findall(r'\d+', output)
     length = int(length[0])
