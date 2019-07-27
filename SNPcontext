@@ -1218,6 +1218,8 @@ vcfSplit(){
     inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" sndMode="${projectDic["sndMode"]}" sniMode="${projectDic["sniMode"]}" pypy3.6 - <<VCF_SPLIT_END
 
 import os
+import re
+import subprocess
 
 def geneDirCreate():
     geneDir={
@@ -1394,6 +1396,8 @@ fastaScanner(){
     
 from itertools import chain
 import os
+import re
+import subprocess
 
 def fastaMapperOld(gene): ## RE_WRITE THIS, Either read a byte at a time or by line, NOT SURE THAT I NEED THIS
     with open(gene ,"rb") as fasta:
