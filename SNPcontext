@@ -1457,7 +1457,7 @@ def fastaMapper(gene): ## RE_WRITE THIS, Either read a byte at a time or by line
                 else:
                     final = final + str(element)
         else:
-            final = final + str(element)
+            final = final + str(fasta.read(1).decode("ascii"))
             sub.append(final)
             master.append(sub)
     return(master)
