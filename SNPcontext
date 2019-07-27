@@ -1325,8 +1325,8 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
                     gene = str(sub[3]) + "to" + str(sub[4])
                     if gene in geneDir:
                         # geneDir[gene].extend(readLine)
-                        geneDir[gene].extend('\t'.join(sub).encode("utf-8"))
-                        geneDir[gene].extend(raw.readline())
+                        geneDir[gene].extend('\t'.join(sub).encode("utf-8") + "\t" + raw.readline())
+                        # geneDir[gene].extend(raw.readline())
                         sub.clear()
                     else:
                         if((sndMode == 1) and (len(sub[3]) >= 2)):
@@ -1340,8 +1340,8 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
                                 sub[1] = str(int(sub[1]) + 1)
                             gene = str(sub[3]) + "to" + str(sub[4])
                             sub.append(results)
-                            SNDGeneDir[gene].extend('\t'.join(sub).encode("utf-8"))
-                            SNDGeneDir[gene].extend(raw.readline())
+                            SNDGeneDir[gene].extend('\t'.join(sub).encode("utf-8") + "\t" + raw.readline())
+                            # SNDGeneDir[gene].extend(raw.readline())
                         else:
                             geneDir['rejected'].extend(raw.readline())
                             sub.clear()
