@@ -1250,7 +1250,7 @@ def geneDirCreate():
 
     return(geneDir, SNDGeneDir)
 
-def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
+def vcfSegmentsOLD(inputFile, geneDir, SNDGeneDir, sndMode):
     with open(inputFile, "rb") as raw:
         sub=[]
         counter=0
@@ -1302,56 +1302,49 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
                 counter+=1
     return(geneDir, SNDGeneDir)
 
-def vcfSegmentsBUSTED(inputFile, geneDir, SNDGeneDir, sndMode):
+def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
+    output = str(subprocess.check_output(['wc', '-m', inputFile]))
+    length = re.findall(r'\d+', output)
+    length = int(length[0])
     with open(inputFile, "rb") as raw:
         sub=[]
-        counter=0
         gene=''
         results=''
-        for readLine in raw: ## Break apart nested loops, one loope for saving head and other is the vcf body
-            sub.clear()
-            gene=''
-            results=''
-            gate=True
-            counter=0
-            while((gate == True) and (counter <= len(readLine))):
-                element = chr(readLine[counter])
-                if((element != '#') or (chr(readLine[0]) != "#")):                                
-                    if((element != '\t') and (element != '\n')):
-                        results = results + element
-                    elif((element == '\t') and (element != '\n')):
-                        sub.append(results)
-                        sub.append(element)
-                        results=''
-                    if((element == "\n") or (len(sub) == 9)):
-                        gene= str(sub[6]) + "to" + str(sub[8])
-                        if gene in geneDir:
-                            geneDir[gene].extend(readLine)
-                            sub.clear()
-                            gate=False
-                        else:
-                            if((sndMode == 1) and (len(sub[6]) >= 2) and (len(sub) == 24)):
-                                if(sub[6][1] != "T"):
-                                    sub[6] = sub[6][1]
-                                    sub[8] = "T"
-                                    sub[2] = str(int(sub[2]) + 1)
-                                else:
-                                    sub[6] = sub[6][1]
-                                    sub[8] = "A"
-                                    sub[2] = str(int(sub[2]) + 1)
-                                gene = str(sub[6]) + "to" + str(sub[8])
-                                # sub.append(results)
-                                # sub.append(element)
-                                SNDGeneDir[gene].extend(''.join(sub).encode("utf-8"))
-                                gate=False
+        for counter in range(length):
+            element = raw.read(1).decode("ascii")
+            if(element != '#'):
+                if((element != '\t') and (element != '\n')):
+                    results = results + element
+                elif((element == '\t') and (element != '\n')):
+                    sub.append(results)
+                    # sub.append(element)
+                    results=''
+                if(len(sub) == 5):
+                    gene = str(sub[3]) + "to" + str(sub[4])
+                    if gene in geneDir:
+                        # geneDir[gene].extend(readLine)
+                        geneDir[gene].extend('\t'.join(sub).encode("utf-8"))
+                        geneDir[gene].extend(raw.readline())
+                        sub.clear()
+                    else:
+                        if((sndMode == 1) and (len(sub[3]) >= 2)):
+                            if(sub[3][1] != "T"):
+                                sub[3] = sub[3][1]
+                                sub[4] = "T"
+                                sub[1] = str(int(sub[1]) + 1)
                             else:
-                                geneDir['rejected'].extend(readLine)
-                                sub.clear()
-                                gate=False
-                else:
-                    geneDir['header'].extend(readLine)
-                    gate=False
-                counter+=1
+                                sub[3] = sub[3][1]
+                                sub[4] = "A"
+                                sub[1] = str(int(sub[1]) + 1)
+                            gene = str(sub[3]) + "to" + str(sub[4])
+                            sub.append(results)
+                            SNDGeneDir[gene].extend('\t'.join(sub).encode("utf-8"))
+                            SNDGeneDir[gene].extend(raw.readline())
+                        else:
+                            geneDir['rejected'].extend(readLine)
+                            sub.clear()
+            else:
+                geneDir['header'].extend(readLine)
     return(geneDir, SNDGeneDir)
 
 def vcfSpliter(outputLoc, filename, baseOut, geneDir, SNDGeneDir, sndMode):
@@ -1402,7 +1395,7 @@ fastaScanner(){
 from itertools import chain
 import os
 
-def fastaMapper(gene): ## RE_WRITE THIS, Either read a byte at a time or by line, NOT SURE THAT I NEED THIS
+def fastaMapperOld(gene): ## RE_WRITE THIS, Either read a byte at a time or by line, NOT SURE THAT I NEED THIS
     with open(gene ,"rb") as fasta:
         fastafile=fasta.read()
         totalN=0
@@ -1435,13 +1428,34 @@ def fastaMapper(gene): ## RE_WRITE THIS, Either read a byte at a time or by line
                 master.append(sub)
     return(master)
 
-def fastaMapperNew(gene): ## RE_WRITE THIS, Either read a byte at a time or by line, NOT SURE THAT I NEED THIS
-    # with open(gene ,"rb") as fasta:
-    with open(gene ,"r") as fasta:
+def fastaMapper(gene): ## RE_WRITE THIS, Either read a byte at a time or by line, NOT SURE THAT I NEED THIS
+    output = str(subprocess.check_output(['wc', '-m', gene]))
+    length = re.findall(r'\d+', output)
+    length = int(length[0])
+    with open(gene ,"rb") as fasta:
         master=[]
-        for line in fasta.readlines():
-            master.append([line])
-        # master = [x for x in fasta.readlines()]
+        sub=[]
+        final=''
+        for counter in range(length):
+            element = fasta.read(1).decode("ascii")
+            if((element != "\n") and (element != ">")):
+                final = final + str(element)
+            if((element == "\n") and (element != ">")):
+                final = final + str(element)
+                sub.append(final)
+                final=''
+            if((element == ">") and (element != "\n")):
+                if(sub != []):
+                    master.append(sub)
+                    sub=[]
+                    final=''
+                    final = final + str(element)
+                else:
+                    final = final + str(element)
+        else:
+            final = final + str(element)
+            sub.append(final)
+            master.append(sub)
     return(master)
 
 def fastaNpop(subMaster, allRejected, nMax): # Use list.count() and count/remove it that way, REMOVE AND INTEGRATE WITH FASTABASEPOP
