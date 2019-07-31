@@ -1328,8 +1328,10 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
                         print(gene)
                         # geneDir[gene].extend(readLine)
                         # geneDir[gene].extend('\t'.join(sub).encode("utf-8") + b'\t' + raw.readline())
-                        geneDir[gene].extend('\t'.join(sub).encode("utf-8"))
-                        geneDir[gene].extend(raw.readline())
+                        out = '\t'.join(sub).encode("utf-8") + raw.readline()
+                        print(out)
+                        geneDir[gene].extend(out)
+                        # geneDir[gene].extend(raw.readline())
                         sub.clear()
                     else:
                         print(sub[3])
