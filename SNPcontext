@@ -1327,10 +1327,7 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
                     if gene in geneDir:
                         print(gene)
                         # geneDir[gene].extend(readLine)
-                        # geneDir[gene].extend('\t'.join(sub).encode("utf-8") + b'\t' + raw.readline())
-                        out = '\t'.join(sub).encode("utf-8") + raw.readline()
-                        print(out)
-                        geneDir[gene].extend(out)
+                        geneDir[gene].extend('\t'.join(sub).encode("utf-8") + b'\t' + raw.readline())
                         # geneDir[gene].extend(raw.readline())
                         sub.clear()
                     else:
@@ -1347,7 +1344,7 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
                             gene = str(sub[3]) + "to" + str(sub[4])
                             sub.append(results)
                             print("SOUTH HAMPTON!!!")
-                            SNDGeneDir[gene].extend('\t'.join(sub).encode("utf-8") + b'\t' + raw.readline())
+                            SNDGeneDir[gene].extend('\t'.join(sub).encode("utf-8") + raw.readline())
                             # SNDGeneDir[gene].extend(raw.readline())
                             gene=''
                             results=''
