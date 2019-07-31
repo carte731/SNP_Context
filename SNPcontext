@@ -2021,6 +2021,9 @@ newMain(){
     local sndExtension=""
     local temp="${projectDic["tempOut"]}"SPLITVCF/
     local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
+    if [[ "${splitDir[@]}" =~ "AtoC_split_"${projectDic[filename]}".vcf"]]; then
+        echo -e "Fire-Works!"
+    fi
     if [[ ${sndAmount} != 0 ]]; then
         local sndLocal=0
         for normalMode in "${splitDir[@]}"; do
