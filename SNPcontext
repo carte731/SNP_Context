@@ -1351,12 +1351,13 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
                             results=''
                             sub.clear()
                         else:
-                            geneDir['rejected'].extend(element.encode("utf-8") + raw.readline())
+                            sub.append(results)
+                            geneDir['rejected'].extend('\t'.join(sub).encode("utf-8") + raw.readline())
                             gene=''
                             results=''
                             sub.clear()
             else:
-                geneDir['header'].extend(raw.readline())
+                geneDir['header'].extend(element.encode("utf-8") + raw.readline())
     return(geneDir, SNDGeneDir)
 
 def vcfSpliter(outputLoc, filename, baseOut, geneDir, SNDGeneDir, sndMode):
