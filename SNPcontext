@@ -2024,11 +2024,45 @@ newMain(){
 
     if [[ ${sndAmount} != 0 ]]; then
         local sndLocal=0
-        for normalMode in "${splitDir[@]}"; do
-            # subMain "${normalMode}" "${sndExtension}" "$sndLocal"
-            subMain "${normalMode}" "${sndExtension}" "$sndLocal" &
-            # parallel -q subMain ::: "${normalMode}" ::: "${sndExtension}" ::: "$sndLocal"
-        done
+        if [[ " ${splitDir[@]} " =~ "AtoC_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "AtoC_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "AtoG_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "AtoG_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "AtoT_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "AtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "CtoA_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "CtoA_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "CtoG_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "CtoG_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "CtoT_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "CtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "GtoA_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "GtoA_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "GtoC_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "GtoC_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "GtoT_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "GtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "TtoA_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "TtoA_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "TtoC_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "TtoCTtoC_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "TtoG_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "TtoG_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        # for normalMode in "${splitDir[@]}"; do
+        #     subMain "${normalMode}" "${sndExtension}" "$sndLocal" &
+        # done
         wait
         allCounts_FileConverter ##ALL_COUNTS
         graphCombined_FileConverter ## MUTATION GRAPHING COMBINED
@@ -2051,13 +2085,13 @@ newMain(){
         if [[ " ${splitDir[@]} " =~ "AtoT_split_${projectDic[filename]}.vcf" ]]; then
             subMain "AtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
         fi
-        if [[ " ${splitDir[@]} " =~ "AtoT_split_${projectDic[filename]}.vcf" ]]; then
+        if [[ " ${splitDir[@]} " =~ "CtoT_split_${projectDic[filename]}.vcf" ]]; then
             subMain "CtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
         fi
-        if [[ " ${splitDir[@]} " =~ "AtoT_split_${projectDic[filename]}.vcf" ]]; then
+        if [[ " ${splitDir[@]} " =~ "GtoT_split_${projectDic[filename]}.vcf" ]]; then
             subMain "GtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
         fi
-        if [[ " ${splitDir[@]} " =~ "AtoT_split_${projectDic[filename]}.vcf" ]]; then
+        if [[ " ${splitDir[@]} " =~ "TtoA_split_${projectDic[filename]}.vcf" ]]; then
             subMain "TtoA_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
         fi
         # for sndMode in ${splitDir[@]}; do
