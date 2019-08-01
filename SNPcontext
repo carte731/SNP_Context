@@ -2025,6 +2025,7 @@ newMain(){
     if [[ ${sndAmount} != 0 ]]; then
         local sndLocal=0
         if [[ " ${splitDir[@]} " =~ "AtoC_split_${projectDic[filename]}.vcf" ]]; then
+            echo -e "\n\nPARALLEL-FORKING TEST 1\n\n"
             subMain "AtoC_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
         fi
         if [[ " ${splitDir[@]} " =~ "AtoG_split_${projectDic[filename]}.vcf" ]]; then
@@ -2055,7 +2056,7 @@ newMain(){
             subMain "TtoA_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
         fi
         if [[ " ${splitDir[@]} " =~ "TtoC_split_${projectDic[filename]}.vcf" ]]; then
-            subMain "TtoCTtoC_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+            subMain "TtoC_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
         fi
         if [[ " ${splitDir[@]} " =~ "TtoG_split_${projectDic[filename]}.vcf" ]]; then
             subMain "TtoG_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
