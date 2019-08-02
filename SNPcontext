@@ -1059,8 +1059,13 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
             elif(tabDelimter > 2):
                 leftNum = str(int(leftNum) - interval)
                 rightNum = str(int(rightNum) + interval)
-                masterList.append([int(leftNum), int(rightNum)])
-                newBed.write(finalOut + b'\t' + leftNum.encode() + b'\t' + rightNum.encode() + b'\t' + bed_test.readline())
+
+                if([leftNum, rightNum] not in master):
+                    masterList.append([int(leftNum), int(rightNum)])
+                    newBed.write(finalOut + b'\t' + leftNum.encode() + b'\t' + rightNum.encode() + b'\t' + bed_test.readline())
+
+                # masterList.append([int(leftNum), int(rightNum)])
+                # newBed.write(finalOut + b'\t' + leftNum.encode() + b'\t' + rightNum.encode() + b'\t' + bed_test.readline())
                 tabDelimter = 0
                 finalOut = b''
                 leftNum = ""
@@ -1476,7 +1481,7 @@ def fastaMapper(gene): ## RE_WRITE THIS, Either read a byte at a time or by line
             master.append(sub)
     return(master)
 
-def fastaNpop(subMaster, allRejected, nMax): # Use list.count() and count/remove it that way, REMOVE AND INTEGRATE WITH FASTABASEPOP
+def fastaNpopOld(subMaster, allRejected, nMax): # Use list.count() and count/remove it that way, REMOVE AND INTEGRATE WITH FASTABASEPOP
     maxP=nMax/100
     newsubMaster=[]
     nMaxList=[]
@@ -1510,7 +1515,7 @@ def fastaNpop(subMaster, allRejected, nMax):
             counter = 0
             outerCounter = 0
             continue
-            
+
 def fastaBasePop(master, interval, flank): 
     allRejected=False
     subMaster=[]
