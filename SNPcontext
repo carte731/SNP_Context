@@ -1495,26 +1495,36 @@ def fastaNpopOld(subMaster, allRejected, nMax): # Use list.count() and count/rem
     return(newsubMaster, nMaxList)
 
 def fastaNpop(subMaster, allRejected, nMax):
+    maxP=nMax/100
+    gate = True
+    totalN = 0
+    counter = 0
+    outerCounter = 0
+    masterLength = len(subMaster)
+    newsubMaster=[]
+    nMaxList=[]
     while(gate):
         if(counter == subLength):
+            ## ADD CONDITIONAL FOR N-REJECT STUFF HERE, TEST nCounter amount (Take from old script)
+            nPercent=totalN/subLength
+            if(nPercent >= maxP):
+                nMaxList.append(subListing)
+            else:
+                newsubMaster.append(subListing)
             line = test2[outerCounter][1]
             temp = test2[outerCounter]
             counter = 0
+            totalN = 0
             subLength = len(line)
             outerCounter += 1
-            print(line)
-            ## ADD CONDITIONAL FOR N-REJECT STUFF HERE, TEST nCounter amount (Take from old script)
         element = line[counter]
-        print(element)
         if(element == "N"):
-            nCounter += 1
-        counter += 1
-        if(outerCounter >= len(test2)):
-            print(line)
+            totalN += 1
+        if(outerCounter >= masterLength):
             gate = False
-            counter = 0
-            outerCounter = 0
             continue
+        counter += 1
+    return(newsubMaster, nMaxList)
 
 def fastaBasePop(master, interval, flank): 
     allRejected=False
