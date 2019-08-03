@@ -1060,7 +1060,7 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
                 leftNum = str(int(leftNum) - interval)
                 rightNum = str(int(rightNum) + interval)
 
-                if([leftNum, rightNum] not in master): # TEMP, FOR TESTING - WILL REMOVE AFTER TESTING IS FINISHED
+                if([leftNum, rightNum] not in masterList): # TEMP, FOR TESTING - WILL REMOVE AFTER TESTING IS FINISHED
                     masterList.append([int(leftNum), int(rightNum)])
                     newBed.write(finalOut + b'\t' + leftNum.encode() + b'\t' + rightNum.encode() + b'\t' + bed_test.readline())
 
