@@ -568,7 +568,7 @@ graphSingle_FileConverter(){
     if [[ "${projectDic["graphs"]}" == 1 ]] || [[ "${projectDic["graphs"]}" == 2 ]]; then
         mkdir "${projectDic[outputLoc]}${2}${3}"
         # mutation_analysis nbr -1 "${projectDic[outputLoc]}""${1}""${geneDirection}"_"${projectDic[filename]}".txt -o "${projectDic[outputLoc]}""${2}""${geneDirection}"
-        mutation_analysis nbr -1 "${1}" -o "${projectDic[outputLoc]}${2}${3}"
+        mutation_analysis nbr -1 "${1}" -o "${projectDic[outputLoc]}${2}${3}" > /dev/null/
     fi
 
 }
@@ -1057,12 +1057,8 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
             elif(tabDelimter == 2):
                 rightNum += chr(ord(element))
             elif(tabDelimter == 3):
-                print(leftNum)
-                print(rightNum)
-                print(tabDelimter)
                 leftNum = str(int(leftNum) - interval)
                 rightNum = str(int(rightNum) + interval)
-                print("POST")
                 if([int(leftNum), int(rightNum)] not in masterList): # TEMP, FOR TESTING - WILL REMOVE AFTER TESTING IS FINISHED
                     masterList.append([int(leftNum), int(rightNum)])
                     newBed.write(finalOut + b'\t' + leftNum.encode("utf-8") + b'\t' + rightNum.encode("utf-8") + b'\t' + bed_test.readline())
