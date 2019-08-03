@@ -1504,27 +1504,27 @@ def fastaNpop(subMaster, allRejected, nMax):
     newsubMaster=[]
     nMaxList=[]
     line = subMaster[outerCounter][1]
-    subLength = len(line)
+    subLength = len(line) - 1 # (-1) Because of the newline character
     while(gate):
         if(counter == subLength):
             ## ADD CONDITIONAL FOR N-REJECT STUFF HERE, TEST nCounter amount (Take from old script)
             nPercent=totalN/subLength
             if(nPercent >= maxP):
-                nMaxList.append(line)
+                nMaxList.append(subMaster[outerCounter])
             else:
-                newsubMaster.append(line)
-            outerCounter += 1            
+                newsubMaster.append(subMaster[outerCounter])
+            outerCounter += 1
+            if(outerCounter >= masterLength):
+                gate = False
+                continue         
             line = subMaster[outerCounter][1]
-            temp = subMaster[outerCounter]
+            # temp = subMaster[outerCounter]
             counter = 0
             totalN = 0
-            subLength = len(line)
+            subLength = len(line) - 1
         element = line[counter]
         if(element == "N"):
             totalN += 1
-        if(outerCounter >= masterLength):
-            gate = False
-            continue
         counter += 1
     return(newsubMaster, nMaxList)
 
