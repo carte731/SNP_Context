@@ -1059,6 +1059,8 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
             elif(tabDelimter > 2):
                 leftNum = str(int(leftNum) - interval)
                 rightNum = str(int(rightNum) + interval)
+                print(leftNum)
+                print(rightNum)
 
                 if([int(leftNum), int(rightNum)] not in masterList): # TEMP, FOR TESTING - WILL REMOVE AFTER TESTING IS FINISHED
                     masterList.append([int(leftNum), int(rightNum)])
