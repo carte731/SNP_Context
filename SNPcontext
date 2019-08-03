@@ -1066,6 +1066,8 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
                 if([int(leftNum), int(rightNum)] not in masterList): # TEMP, FOR TESTING - WILL REMOVE AFTER TESTING IS FINISHED
                     masterList.append([int(leftNum), int(rightNum)])
                     newBed.write(finalOut + b'\t' + leftNum.encode("utf-8") + b'\t' + rightNum.encode("utf-8") + b'\t' + bed_test.readline())
+                else:
+                    bed_test.readline()
 
                 # masterList.append([int(leftNum), int(rightNum)])
                 # newBed.write(finalOut + b'\t' + leftNum.encode("utf-8") + b'\t' + rightNum.encode("utf-8") + b'\t' + bed_test.readline())
