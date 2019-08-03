@@ -543,7 +543,7 @@ alnToCounts_FileConverter(){
     aln_to_counts --align_path "${1}" --output_path "${projectDic[outputLoc]}""${2}" --flank_size "${projectDic[flanks]}" --direction "${3}" -F > /dev/null
     # mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"_"${projectDic[filename]}".txt
     # mv "${projectDic[outputLoc]}""${2}"*.log* "${projectDic[outputLoc]}""${2}"LOGS/"${geneDirection}"_"${projectDic[filename]}".log ##FIX Unique Log ID'S    
-    mv "${projectDic[outputLoc]}""${2}""${geneDirection}"_"${projectDic[filename]}".log "${projectDic[outputLoc]}""${2}"LOGS/ ##FIX Unique Log ID'S    
+    mv "${projectDic[outputLoc]}""${2}""${3}"_"${projectDic[filename]}".log "${projectDic[outputLoc]}""${2}"LOGS/ ##FIX Unique Log ID'S    
     # active+=("${geneDirection}")
 }
 
