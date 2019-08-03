@@ -1059,6 +1059,7 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
             elif(tabDelimter == 3):
                 print(leftNum)
                 print(rightNum)
+                print(tabDelimter)
                 leftNum = str(int(leftNum) - interval)
                 rightNum = str(int(rightNum) + interval)
 
