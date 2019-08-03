@@ -1050,7 +1050,7 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
                 continue
             if(chr(ord(element)) == '\t'):
                 tabDelimter += 1
-            if(tabDelimter == 0):
+            elif(tabDelimter == 0):
                 finalOut += element
             elif(tabDelimter == 1):
                 leftNum += chr(ord(element))
@@ -1062,7 +1062,7 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
                 print(tabDelimter)
                 leftNum = str(int(leftNum) - interval)
                 rightNum = str(int(rightNum) + interval)
-
+                print("POST")
                 if([int(leftNum), int(rightNum)] not in masterList): # TEMP, FOR TESTING - WILL REMOVE AFTER TESTING IS FINISHED
                     masterList.append([int(leftNum), int(rightNum)])
                     newBed.write(finalOut + b'\t' + leftNum.encode("utf-8") + b'\t' + rightNum.encode("utf-8") + b'\t' + bed_test.readline())
