@@ -2080,7 +2080,7 @@ newMain(){
         # parallel subMain "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
 
         if [[ " ${splitDir[@]} " =~ "AtoC_split_${projectDic[filename]}.vcf" ]]; then
-            subMain "AtoC_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+            subMain "AtoC_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal"
         fi
         # if [[ " ${splitDir[@]} " =~ "AtoG_split_${projectDic[filename]}.vcf" ]]; then
         #     subMain "AtoG_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
