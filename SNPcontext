@@ -2055,6 +2055,13 @@ newMain(){
     vcfSplit
 
     export -f subMain
+    export -f fastaScanner
+    export -f vcfSplit
+    export -f pythonBEDScanner
+    export -f graphSingle_FileConverter
+    export -f alnToCounts_FileConverter
+    export -f fasta_FileConverter
+    export -f bed_FileConverter
 
     ## GOT TO MAKE COMPLETE LIST OF VCF FILES TO ITERATE OVER AND FEED INTO FOR LOOP
     cd "${projectDic["tempOut"]}"SPLITVCF/
