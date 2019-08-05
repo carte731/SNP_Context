@@ -2054,6 +2054,8 @@ newMain(){
     dirStructure
     vcfSplit
 
+    export -f subMain
+
     ## GOT TO MAKE COMPLETE LIST OF VCF FILES TO ITERATE OVER AND FEED INTO FOR LOOP
     cd "${projectDic["tempOut"]}"SPLITVCF/
     local sndAmount=$(find . -maxdepth 1 -type f -name "*.vcf" | wc -l)
@@ -2065,7 +2067,7 @@ newMain(){
     if [[ ${sndAmount} != 0 ]]; then
         local sndLocal=0
 
-        parallel "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
+        parallel subMain "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
 
         # if [[ " ${splitDir[@]} " =~ "AtoC_split_${projectDic[filename]}.vcf" ]]; then
         #     subMain "AtoC_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
@@ -2129,7 +2131,7 @@ newMain(){
     if [[ "${projectDic["sndMode"]}" -eq 1 ]] && [[ ${sndAmount} != 0 ]]; then
         local sndLocal=1
 
-        parallel "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
+        parallel subMain "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
 
         # if [[ " ${splitDir[@]} " =~ "AtoT_split_${projectDic[filename]}.vcf" ]]; then
         #     subMain "AtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
