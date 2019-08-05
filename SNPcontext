@@ -2023,7 +2023,7 @@ subMain(){
     local fileName="${projectDic["tempOut"]}BED_SPLIT/${2}${targetVCF}.bed"
     bed_FileConverter "${1}" "${fileName}" ##MAKES BED FILE
 
-    pythonBEDScanner "$geneDir" "$3" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
+    # pythonBEDScanner "$geneDir" "$3" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
     parallel pythonBEDScanner ::: "$geneDir" ::: "$3"
 
     fileConverterTemp="FASTA_SPLIT/${2}"
@@ -2031,7 +2031,8 @@ subMain(){
     fasta_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ##CREATES FASTA FILE
 
     fileName="${projectDic["tempOut"]}FASTA_SPLIT/${2}${geneDir}_${projectDic[filename]}.fasta"
-    fastaScanner "${fileName}" "${geneDir}" ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
+    # fastaScanner "${fileName}" "${geneDir}" ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
+    parallel fastaScanner ::: "${fileName}" ::: "${geneDir}"
 
     fileConverterTemp="COUNTS_TABLES/${2}"
     alnToCounts_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
