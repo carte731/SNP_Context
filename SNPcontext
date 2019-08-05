@@ -2024,6 +2024,7 @@ subMain(){
     bed_FileConverter "${1}" "${fileName}" ##MAKES BED FILE
 
     pythonBEDScanner "$geneDir" "$3" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
+    parallel pythonBEDScanner ::: "$geneDir" ::: "$3"
 
     fileConverterTemp="FASTA_SPLIT/${2}"
     fileName="${projectDic["tempOut"]}BED_SPLIT/${2}${geneDir}_${projectDic[filename]}"_new_interval.bed
@@ -2075,11 +2076,11 @@ newMain(){
     if [[ ${sndAmount} != 0 ]]; then
         local sndLocal=0
 
-        parallel subMain "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
+        # parallel subMain "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
 
-        # if [[ " ${splitDir[@]} " =~ "AtoC_split_${projectDic[filename]}.vcf" ]]; then
-        #     subMain "AtoC_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
-        # fi
+        if [[ " ${splitDir[@]} " =~ "AtoC_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "AtoC_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
         # if [[ " ${splitDir[@]} " =~ "AtoG_split_${projectDic[filename]}.vcf" ]]; then
         #     subMain "AtoG_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
         # fi
@@ -2139,11 +2140,11 @@ newMain(){
     if [[ "${projectDic["sndMode"]}" -eq 1 ]] && [[ ${sndAmount} != 0 ]]; then
         local sndLocal=1
 
-        parallel subMain "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
+        # parallel subMain "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
 
-        # if [[ " ${splitDir[@]} " =~ "AtoT_split_${projectDic[filename]}.vcf" ]]; then
-        #     subMain "AtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
-        # fi
+        if [[ " ${splitDir[@]} " =~ "AtoT_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "AtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
         # if [[ " ${splitDir[@]} " =~ "CtoT_split_${projectDic[filename]}.vcf" ]]; then
         #     subMain "CtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
         # fi
