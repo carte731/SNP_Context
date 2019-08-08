@@ -12,6 +12,10 @@
 
 #    SNPcontext Version: 2.0.0
 
+module load parallel ## ADDED FOR TESTING
+. `which env_parallel.bash`
+env_parallel --session ## ADDED FOR TESTING
+
 scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" ## Location of the script
 
 set -e
@@ -2023,16 +2027,16 @@ subMain(){
     local fileName="${projectDic["tempOut"]}BED_SPLIT/${2}${targetVCF}.bed"
     bed_FileConverter "${1}" "${fileName}" ##MAKES BED FILE
 
-    # pythonBEDScanner "$geneDir" "$3" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
-    parallel pythonBEDScanner ::: "$geneDir" ::: "$3"
+    pythonBEDScanner "$geneDir" "$3" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
+    # parallel pythonBEDScanner ::: "$geneDir" ::: "$3"
 
     fileConverterTemp="FASTA_SPLIT/${2}"
     fileName="${projectDic["tempOut"]}BED_SPLIT/${2}${geneDir}_${projectDic[filename]}"_new_interval.bed
     fasta_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ##CREATES FASTA FILE
 
     fileName="${projectDic["tempOut"]}FASTA_SPLIT/${2}${geneDir}_${projectDic[filename]}.fasta"
-    # fastaScanner "${fileName}" "${geneDir}" ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
-    parallel fastaScanner ::: "${fileName}" ::: "${geneDir}"
+    fastaScanner "${fileName}" "${geneDir}" ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
+    # parallel fastaScanner ::: "${fileName}" ::: "${geneDir}"
 
     fileConverterTemp="COUNTS_TABLES/${2}"
     alnToCounts_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
@@ -2078,10 +2082,11 @@ newMain(){
         local sndLocal=0
 
         # parallel subMain "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
+        env_parallel  subMain "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
 
-        if [[ " ${splitDir[@]} " =~ "AtoC_split_${projectDic[filename]}.vcf" ]]; then
-            subMain "AtoC_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal"
-        fi
+        # if [[ " ${splitDir[@]} " =~ "AtoC_split_${projectDic[filename]}.vcf" ]]; then
+        #     subMain "AtoC_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal"
+        # fi
         # if [[ " ${splitDir[@]} " =~ "AtoG_split_${projectDic[filename]}.vcf" ]]; then
         #     subMain "AtoG_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
         # fi
@@ -2142,10 +2147,11 @@ newMain(){
         local sndLocal=1
 
         # parallel subMain "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
+        env_parallel  subMain "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
 
-        if [[ " ${splitDir[@]} " =~ "AtoT_split_${projectDic[filename]}.vcf" ]]; then
-            subMain "AtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
-        fi
+        # if [[ " ${splitDir[@]} " =~ "AtoT_split_${projectDic[filename]}.vcf" ]]; then
+        #     subMain "AtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        # fi
         # if [[ " ${splitDir[@]} " =~ "CtoT_split_${projectDic[filename]}.vcf" ]]; then
         #     subMain "CtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
         # fi
@@ -2198,3 +2204,5 @@ newMain(){
 
 # main "$@"
 newMain "$@"
+
+env_parallel --end-session ## ADDED FOR TESTING
