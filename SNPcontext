@@ -2092,23 +2092,21 @@ newMain(){
         module load python3_ML/3.6.4
         jobCreator "$@"
     fi
+
+    start=$SECONDS # TIMER
+
     moduleLoader ##LOADS CORRECT MODULES    
-
-    module load parallel ## ADDED FOR TESTING
-    . `which env_parallel.bash`
-    env_parallel --session ## ADDED FOR TESTING    
-
     dirStructure
     vcfSplit
 
-    export -f subMain
-    export -f fastaScanner
-    export -f vcfSplit
-    export -f pythonBEDScanner
-    export -f graphSingle_FileConverter
-    export -f alnToCounts_FileConverter
-    export -f fasta_FileConverter
-    export -f bed_FileConverter
+    # export -f subMain
+    # export -f fastaScanner
+    # export -f vcfSplit
+    # export -f pythonBEDScanner
+    # export -f graphSingle_FileConverter
+    # export -f alnToCounts_FileConverter
+    # export -f fasta_FileConverter
+    # export -f bed_FileConverter
     # export projectDic
 
     ## GOT TO MAKE COMPLETE LIST OF VCF FILES TO ITERATE OVER AND FEED INTO FOR LOOP
@@ -2123,7 +2121,7 @@ newMain(){
         local sndLocal=0
 
         # parallel subMain "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
-        env_parallel  subMain "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
+        # env_parallel  subMain "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
 
         # if [[ " ${splitDir[@]} " =~ "AtoC_split_${projectDic[filename]}.vcf" ]]; then
         #     subMain "AtoC_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal"
@@ -2162,9 +2160,9 @@ newMain(){
         #     echo -e "\n\nPARALLEL-FORKING TEST 1\n\n"
         #     subMain "TtoG_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
         # fi
-        # for normalMode in "${splitDir[@]}"; do
-        #     subMain "${normalMode}" "${sndExtension}" "$sndLocal" &
-        # done
+        for normalMode in "${splitDir[@]}"; do
+            subMain "${normalMode}" "${sndExtension}" "$sndLocal" &
+        done
 
         # wait
 
@@ -2188,7 +2186,7 @@ newMain(){
         local sndLocal=1
 
         # parallel subMain "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
-        env_parallel  subMain "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
+        # env_parallel  subMain "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
 
         # if [[ " ${splitDir[@]} " =~ "AtoT_split_${projectDic[filename]}.vcf" ]]; then
         #     subMain "AtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
@@ -2203,9 +2201,9 @@ newMain(){
         #     subMain "TtoA_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
         # fi
 
-        # for sndMode in ${splitDir[@]}; do
-        #     subMain "${sndMode}" "${sndExtension}" "$sndLocal" &
-        # done
+        for sndMode in ${splitDir[@]}; do
+            subMain "${sndMode}" "${sndExtension}" "$sndLocal" &
+        done
         
         # wait
     
@@ -2216,8 +2214,6 @@ newMain(){
     #     allCounts_FileConverter ##ALL_COUNTS
     #     graphCombined_FileConverter ## MUTATION GRAPHING COMBINED
     # fi
-
-    env_parallel --end-session ## ADDED FOR TESTING
 
     active=()
 
@@ -2240,6 +2236,10 @@ newMain(){
     if [[ "${projectDic["github"]}" == 'true' ]]; then
         gitHubSaver "$@"
     fi
+
+    duration=$(( SECONDS - start ))
+    echo -e "\n\nTOTAL TIME IN SECONDS: ${duration}"
+
     echo -e "Operations completed...\n"
     exit 0
 
