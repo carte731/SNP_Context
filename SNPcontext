@@ -12,10 +12,6 @@
 
 #    SNPcontext Version: 2.0.0
 
-module load parallel ## ADDED FOR TESTING
-. `which env_parallel.bash`
-env_parallel --session ## ADDED FOR TESTING
-
 scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" ## Location of the script
 
 set -e
@@ -32,42 +28,42 @@ set -e
 
 #     A bash dictionary for input parameters
 
-declare -A projectDic=(
-    ["email"]='' #-em
-    ["windowLength"]=-9091 #-w
-    ["inputFile"]='' #-i
-    ["inputLoc"]=''
-    ["outputLoc"]='' #-o
-    ["filename"]=''
-    ["projectName"]='DefaultProjectName' #-p
-    ["flanks"]=-9091 #-f
-    ["referenceGenome"]='' #-r
-    ["OperationalStage"]='vcfTObed'
-    ["nMax"]=-9091 ##-n
-    ["TempLoc"]=''
-    ["tempOut"]=''
-    ["allData"]='' #-ad
-    ["msi"]='' #-msi
-    ["s3"]=-9091 #-s3
-    ["sndMode"]=-9091 #-snd
-    ["sniMode"]=-9091 #-sni REMOVE FROM DICTIONARY
-    ["dropbox"]='' #-dpb
-    ["dropboxAuth"]='' #-dpba
-    ["github"]='' #-gh
-    ["gitUser"]='' #-ghu
-    ["gitPass"]='' #-ghp
-    ["owner"]='' #-gho
-    ["Myrepository"]='' #-ghr
-    ["job_specs"]='' #-sp
-    ["mutationAnalysis"]='' #-ma
-    ["nbrOrSpec"]='' #-nbrs
-    ["symOrAsy"]='' #-symas
-    ["configLocation"]=''
-    ["JOB"]='NO_JOB_NOW'
-    ["isCmd"]=''
-    ["queue"]='' #-qu
-    ["graphs"]=-9091 #-graphs
-)
+# declare -A projectDic=(
+#     ["email"]='' #-em
+#     ["windowLength"]=-9091 #-w
+#     ["inputFile"]='' #-i
+#     ["inputLoc"]=''
+#     ["outputLoc"]='' #-o
+#     ["filename"]=''
+#     ["projectName"]='DefaultProjectName' #-p
+#     ["flanks"]=-9091 #-f
+#     ["referenceGenome"]='' #-r
+#     ["OperationalStage"]='vcfTObed'
+#     ["nMax"]=-9091 ##-n
+#     ["TempLoc"]=''
+#     ["tempOut"]=''
+#     ["allData"]='' #-ad
+#     ["msi"]='' #-msi
+#     ["s3"]=-9091 #-s3
+#     ["sndMode"]=-9091 #-snd
+#     ["sniMode"]=-9091 #-sni REMOVE FROM DICTIONARY
+#     ["dropbox"]='' #-dpb
+#     ["dropboxAuth"]='' #-dpba
+#     ["github"]='' #-gh
+#     ["gitUser"]='' #-ghu
+#     ["gitPass"]='' #-ghp
+#     ["owner"]='' #-gho
+#     ["Myrepository"]='' #-ghr
+#     ["job_specs"]='' #-sp
+#     ["mutationAnalysis"]='' #-ma
+#     ["nbrOrSpec"]='' #-nbrs
+#     ["symOrAsy"]='' #-symas
+#     ["configLocation"]=''
+#     ["JOB"]='NO_JOB_NOW'
+#     ["isCmd"]=''
+#     ["queue"]='' #-qu
+#     ["graphs"]=-9091 #-graphs
+# )
 
 #     A bash list of all possible nucleotide state changes
 #     List will be used for iteration and to create output directories and files
@@ -2051,12 +2047,57 @@ subMain(){
 
 
 newMain(){
+
+    scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" ## Location of the script
+
+    declare -A projectDic=(
+    ["email"]='' #-em
+    ["windowLength"]=-9091 #-w
+    ["inputFile"]='' #-i
+    ["inputLoc"]=''
+    ["outputLoc"]='' #-o
+    ["filename"]=''
+    ["projectName"]='DefaultProjectName' #-p
+    ["flanks"]=-9091 #-f
+    ["referenceGenome"]='' #-r
+    ["OperationalStage"]='vcfTObed'
+    ["nMax"]=-9091 ##-n
+    ["TempLoc"]=''
+    ["tempOut"]=''
+    ["allData"]='' #-ad
+    ["msi"]='' #-msi
+    ["s3"]=-9091 #-s3
+    ["sndMode"]=-9091 #-snd
+    ["sniMode"]=-9091 #-sni REMOVE FROM DICTIONARY
+    ["dropbox"]='' #-dpb
+    ["dropboxAuth"]='' #-dpba
+    ["github"]='' #-gh
+    ["gitUser"]='' #-ghu
+    ["gitPass"]='' #-ghp
+    ["owner"]='' #-gho
+    ["Myrepository"]='' #-ghr
+    ["job_specs"]='' #-sp
+    ["mutationAnalysis"]='' #-ma
+    ["nbrOrSpec"]='' #-nbrs
+    ["symOrAsy"]='' #-symas
+    ["configLocation"]=''
+    ["JOB"]='NO_JOB_NOW'
+    ["isCmd"]=''
+    ["queue"]='' #-qu
+    ["graphs"]=-9091 #-graphs
+    )
+
     config_check "$@"
     if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]] && [[ "${projectDic["msi"]}" == 'true' ]]; then
         module load python3_ML/3.6.4
         jobCreator "$@"
     fi
-    moduleLoader ##LOADS CORRECT MODULES        
+    moduleLoader ##LOADS CORRECT MODULES    
+
+    module load parallel ## ADDED FOR TESTING
+    . `which env_parallel.bash`
+    env_parallel --session ## ADDED FOR TESTING    
+
     dirStructure
     vcfSplit
 
@@ -2176,6 +2217,8 @@ newMain(){
     #     graphCombined_FileConverter ## MUTATION GRAPHING COMBINED
     # fi
 
+    env_parallel --end-session ## ADDED FOR TESTING
+
     active=()
 
     ## Find vcf files in main and SND directory
@@ -2204,5 +2247,3 @@ newMain(){
 
 # main "$@"
 newMain "$@"
-
-env_parallel --end-session ## ADDED FOR TESTING
