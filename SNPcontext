@@ -569,7 +569,8 @@ graphSingle_FileConverter(){
     if [[ "${projectDic["graphs"]}" == 1 ]] || [[ "${projectDic["graphs"]}" == 2 ]]; then
         mkdir "${projectDic[outputLoc]}${2}${3}"
         # mutation_analysis nbr -1 "${projectDic[outputLoc]}""${1}""${geneDirection}"_"${projectDic[filename]}".txt -o "${projectDic[outputLoc]}""${2}""${geneDirection}"
-        mutation_analysis nbr -1 "${1}" -o "${projectDic[outputLoc]}${2}${3}" > /dev/null/
+        # mutation_analysis nbr -1 "${1}" -o "${projectDic[outputLoc]}${2}${3}" > /dev/null/
+        mutation_analysis nbr -1 "${1}" -o "${projectDic[outputLoc]}${2}${3}"
     fi
 
 }
@@ -2024,22 +2025,27 @@ subMain(){
     local fileName="${projectDic["tempOut"]}BED_SPLIT/${2}${targetVCF}.bed"
     bed_FileConverter "${1}" "${fileName}" ##MAKES BED FILE
 
+    echo -e "T-1"
     pythonBEDScanner "$geneDir" "$3" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
     # parallel pythonBEDScanner ::: "$geneDir" ::: "$3"
-
+    echo -e "T-2"
     fileConverterTemp="FASTA_SPLIT/${2}"
     fileName="${projectDic["tempOut"]}BED_SPLIT/${2}${geneDir}_${projectDic[filename]}"_new_interval.bed
+    echo -e "T-3"
     fasta_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ##CREATES FASTA FILE
-
+    echo -e "T-4"
     fileName="${projectDic["tempOut"]}FASTA_SPLIT/${2}${geneDir}_${projectDic[filename]}.fasta"
     fastaScanner "${fileName}" "${geneDir}" ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
     # parallel fastaScanner ::: "${fileName}" ::: "${geneDir}"
+    echo -e "T-5"
 
     fileConverterTemp="COUNTS_TABLES/${2}"
     alnToCounts_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
-    
+    echo -e "T-6"
+
     fileName="${projectDic[outputLoc]}COUNTS_TABLES/${2}${geneDir}_${projectDic[filename]}.txt"
 
+    echo -e "T-7"
     fileConverterTemp="MUTATION_ANALYSIS/${2}"
     graphSingle_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ## MUTATION GRAPHING
     
