@@ -712,6 +712,7 @@ dirStructure(){
         projectDic["tempOut"]="${projectDic[outputLoc]}"
     elif [[ ${projectDic["allData"]} == "false" ]]; then
         projectDic["TempLoc"]+=$(mktemp -d)
+        projectDic["tempOut"]="${projectDic["TempLoc"]}"/
         mkdir "${projectDic[TempLoc]}"/SPLITVCF
         mkdir "${projectDic[TempLoc]}"/FASTA_SPLIT
         mkdir "${projectDic[TempLoc]}"/BED_SPLIT
@@ -719,11 +720,11 @@ dirStructure(){
             mkdir "${projectDic[TempLoc]}"/SPLITVCF/SND
             mkdir "${projectDic[TempLoc]}"/FASTA_SPLIT/SND
             mkdir "${projectDic[TempLoc]}"/BED_SPLIT/SND
-            mkdir "${projectDic[TempLoc]}"/COUNTS_TABLES/SND
-            mkdir "${projectDic[TempLoc]}"/COUNTS_TABLES/SND/LOGS
-            mkdir "${projectDic[TempLoc]}"/MUTATION_ANALYSIS/SND
+            mkdir "${projectDic[outputLoc]}"/COUNTS_TABLES/SND
+            mkdir "${projectDic[outputLoc]}"/COUNTS_TABLES/SND/LOGS
+            mkdir "${projectDic[outputLoc]}"/MUTATION_ANALYSIS/SND
         fi
-        projectDic["tempOut"]="${projectDic["TempLoc"]}"/
+        
     fi
 }
 
