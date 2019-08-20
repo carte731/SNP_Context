@@ -487,8 +487,7 @@ moduleLoader(){ #Load modules needed for operations
         export MODULEPATH=/panfs/roc/groups/9/morrellp/public/Modules:$MODULEPATH
         module load python3_ML/3.6.4
         module load bedops_ML/2.4.35 
-        # module load bedtools_ML/2.23.0
-        module load bedtools_ML/2.28.0
+        module load bedtools_ML/2.23.0
 	    module load pypy_ML/3.6 ## CREATE ALIUS OF 'PYPY' and 'Python'
         module load parallel
     else  ##Update commands below
@@ -569,8 +568,7 @@ graphSingle_FileConverter(){
     if [[ "${projectDic["graphs"]}" == 1 ]] || [[ "${projectDic["graphs"]}" == 2 ]]; then
         mkdir "${projectDic[outputLoc]}${2}${3}"
         # mutation_analysis nbr -1 "${projectDic[outputLoc]}""${1}""${geneDirection}"_"${projectDic[filename]}".txt -o "${projectDic[outputLoc]}""${2}""${geneDirection}"
-        # mutation_analysis nbr -1 "${1}" -o "${projectDic[outputLoc]}${2}${3}" > /dev/null/
-        mutation_analysis nbr -1 "${1}" -o "${projectDic[outputLoc]}${2}${3}"
+        mutation_analysis nbr -1 "${1}" -o "${projectDic[outputLoc]}${2}${3}" 2> /dev/null
     fi
 
 }
@@ -2025,27 +2023,20 @@ subMain(){
     local fileName="${projectDic["tempOut"]}BED_SPLIT/${2}${targetVCF}.bed"
     bed_FileConverter "${1}" "${fileName}" ##MAKES BED FILE
 
-    echo -e "T-1"
     pythonBEDScanner "$geneDir" "$3" ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
-    # parallel pythonBEDScanner ::: "$geneDir" ::: "$3"
-    echo -e "T-2"
+
     fileConverterTemp="FASTA_SPLIT/${2}"
     fileName="${projectDic["tempOut"]}BED_SPLIT/${2}${geneDir}_${projectDic[filename]}"_new_interval.bed
-    echo -e "T-3"
     fasta_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ##CREATES FASTA FILE
-    echo -e "T-4"
+
     fileName="${projectDic["tempOut"]}FASTA_SPLIT/${2}${geneDir}_${projectDic[filename]}.fasta"
     fastaScanner "${fileName}" "${geneDir}" ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
-    # parallel fastaScanner ::: "${fileName}" ::: "${geneDir}"
-    echo -e "T-5"
 
     fileConverterTemp="COUNTS_TABLES/${2}"
     alnToCounts_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
-    echo -e "T-6"
-
+    
     fileName="${projectDic[outputLoc]}COUNTS_TABLES/${2}${geneDir}_${projectDic[filename]}.txt"
 
-    echo -e "T-7"
     fileConverterTemp="MUTATION_ANALYSIS/${2}"
     graphSingle_FileConverter "${fileName}" "${fileConverterTemp}" "${geneDir}" ## MUTATION GRAPHING
     
@@ -2054,67 +2045,14 @@ subMain(){
 
 
 newMain(){
-
-    # scriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd -P )" ## Location of the script
-
-    # declare -A projectDic=(
-    # ["email"]='' #-em
-    # ["windowLength"]=-9091 #-w
-    # ["inputFile"]='' #-i
-    # ["inputLoc"]=''
-    # ["outputLoc"]='' #-o
-    # ["filename"]=''
-    # ["projectName"]='DefaultProjectName' #-p
-    # ["flanks"]=-9091 #-f
-    # ["referenceGenome"]='' #-r
-    # ["OperationalStage"]='vcfTObed'
-    # ["nMax"]=-9091 ##-n
-    # ["TempLoc"]=''
-    # ["tempOut"]=''
-    # ["allData"]='' #-ad
-    # ["msi"]='' #-msi
-    # ["s3"]=-9091 #-s3
-    # ["sndMode"]=-9091 #-snd
-    # ["sniMode"]=-9091 #-sni REMOVE FROM DICTIONARY
-    # ["dropbox"]='' #-dpb
-    # ["dropboxAuth"]='' #-dpba
-    # ["github"]='' #-gh
-    # ["gitUser"]='' #-ghu
-    # ["gitPass"]='' #-ghp
-    # ["owner"]='' #-gho
-    # ["Myrepository"]='' #-ghr
-    # ["job_specs"]='' #-sp
-    # ["mutationAnalysis"]='' #-ma
-    # ["nbrOrSpec"]='' #-nbrs
-    # ["symOrAsy"]='' #-symas
-    # ["configLocation"]=''
-    # ["JOB"]='NO_JOB_NOW'
-    # ["isCmd"]=''
-    # ["queue"]='' #-qu
-    # ["graphs"]=-9091 #-graphs
-    # )
-
     config_check "$@"
     if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]] && [[ "${projectDic["msi"]}" == 'true' ]]; then
         module load python3_ML/3.6.4
         jobCreator "$@"
     fi
-
-    start=$SECONDS # TIMER
-
-    moduleLoader ##LOADS CORRECT MODULES    
+    moduleLoader ##LOADS CORRECT MODULES        
     dirStructure
     vcfSplit
-
-    # export -f subMain
-    # export -f fastaScanner
-    # export -f vcfSplit
-    # export -f pythonBEDScanner
-    # export -f graphSingle_FileConverter
-    # export -f alnToCounts_FileConverter
-    # export -f fasta_FileConverter
-    # export -f bed_FileConverter
-    # export projectDic
 
     ## GOT TO MAKE COMPLETE LIST OF VCF FILES TO ITERATE OVER AND FEED INTO FOR LOOP
     cd "${projectDic["tempOut"]}"SPLITVCF/
@@ -2126,53 +2064,47 @@ newMain(){
 
     if [[ ${sndAmount} != 0 ]]; then
         local sndLocal=0
-
-        # parallel subMain "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
-        # env_parallel  subMain "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
-
-        # if [[ " ${splitDir[@]} " =~ "AtoC_split_${projectDic[filename]}.vcf" ]]; then
-        #     subMain "AtoC_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal"
-        # fi
-        # if [[ " ${splitDir[@]} " =~ "AtoG_split_${projectDic[filename]}.vcf" ]]; then
-        #     subMain "AtoG_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
-        # fi
-        # if [[ " ${splitDir[@]} " =~ "AtoT_split_${projectDic[filename]}.vcf" ]]; then
-        #     subMain "AtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
-        # fi
-        # if [[ " ${splitDir[@]} " =~ "CtoA_split_${projectDic[filename]}.vcf" ]]; then
-        #     subMain "CtoA_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
-        # fi
-        # if [[ " ${splitDir[@]} " =~ "CtoG_split_${projectDic[filename]}.vcf" ]]; then
-        #     subMain "CtoG_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
-        # fi
-        # if [[ " ${splitDir[@]} " =~ "CtoT_split_${projectDic[filename]}.vcf" ]]; then
-        #     subMain "CtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
-        # fi
-        # if [[ " ${splitDir[@]} " =~ "GtoA_split_${projectDic[filename]}.vcf" ]]; then
-        #     subMain "GtoA_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
-        # fi
-        # if [[ " ${splitDir[@]} " =~ "GtoC_split_${projectDic[filename]}.vcf" ]]; then
-        #     subMain "GtoC_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
-        # fi
-        # if [[ " ${splitDir[@]} " =~ "GtoT_split_${projectDic[filename]}.vcf" ]]; then
-        #     subMain "GtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
-        # fi
-        # if [[ " ${splitDir[@]} " =~ "TtoA_split_${projectDic[filename]}.vcf" ]]; then
-        #     subMain "TtoA_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
-        # fi
-        # if [[ " ${splitDir[@]} " =~ "TtoC_split_${projectDic[filename]}.vcf" ]]; then
-        #     subMain "TtoC_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
-        # fi
-        # if [[ " ${splitDir[@]} " =~ "TtoG_split_${projectDic[filename]}.vcf" ]]; then
-        #     echo -e "\n\nPARALLEL-FORKING TEST 1\n\n"
-        #     subMain "TtoG_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
-        # fi
-        for normalMode in "${splitDir[@]}"; do
-            subMain "${normalMode}" "${sndExtension}" "$sndLocal" &
-        done
-
-        # wait
-
+        if [[ " ${splitDir[@]} " =~ "AtoC_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "AtoC_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "AtoG_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "AtoG_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "AtoT_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "AtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "CtoA_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "CtoA_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "CtoG_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "CtoG_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "CtoT_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "CtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "GtoA_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "GtoA_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "GtoC_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "GtoC_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "GtoT_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "GtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "TtoA_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "TtoA_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "TtoC_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "TtoC_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "TtoG_split_${projectDic[filename]}.vcf" ]]; then
+            echo -e "\n\nPARALLEL-FORKING TEST 1\n\n"
+            subMain "TtoG_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        # for normalMode in "${splitDir[@]}"; do
+        #     subMain "${normalMode}" "${sndExtension}" "$sndLocal" &
+        # done
+        wait
         allCounts_FileConverter ##ALL_COUNTS
         graphCombined_FileConverter ## MUTATION GRAPHING COMBINED
     else
@@ -2191,29 +2123,22 @@ newMain(){
     # fi
     if [[ "${projectDic["sndMode"]}" -eq 1 ]] && [[ ${sndAmount} != 0 ]]; then
         local sndLocal=1
-
-        # parallel subMain "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
-        # env_parallel  subMain "${splitDir[@]}" ::: "${sndExtension}" ::: "${sndLocal}"
-
-        # if [[ " ${splitDir[@]} " =~ "AtoT_split_${projectDic[filename]}.vcf" ]]; then
-        #     subMain "AtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
-        # fi
-        # if [[ " ${splitDir[@]} " =~ "CtoT_split_${projectDic[filename]}.vcf" ]]; then
-        #     subMain "CtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
-        # fi
-        # if [[ " ${splitDir[@]} " =~ "GtoT_split_${projectDic[filename]}.vcf" ]]; then
-        #     subMain "GtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
-        # fi
-        # if [[ " ${splitDir[@]} " =~ "TtoA_split_${projectDic[filename]}.vcf" ]]; then
-        #     subMain "TtoA_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
-        # fi
-
-        for sndMode in ${splitDir[@]}; do
-            subMain "${sndMode}" "${sndExtension}" "$sndLocal" &
-        done
-        
-        # wait
-    
+        if [[ " ${splitDir[@]} " =~ "AtoT_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "AtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "CtoT_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "CtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "GtoT_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "GtoT_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        if [[ " ${splitDir[@]} " =~ "TtoA_split_${projectDic[filename]}.vcf" ]]; then
+            subMain "TtoA_split_${projectDic[filename]}.vcf" "${sndExtension}" "$sndLocal" &
+        fi
+        # for sndMode in ${splitDir[@]}; do
+        #     subMain "${sndMode}" "${sndExtension}" "$sndLocal" &
+        # done
+        wait
     fi
 
     ## if for snd mode
@@ -2243,10 +2168,6 @@ newMain(){
     if [[ "${projectDic["github"]}" == 'true' ]]; then
         gitHubSaver "$@"
     fi
-
-    duration=$(( SECONDS - start ))
-    echo -e "\n\nTOTAL TIME IN SECONDS: ${duration}"
-
     echo -e "Operations completed...\n"
     exit 0
 
