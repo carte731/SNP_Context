@@ -716,12 +716,12 @@ dirStructure(){
         mkdir "${projectDic[TempLoc]}"/FASTA_SPLIT
         mkdir "${projectDic[TempLoc]}"/BED_SPLIT
         if [[ "${projectDic[sndMode]}" -eq 1 ]]; then
-            mkdir "${projectDic[TempLoc]}"SPLITVCF/SND
-            mkdir "${projectDic[TempLoc]}"FASTA_SPLIT/SND
-            mkdir "${projectDic[TempLoc]}"BED_SPLIT/SND
-            mkdir "${projectDic[TempLoc]}"COUNTS_TABLES/SND
-            mkdir "${projectDic[TempLoc]}"COUNTS_TABLES/SND/LOGS
-            mkdir "${projectDic[TempLoc]}"MUTATION_ANALYSIS/SND
+            mkdir "${projectDic[TempLoc]}"/SPLITVCF/SND
+            mkdir "${projectDic[TempLoc]}"/FASTA_SPLIT/SND
+            mkdir "${projectDic[TempLoc]}"/BED_SPLIT/SND
+            mkdir "${projectDic[TempLoc]}"/COUNTS_TABLES/SND
+            mkdir "${projectDic[TempLoc]}"/COUNTS_TABLES/SND/LOGS
+            mkdir "${projectDic[TempLoc]}"/MUTATION_ANALYSIS/SND
         fi
         projectDic["tempOut"]="${projectDic["TempLoc"]}"/
     fi
