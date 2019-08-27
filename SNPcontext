@@ -1062,7 +1062,10 @@ END_OF_PYTHON
 vcfSplit(){
     inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" sndMode="${projectDic["sndMode"]}" pypy3.6 - <<VCF_SPLIT_END
 
+# import os
 import os
+import re
+import subprocess
 
 def geneDirCreate():
     geneDir={
