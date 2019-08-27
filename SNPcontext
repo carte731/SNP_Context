@@ -884,7 +884,7 @@ import subprocess
 from itertools import chain
 import datetime
 
-def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedType):
+def bedMapperOld(interval, outputLoc, projectName, filename, geneDir, sndMode, bedType):
     output = str(subprocess.check_output(['wc', '-m', outputLoc + bedType + geneDir + "_split_" + filename + ".bed"]))
     length = re.findall(r'\d+', output)
     length = int(length[0])
@@ -930,6 +930,44 @@ def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedT
     with open(outputLoc + bedType + geneDir + "_" + filename + "_new_interval.bed", "wb") as newBed: ##Change to input variables ## Moved indent in
         newBed.write(bedMapper)
     
+    return(masterList)
+
+def bedMapper(interval, outputLoc, projectName, filename, geneDir, sndMode, bedType):
+    masterList=[]
+    with open(outputLoc + bedType + geneDir + "_split_" + filename + ".bed", "rb") as bed_test, open(outputLoc + bedType + geneDir + "_" + filename + "_new_interval.bed", "wb+") as newBed:
+        gate = True
+        tabDelimter = 0
+        finalOut = b''
+        leftNum = ""
+        rightNum = ""
+        while(gate):
+            element = bed_test.read(1)
+            if(not element):
+                gate = False
+                continue
+            if(chr(ord(element)) == '\t'):
+                tabDelimter += 1
+            elif(tabDelimter == 0):
+                finalOut += element
+            elif(tabDelimter == 1):
+                leftNum += chr(ord(element))
+            elif(tabDelimter == 2):
+                rightNum += chr(ord(element))
+            elif(tabDelimter == 3):
+                leftNum = str(int(leftNum) - interval)
+                rightNum = str(int(rightNum) + interval)
+                # if([int(leftNum), int(rightNum)] not in masterList): # TEMP, FOR TESTING - WILL REMOVE AFTER TESTING IS FINISHED
+                #     masterList.append([int(leftNum), int(rightNum)])
+                #     newBed.write(finalOut + b'\t' + leftNum.encode("utf-8") + b'\t' + rightNum.encode("utf-8") + b'\t' + bed_test.readline())
+                # else:
+                #     bed_test.readline()
+
+                masterList.append([int(leftNum), int(rightNum)])
+                newBed.write(finalOut + b'\t' + leftNum.encode("utf-8") + b'\t' + rightNum.encode("utf-8") + b'\t' + bed_test.readline())
+                tabDelimter = 0
+                finalOut = b''
+                leftNum = ""
+                rightNum = ""
     return(masterList)
 
 def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, geneDir, baseOut):
