@@ -1094,7 +1094,7 @@ def geneDirCreate():
     }
     return(geneDir, SNDGeneDir)
 
-def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
+def vcfSegmentsOld(inputFile, geneDir, SNDGeneDir, sndMode):
     with open(inputFile, "rb") as raw:
         sub=[]
         counter=0
@@ -1145,6 +1145,63 @@ def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
                     gate=False
                 counter+=1
     return(geneDir, SNDGeneDir)
+
+def vcfSegments(inputFile, geneDir, SNDGeneDir, sndMode):
+    output = str(subprocess.check_output(['wc', '-m', inputFile]))
+    length = re.findall(r'\d+', output)
+    length = int(length[0])
+    with open(inputFile, "rb") as raw:
+        sub=[]
+        gene=''
+        results=''
+        for counter in range(length):
+            element = raw.read(1).decode("ascii")
+            if(element != '#'):
+                if((element != '\t') and (element != '\n')):
+                    results = results + element
+                elif((element == '\t') and (element != '\n')):
+                    sub.append(results)
+                    # sub.append(element)
+                    results=''
+                if(len(sub) >= 5):
+                    # print(sub)
+                    gene = str(sub[3]) + "to" + str(sub[4])
+                    if gene in geneDir:
+                        # print(gene)
+                        # geneDir[gene].extend(readLine)
+                        # geneDir[gene].extend('\t'.join(sub).encode("utf-8") + b'\t' + raw.readline())
+                        geneDir[gene].extend('\t'.join(sub).encode("utf-8") + raw.readline())
+                        # geneDir[gene].extend(raw.readline())
+                        sub.clear()
+                    else:
+                        # print(sub[3])
+                        if((sndMode == 1) and (len(sub[3]) >= 2)):
+                            if(sub[3][1] != "T"):
+                                sub[3] = sub[3][1]
+                                sub[4] = "T"
+                                sub[1] = str(int(sub[1]) + 1)
+                            else:
+                                sub[3] = sub[3][1]
+                                sub[4] = "A"
+                                sub[1] = str(int(sub[1]) + 1)
+                            gene = str(sub[3]) + "to" + str(sub[4])
+                            sub.append(results)
+                            # print("SOUTH HAMPTON!!!")
+                            SNDGeneDir[gene].extend('\t'.join(sub).encode("utf-8") + raw.readline())
+                            # SNDGeneDir[gene].extend(raw.readline())
+                            gene=''
+                            results=''
+                            sub.clear()
+                        else:
+                            sub.append(results)
+                            geneDir['rejected'].extend('\t'.join(sub).encode("utf-8") + raw.readline())
+                            gene=''
+                            results=''
+                            sub.clear()
+            else:
+                geneDir['header'].extend(element.encode("utf-8") + raw.readline())
+    return(geneDir, SNDGeneDir)
+
 
 def vcfSpliter(outputLoc, filename, baseOut, geneDir, SNDGeneDir, sndMode):
     for key in geneDir:
