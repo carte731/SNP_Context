@@ -43,7 +43,6 @@ declare -A projectDic=(
     ["TempLoc"]=''
     ["tempOut"]=''
     ["allData"]='' #-ad
-    ["msi"]='' #-msi
     ["s3"]=-9091 #-s3
     ["sndMode"]=-9091 #-snd
     ["dropbox"]='' #-dpb
@@ -53,7 +52,6 @@ declare -A projectDic=(
     ["gitPass"]='' #-ghp
     ["owner"]='' #-gho
     ["Myrepository"]='' #-ghr
-    ["job_specs"]='' #-sp
     ["mutationAnalysis"]='' #-ma
     ["nbrOrSpec"]='' #-nbrs
     ["symOrAsy"]='' #-symas
@@ -62,6 +60,16 @@ declare -A projectDic=(
     ["isCmd"]=''
     ["queue"]='' #-qu
     ["graphs"]=-9091 #-graphs
+    ## New Job scheduler/Slurm stuff
+    ["msi"]='' #-msi ## Old-Implementation
+    ["job_specs"]='' #-sp ## Old-Implementation
+    ["jobScheduler"]='' # -js Job-scheduler (boolean)
+    ["schedulerMode"]=-9091 # -sm Scheduler Mode (int) 
+    ["job-time"]='' ## -jt Job time (String HH:MM:SS)
+    ["job-nodes"]=-9091 ## -jn Number of nodes (int)
+    ["job-memory"]='' ## -jm Memory for whole operation (String)
+    ["job-memPerCPU"]='' ## -jmpc Minimum memory per CPU
+    ["job-cpuPerTask"]='' ##  -jcpt CPUs per tasks
 )
 
 #     A bash list of all possible nucleotide state changes
@@ -117,10 +125,8 @@ config_check(){
                         ${s3_login}
                         ${s3_password}
                         ${input_email}
-                        ${MSI_Mode}
 			            ${queue}
                         ${sndMode}
-                        ${job_specs}
                         ${mutation_analysis}
                         ${nbr_or_spectra}
                         ${strand_symmetry_or_asymmetry}
@@ -133,6 +139,16 @@ config_check(){
                         ${Myrepository}
                         ${owner}
                         ${graphs}
+                        ## New Job scheduler/Slurm portion
+                        ${MSI_Mode} ## Old-Implementation
+                        ${job_specs} ## Old-Implementation
+                        ${job_scheduler}
+                        ${scheduler_mode}
+                        ${time}
+                        ${nodes}
+                        ${memory}
+                        ${memory_per_CPU}
+                        ${cpus_per_task}
                     )
                     # echo -e "${MSI_Mode}"
                     starter ${startList} # Calls program to assign variables
@@ -322,12 +338,31 @@ starter(){ #grabs the arguments
                 echo -e "No valid entry for github uploading (true or false), defaulting to false."
                 projectDic["github"]="false"
             fi
+        ## New Addition for Slurm Implementation
+        elif [[ "${i,,}" == "-js" ]] || [[ ${job_scheduler} == $i ]] && [[ ${projectDic["jobScheduler"]} == "" ]]; then
+            if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
+                projectDic["jobScheduler"]="${var,,}" ## Saves job scheduler results to the hashmap
+            else 
+                echo -e "Invalid job scheduler mode, defaulting to false."
+                projectDic["jobScheduler"]='false'
+                frontgate=1
+                unset job_scheduler 
+            fi
+        elif [[ "${i,,}" == "-sm" ]] || [[ ${scheduler_mode} == $i ]] && [[ ${projectDic["schedulerMode"]} == -9091 ]]; then
+            if [[ "${var,,}" -eq 1 ]] || [[ "${var,,}" -eq 2 ]]; then
+                projectDic["schedulerMode"]="${var,,}" ## Saves job scheduler results to the hashmap
+            else 
+                echo -e "Invalid job scheduler mode, 1 = slurm or 2 = PBS - defaulting to false."
+                projectDic["jobScheduler"]='false'
+                projectDic["jobScheduler"]=0
+                frontgate=1
+                unset job_scheduler 
+            fi
         elif [[ "${i,,}" == "-msi" ]] || [[ ${MSI_Mode} == $i ]] && [[ ${projectDic["msi"]} == "" ]]; then # Set flag for MSI-specific operations
             # echo -e "MSI MODE:\n"
             # echo -e "${var}"
             if [[ "${var,,}" == "true" ]] || [[ "${var,,}" == "false" ]]; then
                 # echo -e "${i}"
-                
                 projectDic["msi"]="${var,,}"
                 frontgate=1
                 unset MSI_Mode
@@ -638,7 +673,7 @@ s3Saver(){
     fi
 
     if (( "${projectDic["s3"]}" != 0 )); then
-        if (( "${projectDic["s3"]}" == 1 )) || (( "${projectDic["mss3i"]}" == 3 )); then
+        if (( "${projectDic["s3"]}" == 1 )) || (( "${projectDic["s3"]}" == 3 )); then
             if s3cmd mb s3://${projectDic["projectName"],,} > /dev/null; then
                 echo -e "\nS3 bucket created..."
                 echo -e "Transfering files..."
@@ -1362,9 +1397,9 @@ main()
 FASTA_SWEEP
 
 }
-#    Creates the job on UMN MSI
+#    Creates a PBS job
 #    Demonstrates that Corey can write more verbose code than Paul! Quite a victory!
-jobCreator(){
+jobCreatorPBS(){
     if [[ ${projectDic["isCmd"]} == "false" ]]; then
         local config="$@"
     else
@@ -1458,7 +1493,121 @@ JOB_CREATED
 echo -e ""
 
 qsub "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
-echo -e "Job submitted.\nEXITING...\n"
+echo -e "PBS job submitted.\nEXITING...\n"
+exit 2
+
+}
+
+#    Creates a Slurm job script
+#    Demonstrates that Corey can write more verbose code than Paul! Quite a victory!
+jobCreatorSlurm(){
+    if [[ ${projectDic["isCmd"]} == "false" ]]; then
+        local config="$@"
+    else
+        local config="none"
+    fi
+    myEmail="${projectDic["email"]}" scriptPath="${scriptPath}" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" \
+    outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" \
+    dpb="${projectDic["dropbox"]}" dpba="${projectDic["dropboxAuth"]}" gh="${projectDic["github"]}" ghu="${projectDic["gitUser"]}" ghp="${projectDic["gitPass"]}" \
+    gho="${projectDic["owner"]}" ghr="${projectDic["Myrepository"]}" config="${config}" ma="${projectDic["mutationAnalysis"]}" nbrs="${projectDic["nbrOrSpec"]}" sndMode="${projectDic["sndMode"]}"\
+    symas="${projectDic["symOrAsy"]}" graphs="${projectDic["graphs"]}" time="${projectDic["job-time"]}" nodes="${projectDic["job-nodes"]}" memory="${projectDic["job-memory"]}" \
+    memory_per_CPU="${projectDic["job-memPerCPU"]}" cpus_per_task="${projectDic["job-cpuPerTask"]}" s3="${projectDic["s3"]}" msi="${projectDic["msi"]}" python3.6 - <<JOB_CREATED
+
+
+import os
+
+def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, dpb, dpba, s3, msi, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas, graphs, sndMode, time, nodes, memory, memory_per_CPU, cpus_per_task):
+
+    job = "#!/bin/bash\n"
+    job += "#SBATCH --job-name=" + projectName + "\n"  
+    job += "#SBATCH --output=" + outputLoc + "\n"  
+    job += "#SBATCH --mail-user=" + email + "\n"  
+    job += "#SBATCH --time=" time + "\n"   	
+    job += "#SBATCH --nodes=" + nodes + "\n"                    
+    job += "#SBATCH --mem=" + memory + "\n" 
+    job += "#SBATCH --mem-per-cpu=" + memory_per_CPU + "\n"                    
+    job += "#SBATCH --cpus-per-task=" + cpus_per_task + "\n"                    
+                   
+    job+= scriptPath + "/SNPcontext "
+    job+= "-i " + inputFile + " "
+    job+= "-o " + outputLoc + " "
+    job+= "-w " + windowLength + " "
+    job+= "-f " + flanks + " "
+    job+= "-p " + projectName + " "
+    job+= "-r " + referenceGenome + " "
+    job+= "-ad " + allData + " "
+    job+= "-n " + nMax + " "
+    job+= "-ma " + ma + " "
+    job+= "-nbrs " + nbrs + " "
+    job+= "-symas " + symas + " "
+    job+= "-graphs " + graphs + " "
+    job+= "-snd " + sndMode + " "
+
+    job+= "-s3 " + s3 + " "
+    job+= "-msi " + msi + " "
+    job+= "-dpb " + dpb + " "
+    job+= "-dpba " + dpba + " "
+    job+= "-gh " + gh + " "
+    job+= "-ghu " + ghu + " "
+    job+= "-ghp " + ghp + " "
+    job+= "-gho " + gho + " "
+    job+= "-ghr " + ghr + " "
+
+    job+= "-JOB THIS_IS_A_JOB "
+    job+= "-CONFIGLOC " + config
+
+    with open(outputLoc + projectName + ".sbatch", "w") as jobScript:
+        jobScript.write(job)
+
+def bashImport():
+    outputLoc=str(os.environ['outputLoc'])
+    email=str(os.environ['myEmail'])
+    flanks=str(os.environ['flanks'])
+    config=str(os.environ['config'])
+    scriptPath=str(os.environ['scriptPath'])
+    referenceGenome=str(os.environ['referenceGenome'])
+    windowLength=str(os.environ['windowLength'])
+    inputFile=str(os.environ['inputFile'])
+    projectName=str(os.environ['projectName'])
+    allData=str(os.environ['allData'])
+    nMax=str(os.environ['nMax'])
+    ma=str(os.environ['ma'])
+    nbrs=str(os.environ['nbrs'])
+    symas=str(os.environ['symas'])
+    graphs=str(os.environ['graphs'])
+    sndMode=str(os.environ["sndMode"])
+
+    dpb=str(os.environ['dpb'])
+    dpba=str(os.environ['dpba'])
+    gh=str(os.environ['gh'])
+    ghu=str(os.environ['ghu'])
+    ghp=str(os.environ['ghp'])
+    gho=str(os.environ['gho'])
+    ghr=str(os.environ['ghr'])
+
+    s3=str(os.environ['s3'])
+    msi=str(os.environ['msi'])
+
+    time=str(os.environ['time'])
+    nodes=str(os.environ['nodes'])
+    memory=str(os.environ['memory'])
+    memory_per_CPU=str(os.environ['memory_per_CPU'])
+    cpus_per_task=str(os.environ['cpus_per_task'])
+
+    return(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas, graphs, sndMode, time, nodes, memory, memory_per_CPU, cpus_per_task)
+
+def main():
+    projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas, graphs, sndMode,  time, nodes, memory, memory_per_CPU, cpus_per_task = bashImport()
+    jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax, scriptPath, s3, msi, dpb, dpba, gh, ghu, ghp, gho, ghr, config, ma, nbrs, symas, queue, graphs, sndMode, time, nodes, memory, memory_per_CPU, cpus_per_task)
+
+main()
+    
+JOB_CREATED
+
+echo -e ""
+
+sbatch "${projectDic["outputLoc"]}""${projectDic["projectName"]}".sbatch
+echo -e "Slurm job submitted.\nEXITING...\n"
 exit 2
 
 }
@@ -1575,11 +1724,32 @@ mainOld(){
 
 main(){
     config_check "$@"
-    if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]] && [[ "${projectDic["msi"]}" == 'true' ]]; then
-        module load python3_ML/3.6.4
-        jobCreator "$@"
+    ## Older-Implementation
+    ##if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]] && [[ "${projectDic["msi"]}" == 'true' ]]; then
+    ##    module load python3_ML/3.6.4
+    ##    jobCreator "$@"
+    ##fi
+    ##moduleLoader ##LOADS CORRECT MODULES   
+    if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]] && [[ "${projectDic["job_scheduler"]}" == 'true' ]]; then
+        if [[ "${projectDic["msi"]}" == 'true' ]]; then
+            module load python3_ML/3.6.4
+        fi
+        ## Checks if system has Python 3.6 or greater installed 
+        if [[ $(python3 -c 'import sys; print(sys.version_info[0:2])') != '(3, 6)' ]]; then
+                echo -e "Python version out of date. Please install Python 3.6.x to submit job.\n"
+                ##exit 1 # May not need an exit here
+        else
+            if [[ "${projectDic["schedulerMode"]}" -eq 1 ]]; then
+                jobCreatorSlurm "$@"
+            else if [[ "${projectDic["schedulerMode"]}" -eq 2 ]]; then
+                jobCreatorPBS "$@"
+            else
+                echo -e "Invalid job scheduler selector - please update the config file. 1 = slurm and 2 = PBS\n"
+                exit 1
+            fi
+        fi
     fi
-    moduleLoader ##LOADS CORRECT MODULES        
+    moduleLoader ##LOADS CORRECT MODULES       
     dirStructure
     vcfSplit
 

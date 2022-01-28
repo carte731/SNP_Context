@@ -89,8 +89,6 @@ Command line parameters allow this script to be plugged into a larger pipeline o
 
 **-o = Output location (String)**
 
-**-msi = MSI Mode (Boolean, true or false)**
-
 **-p = Project name (String)**
 
 **-f = Flanks (integer, 0-2)**
