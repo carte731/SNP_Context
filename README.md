@@ -22,8 +22,32 @@ SNP Context can be used with either a **config file** or the **command line**, w
 
 * **Output location (String)**: The output location of your files. A project directory is created at this location. If no location is specified, then the directory and files will be saved at the same location as the input file.
 
+### Job Scheduler 
+The user can select which job scheduler they would like to use - either Slurm or PBS.
+* **Job Scheduler (Boolean, true or false)**: Allows the user to decide if they would like to use a job scheduler for SNP Context operations.
+
+* **scheduler_mode (int, 1 or 2)**: Allows the user to specify which job scheduler they would like to use - 1 for Slurm and 2 for PBS.
+
+### Slurm Options
+If 1 is chosen, then Slurm job schdeuler is used.
+* **time (hours:minutes:seconds)**: The walltime reserved for this job.
+
+* **Node (int 1 to ...)**: The amount of nodes needed for operations.
+
+* **Memory (string)**: Minimum memory (RAM) per node. Number followed by unit prefix.
+
+* **Memory Per CPU**: Minimum memory (RAM) per requested physical CPU core Number followed by unit prefix.
+
+* **CPUs Per Task**: CPU cores per task. For MPI use one. For parallelized applications benchmark this is the number of threads.
+
+### PBS Options
+* **PBS parameters (Integer)**: Job Specs allows you to change the time and amount of resources allocated to the PBS job. 
+Follow the link for more info: [MSI PBS job submission](https://www.msi.umn.edu/content/job-submission-and-scheduling-pbs-scripts)
+
+* **Queue (string)**: The PBS queue the user would like to submit the job to.
+
 ### MSI options for config file
-* **MSI Mode (Boolean, true or false)**: If true, then the script will automatically submit your job to PBS job scheduler and allows for the user to save the output text files to MSI S3 tier two storage.
+* **MSI Mode (Boolean, true or false)**: If true, then the script will load the MSI specific modules needed for operations. Non-MSI systems will have to either have to install or load the necessary dependencies. 
 
 * **PBS parameters (Integer)**: Allows you to change the time and amount of resources allocated to the PBS job. 
 Follow the link for more info: [MSI PBS job submission](https://www.msi.umn.edu/content/job-submission-and-scheduling-pbs-scripts)
